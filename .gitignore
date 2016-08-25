@@ -1,0 +1,4 @@
+src/eigen
+*.o
+*.mex*
+
