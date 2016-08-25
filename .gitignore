@@ -1,4 +1,4 @@
 src/eigen
 *.o
 *.mex*
-
+.syncthing*
