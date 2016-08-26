@@ -18,3 +18,20 @@ The GEM library is free and open source. Anyone can contribute on the [gitlab pa
 Usage example
 -------------
 
+
+
+Installation (compilation)
+--------------------------
+
+Here are the instructions for installing gem on *ubuntu* (please update this file on [gitlab](https://gitlab.com/jdbancal/gem) with instructions if you find out how to install it on other platforms, unfortunately I don't have any of those to play with).
+
+1. Check out this repository in the folder of your choice
+2. Download the latest version of Eigen on [eigen.tuxfamily.org](eigen.tuxfamily.org) and place it into the src folder.
+3. Install the gmp and mpfrc++ libraries with the command
+'''sudo apt-get install libmpfrc++-dev libgmp-dev
+4. Start matlab and go to the gem folder.
+5. Type 'make'. This will launch the compilation of the library. If everything goes fine, the program will return 'Compilation successful'.
+6. Add the gem folder to your matlab path. You can now safely play with high precision objects :-)
+
+
+
