@@ -3326,6 +3326,113 @@ GmpEigenMatrix& GmpEigenMatrix::atan_new() const
 
 
 
+/* hyperbolic sine function b = sinh(a) */
+GmpEigenMatrix GmpEigenMatrix::sinh() const
+{
+    GmpEigenMatrix result;
+
+    result.matrixR.resize(matrixR.rows(),matrixR.cols());
+    result.isComplex = isComplex;
+    if (isComplex) {
+        result.matrixI.resize(matrixR.rows(),matrixR.cols());
+//        result = -constI()*GmpEigenMatrix(1/mpreal(2))*((constI()*(*this)).exp() - (-constI()*(*this)).exp());
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i) {
+                result.matrixR(i,j) = mpfr::sinh(matrixR(i,j))*mpfr::cos(matrixI(i,j));
+                result.matrixI(i,j) = mpfr::cosh(matrixR(i,j))*mpfr::sin(matrixI(i,j));
+            }
+        result.checkComplexity();
+    } else {
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i)
+                result.matrixR(i,j) = mpfr::sinh(matrixR(i,j));
+    }
+
+    return result;
+}
+
+/* hyperbolic sine function b = sinh(a) */
+GmpEigenMatrix& GmpEigenMatrix::sinh_new() const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix));
+
+    result.matrixR.resize(matrixR.rows(),matrixR.cols());
+    result.isComplex = isComplex;
+    if (isComplex) {
+        result.matrixI.resize(matrixR.rows(),matrixR.cols());
+//        result = -constI()*GmpEigenMatrix(1/mpreal(2))*((constI()*(*this)).exp() - (-constI()*(*this)).exp());
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i) {
+                result.matrixR(i,j) = mpfr::sinh(matrixR(i,j))*mpfr::cos(matrixI(i,j));
+                result.matrixI(i,j) = mpfr::cosh(matrixR(i,j))*mpfr::sin(matrixI(i,j));
+            }
+        result.checkComplexity();
+    } else {
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i)
+                result.matrixR(i,j) = mpfr::sinh(matrixR(i,j));
+    }
+
+    return result;
+}
+
+/* hyperbolic cosine function b = cosh(a) */
+GmpEigenMatrix GmpEigenMatrix::cosh() const
+{
+    GmpEigenMatrix result;
+
+    result.matrixR.resize(matrixR.rows(),matrixR.cols());
+    result.isComplex = isComplex;
+    if (isComplex) {
+        result.matrixI.resize(matrixR.rows(),matrixR.cols());
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i) {
+                result.matrixR(i,j) = mpfr::cosh(matrixR(i,j))*mpfr::cos(matrixI(i,j));
+                result.matrixI(i,j) = mpfr::sinh(matrixR(i,j))*mpfr::sin(matrixI(i,j));
+            }
+        result.checkComplexity();
+    } else {
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i)
+                result.matrixR(i,j) = mpfr::cosh(matrixR(i,j));
+    }
+
+    return result;
+}
+
+/* hyperbolic cosine function b = cosh(a) */
+GmpEigenMatrix& GmpEigenMatrix::cosh_new() const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix));
+
+    result.matrixR.resize(matrixR.rows(),matrixR.cols());
+    result.isComplex = isComplex;
+    if (isComplex) {
+        result.matrixI.resize(matrixR.rows(),matrixR.cols());
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i) {
+                result.matrixR(i,j) = mpfr::cosh(matrixR(i,j))*mpfr::cos(matrixI(i,j));
+                result.matrixI(i,j) = mpfr::sinh(matrixR(i,j))*mpfr::sin(matrixI(i,j));
+            }
+        result.checkComplexity();
+    } else {
+        for (IndexType j(0); j < result.matrixR.cols(); ++j)
+            for (IndexType i(0); i < result.matrixR.rows(); ++i)
+                result.matrixR(i,j) = mpfr::cosh(matrixR(i,j));
+    }
+
+    return result;
+}
+
+/* For tanh, use the fact that tan(ix) = i*tahn(x), plus the expansion of tanh in terms of sinh and cosh. */
+
+
+
+
+
+
+
+
 /* -----------------------------
    | Some comparison operators |
    ----------------------------- */

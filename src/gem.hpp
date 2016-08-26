@@ -297,6 +297,15 @@ public:
     GmpEigenMatrix atan() const;
     GmpEigenMatrix& atan_new() const;
 
+    // hypergeometric functions
+    GmpEigenMatrix sin() const;
+    GmpEigenMatrix& sin_new() const;
+    GmpEigenMatrix cos() const;
+    GmpEigenMatrix& cos_new() const;
+    GmpEigenMatrix tan() const;
+    GmpEigenMatrix& tan_new() const;
+
+
 
     /* ---------------------------------------
        | Some tests and comparison operators |
