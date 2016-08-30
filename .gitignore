@@ -3,3 +3,6 @@ src/eigen
 *.mex*
 .syncthing*
 *~
+gmp-*
+mpfr-*
+
