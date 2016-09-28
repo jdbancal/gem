@@ -14,7 +14,7 @@ v = version;
 vDots = find(v=='.');
 v = str2num(v(1:vDots(2)-1));
 
-if nargin < 0
+if nargin < 1
     parallelization = 1;
 end
 
@@ -46,8 +46,9 @@ else
     else
         error('Compilation error.');
     end
-else
-    % This line launches the compilation with default options
-    mex -largeArrayDims -Isrc/eigen -Isrc/eigen/unsupported -Ieigen -Ieigen/unsupported -I/usr/include -lmpfr -lgmp src/gem_mex.cpp src/gem.cpp src/utils.cpp
 end
+
+% The following line launches the compilation with default options (and no
+% parallelization) :
+%mex -largeArrayDims -Isrc/eigen -Isrc/eigen/unsupported -Ieigen -Ieigen/unsupported -I/usr/include -lmpfr -lgmp src/gem_mex.cpp src/gem.cpp src/utils.cpp
 
