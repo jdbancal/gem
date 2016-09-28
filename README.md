@@ -1,7 +1,7 @@
 Gmp Eigen Matrix Library
 ========================
 
-The GEM library is a variable precision library for [matlab](http://www.mathworks.com/products/matlab/). It provides a simple way to perform matlab computations with a higher precision.
+The GEM library is an open source variable precision library for [matlab](http://www.mathworks.com/products/matlab/). It provides a simple way to perform matlab computations with a higher precision.
 
 The library provides two data types:
  - 'gem' for high precision dense matrices
