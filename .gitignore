@@ -6,3 +6,4 @@ src/eigen
 gmp-*
 mpfr-*
 
+/src/staticLibraries/
