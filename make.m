@@ -8,7 +8,7 @@ function make(parallelization)
 % library should be dowloaded from http://eigen.tuxfamily.org and placed in
 % the gem/src folder. On ubuntu, the two other libraries can be installed 
 % by running the following command in the terminal :
-%   sudo apt-get install libmpfrc++-dev libgmp-dev
+%   sudo apt-get install libgmp-dev libmpfr-dev libmpfrc++-dev
 %
 % It is also possible to perform a compilation with gmp and mpfr source 
 % codes instead of relying on precompiled gmp and mpfr libraries. In this
@@ -20,17 +20,30 @@ function make(parallelization)
 % - Set the value of 'useSharedGmpAndMpfr' to 0 in this file
 % - Run this file from matlab
 
-v = version;
-vDots = find(v=='.');
-v = str2num(v(1:vDots(2)-1));
 
+%% Settings
 if nargin < 1
-    parallelization = 1;
+    parallelization = 0;
 end
 
 % Set the following variable to 0 in order to compile a library which does
 % not depend on shared gmp and mpfr libraries:
 useSharedGmpAndMpfr = 0;
+
+
+%% We perform some checks
+% This file needs to be run from within its folder
+tmp = mfilename('fullpath');
+tmp = tmp(1:find(tmp=='/',1,'last')-1);
+if ~isequal(tmp, pwd)
+    error('Unable to compile the gem library from a different folder.');
+end
+
+% We extract the matlab version
+v = version;
+vDots = find(v=='.');
+v = str2num(v(1:vDots(2)-1));
+
 
 % We check that the eigen source code was downloaded
 list = dir('src');
@@ -42,15 +55,17 @@ if eigenFound == 0
     error('The eigen library was not found in the gem/src folder. Please download it from http://eigen.tuxfamily.org');
 end
 
+
+%% Now we proceed to compilation
 if useSharedGmpAndMpfr == 1
     if parallelization == 1
         % Compilation with parallelization
         cd src
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp utils.cpp -o utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem.cpp -o gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem_mex.cpp -o gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem.cpp -o sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem_mex.cpp -o sgem_mex.o']);
+        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp utils.cpp -o utils.o']);
+        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem.cpp -o gem.o']);
+        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem_mex.cpp -o gem_mex.o']);
+        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem.cpp -o sgem.o']);
+        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem_mex.cpp -o sgem_mex.o']);
         flags(6) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -fopenmp -o ../gem_mex.', mexext]);
         flags(7) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -fopenmp -o ../sgem_mex.', mexext]);
         cd ..
@@ -62,11 +77,11 @@ if useSharedGmpAndMpfr == 1
     else
         % Compilation without parallelization
         cd src
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem_mex.cpp -o gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem.cpp -o sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
+        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
+        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
+        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem_mex.cpp -o gem_mex.o']);
+        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem.cpp -o sgem.o']);
+        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
         flags(6) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -o ../gem_mex.', mexext]);
         flags(7) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -o ../sgem_mex.', mexext]);
         cd ..
@@ -82,27 +97,36 @@ else
     % - download the gmp source code from https://gmplib.org/#DOWNLOAD
     %   and unpack it into the 'src' folder (this creates the folder src/gmp*)
     % - download the mpfr source code from http://www.mpfr.org/mpfr-current/#download
-    %   and unpack it into the 'src' folder
+    %   and unpack it into the 'src' folder (this creates the folder src/mpfr*)
+    % - download the mpfrc++ source code from http://www.mpfr.org/mpfr-current/#download
+    %   and unpack it into the 'src' folder (this creates the folder src/mpfrc++*)
 
-    % We check that the gmp and mpfr sources have been downloaded
+    % We check that the gmp, mpfr and mpfrc++ sources are available
     gmpFolder = '';
     mpfrFolder = '';
+    mpfrcppFolder = '';
     for i=1:length(list)
-        if isequal(list(i).name(1:min(end,3)),'gmp')
+        if isequal(lower(list(i).name(1:min(end,3))),'gmp')
             gmpFolder = list(i).name;
         end
-        if isequal(list(i).name(1:min(end,4)),'mpfr')
+        if isequal(lower(list(i).name(1:min(end,4))),'mpfr') && ~isequal(lower(list(i).name(1:min(end,7))),'mpfrc++')
             mpfrFolder = list(i).name;
+        end
+        if isequal(lower(list(i).name(1:min(end,7))),'mpfrc++')
+            mpfrcppFolder = list(i).name;
         end
     end
     if isempty(gmpFolder)
-        error('The gmp source code was not found. Please download it from https://gmplib.org');
+        error('The gmp source code was not found. Please download it from https://gmplib.org and place it into the gem/src folder');
     end
     if isempty(mpfrFolder)
-        error('The mpfr source code was not found. Please download it from http://www.mpfr.org');
+        error('The mpfr source code was not found. Please download it from http://www.mpfr.org and place it into the gem/src folder');
+    end
+    if isempty(mpfrcppFolder) || ~isequal(exist(['src/', mpfrcppFolder, '/mpreal.h']), 2)
+        error('The mpfrc++ source code was not found. Please download it from http://www.holoborodko.com/pavel/mpfr and place it into the gem/src folder');
     end
     
-    % we compile the libraries if needed
+    % We compile the libraries if needed
     cd src
     if exist('staticLibraries') ~= 7
         unix('mkdir staticLibraries');
@@ -127,11 +151,11 @@ else
     % Now gmp and mpfr should be ready, we can compile gem
     if parallelization == 1
         % Compilation with parallelization
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp utils.cpp -o utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem.cpp -o gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem_mex.cpp -o gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem.cpp -o sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem_mex.cpp -o sgem_mex.o']);
+        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp utils.cpp -o utils.o']);
+        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem.cpp -o gem.o']);
+        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem_mex.cpp -o gem_mex.o']);
+        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem.cpp -o sgem.o']);
+        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem_mex.cpp -o sgem_mex.o']);
         flags(6) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -fopenmp -o ../gem_mex.', mexext]);
         flags(7) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -fopenmp -o ../sgem_mex.', mexext]);
         cd ..
@@ -142,11 +166,11 @@ else
         end
     else
         % Compilation without parallelization
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem_mex.cpp -o gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem.cpp -o sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Ieigen/unsupported/test/mpreal -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
+        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
+        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
+        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG gem_mex.cpp -o gem_mex.o']);
+        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem.cpp -o sgem.o']);
+        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 -O3 -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
         flags(6) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -o ../gem_mex.', mexext]);
         flags(7) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ -O3 -DEIGEN_NO_DEBUG -o ../sgem_mex.', mexext]);
         cd ..
