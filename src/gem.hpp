@@ -308,6 +308,18 @@ public:
 
 
     /* ---------------------------------------
+       |   Some linear algebra operations    |
+       --------------------------------------- */
+
+    GmpEigenMatrix inv() const;
+    GmpEigenMatrix& inv_new() const;
+    GmpEigenMatrix eig(GmpEigenMatrix& V) const;
+    GmpEigenMatrix& eig_new(GmpEigenMatrix& V) const;
+
+
+
+
+    /* ---------------------------------------
        | Some tests and comparison operators |
        --------------------------------------- */
 
@@ -411,6 +423,23 @@ public:
     friend GmpEigenMatrix& constEuler_new();
     friend GmpEigenMatrix constCatalan();
     friend GmpEigenMatrix& constCatalan_new();
+
+
+
+
+
+
+    /* --------------------------------------------------
+       | Useful functions to deal with complex matrices |
+       -------------------------------------------------- */
+
+    /* This function transforms complex matrices into twice as big real matrices */
+    GmpEigenMatrix complexIsometry() const;
+    /* This function restores the complex matrix corresponding to a big real
+       matrix created with the complexIsometry function. */
+    GmpEigenMatrix complexIsometryInverse() const;
+
+
 
 
 

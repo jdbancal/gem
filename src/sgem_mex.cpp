@@ -733,6 +733,31 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+
+
+
+
+    /* Call the class method "inv" */
+    if (!strcmp("inv", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 2))
+            mexErrMsgTxt("inv: Unexpected arguments.");
+
+        // Compute the matric inverse
+        SparseGmpEigenMatrix& result(SparseGmpEigenMatrix_instance.inv_new());
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<SparseGmpEigenMatrix>(result);
+
+        return;
+    }
+
+
+
+
+
+
+
     /* Call the class method "colMin" */
     if (!strcmp("colMin", cmd)) {
         // Check parameters

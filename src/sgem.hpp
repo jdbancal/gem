@@ -6,6 +6,8 @@
 #include <vector>
 #include <Eigen/Sparse>
 #include <Eigen/MPRealSupport>
+#include <Eigen/OrderingMethods>
+#include <Eigen/SparseLU>
 #include "utils.hpp"
 
 /*
@@ -262,6 +264,16 @@ public:
 
 
     /* ---------------------------------------
+       |   Some linear algebra operations    |
+       --------------------------------------- */
+
+    SparseGmpEigenMatrix inv();
+    SparseGmpEigenMatrix& inv_new();
+    SparseGmpEigenMatrix& eig_new(SparseGmpEigenMatrix& V) const;
+
+
+
+    /* ---------------------------------------
        | Some tests and comparison operators |
        --------------------------------------- */
 
@@ -375,6 +387,16 @@ public:
 
 
 
+
+    /* --------------------------------------------------
+       | Useful functions to deal with complex matrices |
+       -------------------------------------------------- */
+
+    /* This function transforms complex matrices into twice as big real matrices */
+    SparseGmpEigenMatrix complexIsometry() const;
+    /* This function restores the complex matrix corresponding to a big real
+       matrix created with the complexIsometry function. */
+    SparseGmpEigenMatrix complexIsometryInverse() const;
 
 
     /* ------------------------

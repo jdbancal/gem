@@ -745,7 +745,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("sin: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the sine
         GmpEigenMatrix& result(GmpEigenMatrix_instance.sin_new());
 
         // We return the reference to this object to matlab
@@ -761,7 +761,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("cos: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the cosine
         GmpEigenMatrix& result(GmpEigenMatrix_instance.cos_new());
 
         // We return the reference to this object to matlab
@@ -777,7 +777,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("tan: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the tangent
         GmpEigenMatrix& result(GmpEigenMatrix_instance.tan_new());
 
         // We return the reference to this object to matlab
@@ -793,7 +793,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("sec: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the secant
         GmpEigenMatrix& result(GmpEigenMatrix_instance.sec_new());
 
         // We return the reference to this object to matlab
@@ -809,7 +809,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("csc: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the cosecant
         GmpEigenMatrix& result(GmpEigenMatrix_instance.csc_new());
 
         // We return the reference to this object to matlab
@@ -825,7 +825,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("cot: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the cotengant
         GmpEigenMatrix& result(GmpEigenMatrix_instance.cot_new());
 
         // We return the reference to this object to matlab
@@ -841,7 +841,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("acos: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the arc cosine
         GmpEigenMatrix& result(GmpEigenMatrix_instance.acos_new());
 
         // We return the reference to this object to matlab
@@ -857,7 +857,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("asin: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the arc sine
         GmpEigenMatrix& result(GmpEigenMatrix_instance.asin_new());
 
         // We return the reference to this object to matlab
@@ -873,7 +873,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 2))
             mexErrMsgTxt("atan: Unexpected arguments.");
 
-        // Compute the cubic root
+        // Compute the arc tangent
         GmpEigenMatrix& result(GmpEigenMatrix_instance.atan_new());
 
         // We return the reference to this object to matlab
@@ -882,6 +882,42 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
+
+
+
+
+    /* Call the class method "inv" */
+    if (!strcmp("inv", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 2))
+            mexErrMsgTxt("inv: Unexpected arguments.");
+
+        // Compute the matric inverse
+        GmpEigenMatrix& result(GmpEigenMatrix_instance.inv_new());
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+
+        return;
+    }
+
+
+    /* Call the class method "eig" */
+    if (!strcmp("eig", cmd)) {
+        // Check parameters
+        if ((nlhs != 2) || (nrhs != 2))
+            mexErrMsgTxt("eig: Unexpected arguments.");
+
+        // Compute the eigen decomposition
+        GmpEigenMatrix& Vmatrix(*(new GmpEigenMatrix));
+        GmpEigenMatrix& result(GmpEigenMatrix_instance.eig_new(Vmatrix));
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+        plhs[1] = createMatlabIdFromObj<GmpEigenMatrix>(Vmatrix);
+
+        return;
+    }
 
 
 

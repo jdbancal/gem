@@ -982,6 +982,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::horzcat(const SparseGmpEigenMatrix& b
     result.matrixR.conservativeResize(matrixR.rows(), matrixR.cols()+b.matrixR.cols());
     // It seems we cannot just call result.matrixR.block(0, matrixR.cols(), b.matrixR.rows(), b.matrixR.cols()) = b.matrixR;
     // So let's do this by hand...
+
     result.matrixR.reserve(b.matrixR.nonZeros());
     for (IndexType k = 0; k < b.matrixR.outerSize(); ++k)
         for (SparseMatrix<mpreal>::InnerIterator it(b.matrixR,k); it; ++it)
@@ -3538,14 +3539,24 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::operator*(const SparseGmpEigenMatrix&
         } else {
             result.matrixR = (matrixR*b.matrixR).pruned();
             result.matrixI = (matrixR*b.matrixI).pruned();
+            result.matrixR.prune(0,0);
+            result.matrixI.prune(0,0);
+            result.matrixR.makeCompressed();
+            result.matrixI.makeCompressed();
             result.checkComplexity();
         }
     } else if (isComplex) {
         result.matrixR = (matrixR*b.matrixR).pruned();
         result.matrixI = (matrixI*b.matrixR).pruned();
+        result.matrixR.prune(0,0);
+        result.matrixI.prune(0,0);
+        result.matrixR.makeCompressed();
+        result.matrixI.makeCompressed();
         result.checkComplexity();
     } else {
         result.matrixR = (matrixR*b.matrixR).pruned();
+        result.matrixR.prune(0,0);
+        result.matrixR.makeCompressed();
         result.isComplex = false;
     }
 
@@ -3569,14 +3580,24 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::mtimes_new(const SparseGmpEigenMatri
         } else {
             result.matrixR = (matrixR*b.matrixR).pruned();
             result.matrixI = (matrixR*b.matrixI).pruned();
+            result.matrixR.prune(0,0);
+            result.matrixI.prune(0,0);
+            result.matrixR.makeCompressed();
+            result.matrixI.makeCompressed();
             result.checkComplexity();
         }
     } else if (isComplex) {
         result.matrixR = (matrixR*b.matrixR).pruned();
         result.matrixI = (matrixI*b.matrixR).pruned();
+        result.matrixR.prune(0,0);
+        result.matrixI.prune(0,0);
+        result.matrixR.makeCompressed();
+        result.matrixI.makeCompressed();
         result.checkComplexity();
     } else {
         result.matrixR = (matrixR*b.matrixR).pruned();
+        result.matrixR.prune(0,0); // It looks like pruned() above does not always remove all zeros, e.g. in m=[1 2; 3 5]; inv(sgem(m))*sgem(m)
+        result.matrixR.makeCompressed();
         result.isComplex = false;
     }
 
@@ -4520,6 +4541,93 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::atan_new() const
 
         // We compress the output if possible
         result.matrixR.prune(0,0);
+    }
+
+    return result;
+}
+
+
+
+
+
+
+
+
+/* ---------------------------------------
+   |   Some linear algebra operations    |
+   --------------------------------------- */
+
+/* Matrix inverse b = inv(a) */
+SparseGmpEigenMatrix SparseGmpEigenMatrix::inv()
+{
+    SparseGmpEigenMatrix result;
+
+    if (isComplex) {
+        result = complexIsometry().inv().complexIsometryInverse();
+    } else {
+        // Since Eigen does not provide an inverse function for sparse matrices,
+        // we use an LU solver to compute the full form of each column of the
+        // inverse matrix one by one (this avoids storing big matrices...).
+
+        //matrixR.makeCompressed(); // The matrix is supposed to be alread compressed at this stage...
+        SparseLU< SparseMatrix<mpreal, ColMajor>, COLAMDOrdering<int> > solver;
+
+        solver.analyzePattern(matrixR);
+        solver.factorize(matrixR);
+
+        Matrix<mpreal, Dynamic, 1> I(matrixR.rows(), 1);
+        GmpEigenMatrix X;
+
+        // We start with the first column
+        I(0,0) = 1;
+        X.matrixR = solver.solve(I);
+        result = SparseGmpEigenMatrix(X);
+
+        // The next columns
+        for (IndexType i(1); i < matrixR.rows(); ++i) {
+            I(i-1,0) = 0;
+            I(i,0) = 1;
+            X.matrixR = solver.solve(I);
+            result = result.horzcat(SparseGmpEigenMatrix(X));
+        }
+    }
+
+    return result;
+}
+
+/* Matrix inverse b = inv(a) */
+SparseGmpEigenMatrix& SparseGmpEigenMatrix::inv_new()
+{
+    SparseGmpEigenMatrix& result(*(new SparseGmpEigenMatrix));
+
+    if (isComplex) {
+        result = complexIsometry().inv().complexIsometryInverse();
+    } else {
+        // Since Eigen does not provide an inverse function for sparse matrices,
+        // we use an LU solver to compute the full form of each column of the
+        // inverse matrix one by one (this avoids storing big matrices...).
+
+        //matrixR.makeCompressed(); // The matrix is supposed to be alread compressed at this stage...
+        SparseLU< SparseMatrix<mpreal, ColMajor>, COLAMDOrdering<int> > solver;
+
+        solver.analyzePattern(matrixR);
+        solver.factorize(matrixR);
+
+        Matrix<mpreal, Dynamic, 1> I(matrixR.rows(), 1);
+        GmpEigenMatrix X;
+
+        // We start with the first column
+        I(0,0) = 1;
+        X.matrixR = solver.solve(I);
+        result = SparseGmpEigenMatrix(X);
+
+        // The next columns
+        for (IndexType i(1); i < matrixR.rows(); ++i) {
+            I(i-1,0) = 0;
+            I(i,0) = 1;
+            X.matrixR = solver.solve(I);
+            result = result.horzcat(SparseGmpEigenMatrix(X));
+        }
     }
 
     return result;
@@ -9257,6 +9365,43 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowProd_new() const
         result.matrixR = products.matrixR.sparseView(mpreal(0),mpreal(1));
         result.isComplex = false;
     }
+
+    return result;
+}
+
+
+
+/* This function transforms complex matrices into twice as big real matrices */
+SparseGmpEigenMatrix SparseGmpEigenMatrix::complexIsometry() const
+{
+    SparseGmpEigenMatrix result;
+    SparseGmpEigenMatrix tmpR;
+    SparseGmpEigenMatrix tmpI;
+
+    tmpR.matrixR = matrixR;
+    if (isComplex)
+        tmpI.matrixR = matrixI;
+    else
+        tmpI.matrixR.resize(matrixR.rows(),matrixR.cols());
+
+    result = (tmpR.horzcat(tmpI)).vertcat((-tmpI).horzcat(tmpR));
+
+    return result;
+}
+
+/* This function restores the complex matrix corresponding to a big real
+   matrix created with the complexIsometry function. */
+SparseGmpEigenMatrix SparseGmpEigenMatrix::complexIsometryInverse() const
+{
+    SparseGmpEigenMatrix result;
+
+    if (isComplex) {
+        mexErrMsgTxt("Error in complexIsometryInverse : the provided matrix is not real.");
+    }
+
+    result.matrixR = matrixR.block(0, 0, matrixR.rows()/2, matrixR.cols()/2);
+    result.matrixI = matrixR.block(0, matrixR.cols()/2, matrixR.rows()/2, matrixR.cols()/2);
+    result.checkComplexity();
 
     return result;
 }

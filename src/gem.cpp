@@ -3434,6 +3434,132 @@ GmpEigenMatrix& GmpEigenMatrix::cosh_new() const
 
 
 
+/* ---------------------------------------
+   |   Some linear algebra operations    |
+   --------------------------------------- */
+
+/* Matrix inverse b = inv(a) */
+GmpEigenMatrix GmpEigenMatrix::inv() const
+{
+    GmpEigenMatrix result;
+
+    if (isComplex) {
+        result = complexIsometry().inv().complexIsometryInverse();
+    } else {
+        result.matrixR = matrixR.inverse();
+    }
+
+    return result;
+}
+
+/* Matrix inverse b = inv(a) */
+GmpEigenMatrix& GmpEigenMatrix::inv_new() const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix));
+
+    if (isComplex) {
+        result = complexIsometry().inv().complexIsometryInverse();
+    } else {
+        result.matrixR = matrixR.inverse();
+    }
+
+    return result;
+}
+
+/* Eigen decopmosition: similar to [V D] = eig(A) */
+GmpEigenMatrix GmpEigenMatrix::eig(GmpEigenMatrix& V) const
+{
+    GmpEigenMatrix result;
+
+    if (isComplex) {
+        // WARNING : According to http://www.holoborodko.com/pavel/mpfr/ , using
+        // std::complex<mpfr::mpreal> can lead to dramatic losses of precision
+        // in the eigenvalue computation, because Eigen's algorithm uses
+        // std::abs(std::complex) on those numbers, which are then implicitely
+        // transformed as doubles. (c.f. comment from April 20, 2016)
+        // So we should try to avoid this std::complex ...
+
+        result = complexIsometry().eig(V).complexIsometryInverse();
+
+
+        /*complex<mpreal> i(0,1);
+        Matrix<complex<mpreal>,Dynamic,Dynamic> mat;
+        mat = matrixR.cast<complex<mpreal> >() + i*matrixI.cast<complex<mpreal> >();
+        EigenSolver< Matrix<complex<mpreal>, Dynamic, Dynamic> > es(mat);
+
+        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVal = es.eigenvalues();
+        result.isComplex = true;
+        result.matrixR = EVal.real();
+        result.matrixI = EVal.imag();
+        result.checkComplexity();
+
+        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVec = es.eigenvectors();
+        V.isComplex = true;
+        V.matrixR = EVec.real();
+        V.matrixR = EVec.real();
+        V.checkComplexity();*/
+    } else {
+        EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(matrixR);
+
+        result.isComplex = false;
+        result.matrixR = es.pseudoEigenvalueMatrix();
+
+        V.isComplex = false;
+        V.matrixR = es.pseudoEigenvectors();
+        V.matrixI.resize(0,0);
+    }
+
+    return result;
+}
+
+/* Eigen decopmosition: similar to [V D] = eig(A) */
+GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix));
+
+    if (isComplex) {
+        // WARNING : According to http://www.holoborodko.com/pavel/mpfr/ , using
+        // std::complex<mpfr::mpreal> can lead to dramatic losses of precision
+        // in the eigenvalue computation, because Eigen's algorithm uses
+        // std::abs(std::complex) on those numbers, which are then implicitely
+        // transformed as doubles. (c.f. comment from April 20, 2016)
+        // So we should try to avoid this std::complex ...
+
+        result = complexIsometry().eig(V).complexIsometryInverse();
+
+
+        /*complex<mpreal> i(0,1);
+        Matrix<complex<mpreal>,Dynamic,Dynamic> mat;
+        mat = matrixR.cast<complex<mpreal> >() + i*matrixI.cast<complex<mpreal> >();
+        EigenSolver< Matrix<complex<mpreal>, Dynamic, Dynamic> > es(mat);
+
+        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVal = es.eigenvalues();
+        result.isComplex = true;
+        result.matrixR = EVal.real();
+        result.matrixI = EVal.imag();
+        result.checkComplexity();
+
+        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVec = es.eigenvectors();
+        V.isComplex = true;
+        V.matrixR = EVec.real();
+        V.matrixR = EVec.real();
+        V.checkComplexity();*/
+    } else {
+        EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(matrixR);
+
+        result.isComplex = false;
+        result.matrixR = es.pseudoEigenvalueMatrix();
+
+        V.isComplex = false;
+        V.matrixR = es.pseudoEigenvectors();
+        V.matrixI.resize(0,0);
+    }
+
+    return result;
+}
+
+
+
 
 
 /* -----------------------------
@@ -4751,6 +4877,48 @@ GmpEigenMatrix& GmpEigenMatrix::rowProd_new() const
 
     return result;
 }
+
+
+
+
+/* This function transforms complex matrices into twice as big real matrices */
+GmpEigenMatrix GmpEigenMatrix::complexIsometry() const
+{
+    GmpEigenMatrix result(*this);
+
+    result.matrixR.conservativeResize(2*matrixR.rows(), 2*matrixR.cols());
+    result.matrixR.block(matrixR.rows(), matrixR.cols(), matrixR.rows(), matrixR.cols()) = matrixR;
+    if (isComplex) {
+        result.matrixI.resize(0,0);
+        result.isComplex = false;
+        result.matrixR.block(0, matrixR.cols(), matrixR.rows(), matrixR.cols()) = matrixI;
+        result.matrixR.block(matrixR.rows(), 0, matrixR.rows(), matrixR.cols()) = -matrixI;
+    }
+
+    return result;
+}
+
+/* This function restores the complex matrix corresponding to a big real
+   matrix created with the complexIsometry function. */
+GmpEigenMatrix GmpEigenMatrix::complexIsometryInverse() const
+{
+    GmpEigenMatrix result;
+
+    if (isComplex) {
+        mexErrMsgTxt("Error in complexIsometryInverse : the provided matrix is not real.");
+    }
+
+    cout << matrixR << endl << endl;
+    result.matrixR = matrixR.block(0, 0, matrixR.rows()/2, matrixR.cols()/2);
+    result.matrixI = matrixR.block(0, matrixR.cols()/2, matrixR.rows()/2, matrixR.cols()/2);
+    cout << result.matrixR << endl << endl;
+    cout << result.matrixI << endl << endl;
+    result.checkComplexity();
+
+    return result;
+}
+
+
 
 
 
