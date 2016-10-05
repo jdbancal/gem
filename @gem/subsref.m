@@ -1,4 +1,6 @@
 % subsref - selects part of the matrix
+%
+% WARNING : We still need to support formats like x = gem([1 2 3]), x([1 2; 2 3]);
 function result = subsref(this, varargin)
 
 

@@ -3479,25 +3479,44 @@ GmpEigenMatrix GmpEigenMatrix::eig(GmpEigenMatrix& V) const
         // transformed as doubles. (c.f. comment from April 20, 2016)
         // So we should try to avoid this std::complex ...
 
-        result = complexIsometry().eig(V).complexIsometryInverse();
+        // First, we solve a complex version of the problem
+        GmpEigenMatrix Vreal; // This matrix will hold an isometry of the eigenvectors
+        EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(complexIsometry().matrixR);
 
+        result.isComplex = false;
+        result.matrixR = es.pseudoEigenvalueMatrix();
 
-        /*complex<mpreal> i(0,1);
-        Matrix<complex<mpreal>,Dynamic,Dynamic> mat;
-        mat = matrixR.cast<complex<mpreal> >() + i*matrixI.cast<complex<mpreal> >();
-        EigenSolver< Matrix<complex<mpreal>, Dynamic, Dynamic> > es(mat);
+        Vreal.isComplex = false;
+        Vreal.matrixR = es.pseudoEigenvectors();
+        Vreal.matrixI.resize(0,0);
 
-        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVal = es.eigenvalues();
-        result.isComplex = true;
-        result.matrixR = EVal.real();
-        result.matrixI = EVal.imag();
-        result.checkComplexity();
+        // Now we analyse the result and extract the complex eigenvalues and eigenvectors
+        // Columns go by pairs, so we can extract one eigenvector from every odd column
+        // We write the indices we'll need to use
+        vector < IndexType > indices1, indicesAR, indicesAI, indicesB;
+        GmpEigenMatrix tmp;
+        indices1.push_back(0);
+        for (IndexType i(0); i < matrixR.rows(); ++i) {
+            indicesAR.push_back(i);
+            indicesAI.push_back(matrixR.rows()+i);
+            indicesB.push_back(2*i);
+        }
+        V = Vreal.subsref(indicesAR, indicesB);
+        tmp = -Vreal.subsref(indicesAI, indicesB);
+        V.matrixI = tmp.matrixR;
+        V.checkComplexity();
 
-        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVec = es.eigenvectors();
-        V.isComplex = true;
-        V.matrixR = EVec.real();
-        V.matrixR = EVec.real();
-        V.checkComplexity();*/
+        // Now we extract the eigenvalues
+        result = (V.inv()*(*this)*V);
+
+/*      // This is another way to extract the eigenvalues, but sometimes it
+        // rather gives the conjugate of the eigenvalues...
+        GmpEigenMatrix lambdaR(result.diagExtract(0)), lambdaI(result.diagExtract(1));
+        lambdaR = lambdaR.subsref(indicesB);
+        lambdaI = lambdaI.subsref(indicesB);//.times(pm1pattern);
+        result.matrixR = lambdaR.matrixR;
+        result.matrixI = lambdaI.matrixR;
+        result.checkComplexity();*/
     } else {
         EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(matrixR);
 
@@ -3507,6 +3526,27 @@ GmpEigenMatrix GmpEigenMatrix::eig(GmpEigenMatrix& V) const
         V.isComplex = false;
         V.matrixR = es.pseudoEigenvectors();
         V.matrixI.resize(0,0);
+
+        // Now, we take care of complex eigenvalues, if there are any.
+        // Their presence is signified by 2x2 blocks on the pseudo eigenvalue
+        // matrix.
+        vector < IndexType > indicesAll, indicesBlock, indicesBlockP1, indicesFullBlock;
+        for (IndexType i(0); i < matrixR.rows(); ++i) {
+            indicesAll.push_back(i);
+            if ((i < matrixR.rows()-1) && (result.matrixR(i,i+1) != 0)) {
+                indicesBlock.push_back(i);
+                indicesBlockP1.push_back(i+1);
+                indicesFullBlock.push_back(i);
+                indicesFullBlock.push_back(i+1);
+            }
+        }
+        V.subsasgn(indicesAll, indicesBlock, V.subsref(indicesAll, indicesBlock) + V.subsref(indicesAll, indicesBlockP1).times(constI()));
+        V.subsasgn(indicesAll, indicesBlockP1, V.subsref(indicesAll, indicesBlock).conj());
+
+        // Now recompute the complex eigenvalues (to make sure they are
+        // associated to the correct eigenvector...)
+        GmpEigenMatrix tmp = (V.inv()*(*this)*V);
+        result.subsasgn(indicesFullBlock, indicesFullBlock, tmp.subsref(indicesFullBlock, indicesFullBlock));
     }
 
     return result;
@@ -3525,25 +3565,44 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
         // transformed as doubles. (c.f. comment from April 20, 2016)
         // So we should try to avoid this std::complex ...
 
-        result = complexIsometry().eig(V).complexIsometryInverse();
+        // First, we solve a complex version of the problem
+        GmpEigenMatrix Vreal; // This matrix will hold an isometry of the eigenvectors
+        EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(complexIsometry().matrixR);
 
+        result.isComplex = false;
+        result.matrixR = es.pseudoEigenvalueMatrix();
 
-        /*complex<mpreal> i(0,1);
-        Matrix<complex<mpreal>,Dynamic,Dynamic> mat;
-        mat = matrixR.cast<complex<mpreal> >() + i*matrixI.cast<complex<mpreal> >();
-        EigenSolver< Matrix<complex<mpreal>, Dynamic, Dynamic> > es(mat);
+        Vreal.isComplex = false;
+        Vreal.matrixR = es.pseudoEigenvectors();
+        Vreal.matrixI.resize(0,0);
 
-        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVal = es.eigenvalues();
-        result.isComplex = true;
-        result.matrixR = EVal.real();
-        result.matrixI = EVal.imag();
-        result.checkComplexity();
+        // Now we analyse the result and extract the complex eigenvalues and eigenvectors
+        // Columns go by pairs, so we can extract one eigenvector from every odd column
+        // We write the indices we'll need to use
+        vector < IndexType > indices1, indicesAR, indicesAI, indicesB;
+        GmpEigenMatrix tmp;
+        indices1.push_back(0);
+        for (IndexType i(0); i < matrixR.rows(); ++i) {
+            indicesAR.push_back(i);
+            indicesAI.push_back(matrixR.rows()+i);
+            indicesB.push_back(2*i);
+        }
+        V = Vreal.subsref(indicesAR, indicesB);
+        tmp = -Vreal.subsref(indicesAI, indicesB);
+        V.matrixI = tmp.matrixR;
+        V.checkComplexity();
 
-        Matrix< std::complex<mpreal>,Dynamic,Dynamic > EVec = es.eigenvectors();
-        V.isComplex = true;
-        V.matrixR = EVec.real();
-        V.matrixR = EVec.real();
-        V.checkComplexity();*/
+        // Now we extract the eigenvalues
+        result = (V.inv()*(*this)*V);
+
+/*      // This is another way to extract the eigenvalues, but sometimes it
+        // rather gives the conjugate of the eigenvalues...
+        GmpEigenMatrix lambdaR(result.diagExtract(0)), lambdaI(result.diagExtract(1));
+        lambdaR = lambdaR.subsref(indicesB);
+        lambdaI = lambdaI.subsref(indicesB);//.times(pm1pattern);
+        result.matrixR = lambdaR.matrixR;
+        result.matrixI = lambdaI.matrixR;
+        result.checkComplexity();*/
     } else {
         EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(matrixR);
 
@@ -3553,6 +3612,28 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
         V.isComplex = false;
         V.matrixR = es.pseudoEigenvectors();
         V.matrixI.resize(0,0);
+
+        // Now, we take care of complex eigenvalues, if there are any.
+        // Their presence is signified by 2x2 blocks on the pseudo eigenvalue
+        // matrix.
+        vector < IndexType > indicesAll, indicesBlock, indicesBlockP1, indicesFullBlock;
+        for (IndexType i(0); i < matrixR.rows(); ++i) {
+            indicesAll.push_back(i);
+            if ((i < matrixR.rows()-1) && (result.matrixR(i,i+1) != 0)) {
+                indicesBlock.push_back(i);
+                indicesBlockP1.push_back(i+1);
+                indicesFullBlock.push_back(i);
+                indicesFullBlock.push_back(i+1);
+            }
+        }
+        V.subsasgn(indicesAll, indicesBlock, V.subsref(indicesAll, indicesBlock) + V.subsref(indicesAll, indicesBlockP1).times(constI()));
+        V.subsasgn(indicesAll, indicesBlockP1, V.subsref(indicesAll, indicesBlock).conj());
+
+        // Now recompute the complex eigenvalues (to make sure they are
+        // associated to the correct eigenvector...)
+        GmpEigenMatrix tmp = (V.inv()*(*this)*V);
+        tmp = tmp.diagExtract(0).diagCreate(0);
+        result.subsasgn(indicesFullBlock, indicesFullBlock, tmp.subsref(indicesFullBlock, indicesFullBlock));
     }
 
     return result;
@@ -4908,11 +4989,8 @@ GmpEigenMatrix GmpEigenMatrix::complexIsometryInverse() const
         mexErrMsgTxt("Error in complexIsometryInverse : the provided matrix is not real.");
     }
 
-    cout << matrixR << endl << endl;
     result.matrixR = matrixR.block(0, 0, matrixR.rows()/2, matrixR.cols()/2);
     result.matrixI = matrixR.block(0, matrixR.cols()/2, matrixR.rows()/2, matrixR.cols()/2);
-    cout << result.matrixR << endl << endl;
-    cout << result.matrixI << endl << endl;
     result.checkComplexity();
 
     return result;
