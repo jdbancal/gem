@@ -6,8 +6,8 @@ The GEM library is an open source variable precision library for [matlab](http:/
 500-fold overheads when performing simple comparison operations (c.f. below) and the absence of support for high-precision sparse matrices are hardly admissible constraints for building innovative high precision algorithms, just like proprietary code. The GEM library is an attempt to address these problems by providing high precision capabilities for basic matlab functions in an open source way.
 
 The library provides two data types:
- - `gem` for high precision dense matrices
- - `sgem` for high precision sparse matrices
+ - **gem** for high precision dense matrices
+ - **sgem** for high precision sparse matrices
 and overloads numerous matlab functions.
 
 The library is coded in C++. It relies on [GMP](https://gmplib.org/) for the high precision arithmetic (through [MPFR C++](http://www.holoborodko.com/pavel/mpfr/) and [MPFR](http://www.mpfr.org/)) and on [Eigen](http://eigen.tuxfamily.org/) for matrix manipulations.
@@ -20,19 +20,19 @@ The GEM library is free and open source. It is therefore also free for academic 
 Usage examples
 --------------
 
- - ```gem(2)```, ```gem(1.23)``` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
- - ```gem('1.23456789123456789+2i')``` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
- - ```gemWorkingPrecision(100)``` updates the working precision to 100 digits
- - ```eig(gemRand(100,100))``` : computes the eigenvalues of a random 100x100 matrix
- - ```notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1) gives 262537412640768743.9999999999992500725971981856889``` (a precision of -1 displays all available digits)
- - ```sgem(eye(3))``` creates a high precision sparse representation of the 3x3 identity matrix
- - ```a=1./gem([1:7]); save('filename','a'); load('filename');``` saves and loads a gem object
+ - `gem(2)`, `gem(1.23)` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
+ - `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
+ - `gemWorkingPrecision(100)` updates the working precision to 100 digits
+ - `eig(gemRand(100,100))` : computes the eigenvalues of a random 100x100 matrix
+ - `notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1) gives 262537412640768743.9999999999992500725971981856889` (a precision of -1 displays all available digits)
+ - `sgem(eye(3))` creates a high precision sparse representation of the 3x3 identity matrix
+ - `a=1./gem([1:7]); save('filename','a'); load('filename');` saves and loads a gem object
 
 
 Installation
 ------------
 
-This library comes pre-compiled for ubuntu 64bits. It is therefore straightforward to use : just add the gem folder into matlab's path, and it is ready to use. This can be done by running the command '''path(path,'/path_to_the_gem_folder/gem').
+This library comes pre-compiled for ubuntu 64bits. It is therefore straightforward to use : just add the gem folder into matlab's path, and it is ready to use. This can be done by running the command `path(path,'/path_to_the_gem_folder/gem')`.
 
 If you are using a different platform (32 bits, mac os or windows), or in case you use an older version of linux/matlab than the one on which this was compiled, you need to compile it. Below are instructions
 
@@ -45,9 +45,9 @@ Here are the instructions for compiling GEM on *ubuntu* (please update this file
 1. Check out this repository in the folder of your choice
 2. Download the latest version of Eigen on [eigen.tuxfamily.org](eigen.tuxfamily.org) and place it into the src folder.
 3. Install the gmp and mpfrc++ libraries with the command
-'''sudo apt-get install libmpfrc++-dev libgmp-dev
+`sudo apt-get install libmpfrc++-dev libgmp-dev`
 4. Start matlab and go to the gem folder.
-5. Type 'make'. This will launch the compilation of the library. If everything goes fine, the program will return 'Compilation successful'.
+5. Type `make`. This will launch the compilation of the library. If everything goes fine, the program will return 'Compilation successful'.
 6. Add the gem folder to your matlab path. You can now safely play with high precision objects :-)
 
 
@@ -190,7 +190,7 @@ Here is a detailed overview of the steps to follow if you want to add one functi
 Design considerations
 ---------------------
 
-- The library uses the type 'mpreal' provided by the mpfrc++ library. Therefore, it deal with complex numbers by itself. In particular, all interactions with the Eigen library involves purely real numbers.
+- The library uses the type *mpreal* provided by the mpfrc++ library. Therefore, it deal with complex numbers by itself. In particular, all interactions with the Eigen library involves purely real numbers.
 
 Note that relying on std::complex has been shown to lead to problems, because several algorithms assume that 'std::complex' comes with double precision, hence leading to a loss of precision (c.f. comment from April 20, 2016 on http://www.holoborodko.com/pavel/mpfr/).
 
