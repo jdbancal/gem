@@ -20,8 +20,8 @@ The GEM library is free and open source. It is therefore also free for academic 
 Usage examples
 --------------
 
- - gem(2), gem(1.23) create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
- - gem('1.23456789123456789+2i') creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
+ - ```gem(2)```, ```gem(1.23)``` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
+ - ```gem('1.23456789123456789+2i')``` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
  - gemWorkingPrecision(100) updates the working precision to 100 digits
  - eig(gemRand(100,100)) : computes the eigenvalues of a random 100x100 matrix
  - notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1) gives 262537412640768743.9999999999992500725971981856889 (a precision of -1 displays all available digits)
@@ -49,26 +49,6 @@ Here are the instructions for compiling GEM on *ubuntu* (please update this file
 4. Start matlab and go to the gem folder.
 5. Type 'make'. This will launch the compilation of the library. If everything goes fine, the program will return 'Compilation successful'.
 6. Add the gem folder to your matlab path. You can now safely play with high precision objects :-)
-
-
-
-How to contribute
------------------
-
-Here is a detailed overview of the steps to follow if you want to add one function to the GEM library:
-
- - First of all, find out:
-    - How many parameters does the function depends on? Which of these parameters can be gem objects, which ones must be indices? If there are several input gem parameters, do they all need to be of the same size, or can the function mix matrices and scalars?
-    - How many outputs does this function produce? Which ones are gem objects or indices?
-    - Does the function preserve sparsity? (i.e. are there sparse inputs which can produce sparse outputs? This is not the case of the cosine functions, for instance.)
- - Identify an existing gem function which has identical or similar properties (e.g. tan(x) is similar to sin(x), plus(x,y) is not similar to find(x))
- - Copy this function and rename it to you new function. Do this in the @gem folder, src/gem_mex.cpp file, src/gem.hpp file, src/gem.cpp file first.
- - Now you can modify these new pieces of code to do what you wish.
- - Compile your code and test it.
- - Now you can implement you function for sparse matrices as well by copying and modifying the files/functions in the @sgem folder, src/sgem_mex.cpp file, src/sgem.hpp file, src/sgem.cpp file. If your function never preserves sparsity, you only need to perform modification at the matlab code in the @sgem folder (i.e. no modification in the src folder at this stage).
- - Compile and check your code.
- - Make sure that your code has a minimal amount of help information and that it contains a few helpful comments that explain what is happening.
- - When all is fine, send a pull request on gitlab to add your new feature to the library!
 
 
 
@@ -151,7 +131,7 @@ Included functions
 | min | ✔ | ✔ |  |
 | minus | ✔ | ✔ |  |
 | mldivide | ✔ | ✔ |  |
-| mpower | ✔ |  | supported for two scalars or for +/-1 exponent |
+| mpower | ✔ |  | supports two scalars or matrices with +/-1 exponent |
 | mrdivide | ✔ | ✔ |  |
 | mtimes | ✔ | ✔ |  |
 | ne | ✔ | ✔ |  |
@@ -184,6 +164,26 @@ Included functions
 | uminus | ✔ | ✔ |  |
 | uplus | ✔ | ✔ |  |
 | vertcat | ✔ | ✔ |  |
+
+
+
+How to contribute
+-----------------
+
+Here is a detailed overview of the steps to follow if you want to add one function to the GEM library:
+
+ - First of all, find out:
+    - How many parameters does the function depends on? Which of these parameters can be gem objects, which ones must be indices? If there are several input gem parameters, do they all need to be of the same size, or can the function mix matrices and scalars?
+    - How many outputs does this function produce? Which ones are gem objects or indices?
+    - Does the function preserve sparsity? (i.e. are there sparse inputs which can produce sparse outputs? This is not the case of the cosine functions, for instance.)
+ - Identify an existing gem function which has identical or similar properties (e.g. tan(x) is similar to sin(x), plus(x,y) is not similar to find(x))
+ - Copy this function and rename it to you new function. Do this in the @gem folder, src/gem_mex.cpp file, src/gem.hpp file, src/gem.cpp file first.
+ - Now you can modify these new pieces of code to do what you wish.
+ - Compile your code and test it.
+ - Now you can implement you function for sparse matrices as well by copying and modifying the files/functions in the @sgem folder, src/sgem_mex.cpp file, src/sgem.hpp file, src/sgem.cpp file. If your function never preserves sparsity, you only need to perform modification at the matlab code in the @sgem folder (i.e. no modification in the src folder at this stage).
+ - Compile and check your code.
+ - Make sure that your code has a minimal amount of help information and that it contains a few helpful comments that explain what is happening.
+ - When all is fine, send a pull request on gitlab to add your new feature to the library!
 
 
 
