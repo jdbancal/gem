@@ -1047,27 +1047,29 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::block(const IndexType& i, const Index
 }
 
 /* This function extracts a sub-matrix with single set of index b = a([1,2,3]) */
-SparseGmpEigenMatrix SparseGmpEigenMatrix::subsref(const vector<IndexType>& indices) const
+SparseGmpEigenMatrix SparseGmpEigenMatrix::subsref(const vector<vector<IndexType> >& indices) const
 {
     SparseGmpEigenMatrix result;
 
-    result.matrixR.resize(indices.size(), 1);
+    result.matrixR.resize(indices.size(), indices[0].size());
     result.matrixR.reserve(std::min((IndexType) matrixR.nonZeros(), (IndexType) indices.size()));
     if (isComplex) {
-        result.matrixI.resize(indices.size(), 1);
+        result.matrixI.resize(indices.size(), indices[0].size());
         result.matrixI.reserve(std::min((IndexType) matrixI.nonZeros(), (IndexType) indices.size()));
     }
 
     for (IndexType x(0); x < indices.size(); ++x) {
-        // We separate the number indices into i and j
-        IndexType i, j;
-        j = indices[x] / matrixR.rows();
-        i = indices[x] % matrixR.rows();
+        for (IndexType y(0); y < indices[x].size(); ++y) {
+            // We separate the number indices into i and j
+            IndexType i, j;
+            j = indices[x][y] / matrixR.rows();
+            i = indices[x][y] % matrixR.rows();
 
-        if (matrixR.coeff(i,j) != 0)
-            result.matrixR.insert(x,0) = matrixR.coeff(i,j);
-        if ((isComplex) && (matrixI.coeff(i,j) != 0))
-            result.matrixI.insert(x,0) = matrixI.coeff(i,j);
+            if (matrixR.coeff(i,j) != 0)
+                result.matrixR.insert(x,y) = matrixR.coeff(i,j);
+            if ((isComplex) && (matrixI.coeff(i,j) != 0))
+                result.matrixI.insert(x,y) = matrixI.coeff(i,j);
+        }
     }
 
     result.matrixR.makeCompressed();
@@ -1078,27 +1080,29 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::subsref(const vector<IndexType>& indi
 }
 
 /* This function extracts a sub-matrix with single set of index b = a([1,2,3]) */
-SparseGmpEigenMatrix& SparseGmpEigenMatrix::subsref_new(const vector<IndexType>& indices) const
+SparseGmpEigenMatrix& SparseGmpEigenMatrix::subsref_new(const vector<vector<IndexType> >& indices) const
 {
     SparseGmpEigenMatrix& result(*(new SparseGmpEigenMatrix));
 
-    result.matrixR.resize(indices.size(), 1);
+    result.matrixR.resize(indices.size(), indices[0].size());
     result.matrixR.reserve(std::min((IndexType) matrixR.nonZeros(), (IndexType) indices.size()));
     if (isComplex) {
-        result.matrixI.resize(indices.size(), 1);
+        result.matrixI.resize(indices.size(), indices[0].size());
         result.matrixI.reserve(std::min((IndexType) matrixI.nonZeros(), (IndexType) indices.size()));
     }
 
     for (IndexType x(0); x < indices.size(); ++x) {
-        // We separate the number indices into i and j
-        IndexType i, j;
-        j = indices[x] / matrixR.rows();
-        i = indices[x] % matrixR.rows();
+        for (IndexType y(0); y < indices[x].size(); ++y) {
+            // We separate the number indices into i and j
+            IndexType i, j;
+            j = indices[x][y] / matrixR.rows();
+            i = indices[x][y] % matrixR.rows();
 
-        if (matrixR.coeff(i,j) != 0)
-            result.matrixR.insert(x,0) = matrixR.coeff(i,j);
-        if ((isComplex) && (matrixI.coeff(i,j) != 0))
-            result.matrixI.insert(x,0) = matrixI.coeff(i,j);
+            if (matrixR.coeff(i,j) != 0)
+                result.matrixR.insert(x,y) = matrixR.coeff(i,j);
+            if ((isComplex) && (matrixI.coeff(i,j) != 0))
+                result.matrixI.insert(x,y) = matrixI.coeff(i,j);
+        }
     }
 
     result.matrixR.makeCompressed();

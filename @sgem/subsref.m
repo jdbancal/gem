@@ -19,7 +19,7 @@ switch varargin{1}(1).type
             elseif isequal(varargin{1}.subs{i},':')
                 if length(varargin{1}.subs) == 1
                     % We are calling with a single index a(:)
-                    indices{i} = 1:prod(s);
+                    indices{i} = [1:prod(s)]';
                 else
                     % We are calling with several indices, as in a(:,1)
                     indices{i} = 1:s(i);
@@ -68,13 +68,21 @@ if length(indices) == 1
         result = sgem([]);
         return;
     end
-    if (min(indices{1}) < 1) || (max(indices{1}) > prod(s))
-        error('Indices out of bound in sgem::subsref')
+    if length(size(indices{1})) > 2
+        error('Indices can have at most two dimensions in gem::subsref');
+    end
+    if (min(min(indices{1})) < 1) || (max(max(indices{1})) > prod(s))
+        error('Indices out of bound in sgem::subsref');
+    end
+elseif length(indices) == 2
+    if (min(size(indices{1})) ~= 1) || (length(size(indices{1})) > 2) || (min(size(indices{2})) ~= 1) || (length(size(indices{2})) > 2)
+        error('Invalid indices in sgem::subsref');
+    end
+    if (min(indices{1}) < 1) || (max(indices{1}) > s(1)) || (min(indices{2}) < 1) || (max(indices{2}) > s(2))
+        error('Indices out of bound in sgem::subsref');
     end
 else
-    if (min(indices{1}) < 1) || (max(indices{1}) > s(1)) || (min(indices{2}) < 1) || (max(indices{2}) > s(2))
-        error('Indices out of bound in sgem::subsref')
-    end
+   error('Sparse gem objects are at most two dimensional in sgem::subsref');
 end
 
 
@@ -84,6 +92,7 @@ if length(indices) == 1
     % Then indices have been specified for one dimension, as in a(1:2)
     % so we call the subsref procedure. Since the function creates a
     % new object with the result, we keep the corresponding handle...
+
     newObjectIdentifier = sgem_mex('subsref', this.objectIdentifier, indices{1}-1);
 
     % ...  and create a new matlab object to keep this handle

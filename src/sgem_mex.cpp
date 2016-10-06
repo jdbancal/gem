@@ -322,7 +322,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // Extract the sub-matrix
         if (nrhs == 3) {
             // We extract the individual indices
-            vector < IndexType > indices(matlabDoublesToVector<IndexType>(prhs[2]));
+            vector < vector < IndexType > > indices(matlabDoublesToMatrixVV<IndexType>(prhs[2]));
 
             SparseGmpEigenMatrix& result(SparseGmpEigenMatrix_instance.subsref_new(indices));
 

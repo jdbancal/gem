@@ -2,8 +2,6 @@
 %
 % supported formats :
 %   e = eig(a) : eigenvalues of a
-%
-% NOTE : At the moment, the eigenvalues are not ordered
 function [V D] = eig(this, varargin)
     % This function can involve up to two argument
     if length(varargin) > 1

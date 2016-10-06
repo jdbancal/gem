@@ -111,8 +111,8 @@ public:
 
     /* Extracting a sub-matrix */
     SparseGmpEigenMatrix block(const IndexType& i, const IndexType& j, const IndexType& rows, const IndexType& cols) const;
-    SparseGmpEigenMatrix subsref(const std::vector<IndexType>& indices) const;
-    SparseGmpEigenMatrix& subsref_new(const std::vector<IndexType>& indices) const;
+    SparseGmpEigenMatrix subsref(const std::vector<std::vector<IndexType> >& indices) const;
+    SparseGmpEigenMatrix& subsref_new(const std::vector<std::vector<IndexType> >& indices) const;
     SparseGmpEigenMatrix subsref(const std::vector<IndexType>& indicesA, const std::vector<IndexType>& indicesB) const;
     SparseGmpEigenMatrix& subsref_new(const std::vector<IndexType>& indicesA, const std::vector<IndexType>& indicesB) const;
 

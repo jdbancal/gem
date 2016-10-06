@@ -738,13 +738,13 @@ GmpEigenMatrix GmpEigenMatrix::find(vector < double >& rows, vector < double >& 
 {
     // We start by filling dynamically allocated tables (we don't know exactly
     // how many elements we'll end up with)
-    vector < IndexType > items;
+    vector < vector < IndexType > > items;
     for (IndexType j = 0; j < matrixR.cols(); ++j) {
         for (IndexType i = 0; i < matrixR.rows(); ++i) {
             if ((matrixR(i,j) != 0) || (isComplex && (matrixI(i,j) != 0))) {
                 rows.push_back(i);
                 cols.push_back(j);
-                items.push_back(matrixR.rows()*j + i);
+                items.push_back(std::vector< IndexType > (1, matrixR.rows()*j + i));
             }
         }
     }
@@ -759,13 +759,13 @@ GmpEigenMatrix& GmpEigenMatrix::find_new(vector < double >& rows, vector < doubl
 {
     // We start by filling dynamically allocated tables (we don't know exactly
     // how many elements we'll end up with)
-    vector < IndexType > items;
+    vector < vector < IndexType > > items;
     for (IndexType j = 0; j < matrixR.cols(); ++j) {
         for (IndexType i = 0; i < matrixR.rows(); ++i) {
             if ((matrixR(i,j) != 0) || (isComplex && (matrixI(i,j) != 0))) {
                 rows.push_back(i);
                 cols.push_back(j);
-                items.push_back(matrixR.rows()*j + i);
+                items.push_back(std::vector< IndexType > (1, matrixR.rows()*j + i));
             }
         }
     }
@@ -935,24 +935,27 @@ GmpEigenMatrix GmpEigenMatrix::block(const IndexType& i, const IndexType& j, con
     return result;
 }
 
-/* This function extracts a sub-matrix with single set of index b = a([1,2,3]) */
-GmpEigenMatrix GmpEigenMatrix::subsref(const vector<IndexType>& indices) const
+/* This function extracts a sub-matrix with single set of index b = a([1,2,3])
+   or b = a([1 2; 2 2]) */
+GmpEigenMatrix GmpEigenMatrix::subsref(const vector<vector<IndexType> >& indices) const
 {
     GmpEigenMatrix result;
 
-    result.matrixR.resize(indices.size(), 1);
+    result.matrixR.resize(indices.size(), indices[0].size());
     if (isComplex)
-        result.matrixI.resize(indices.size(), 1);
+        result.matrixI.resize(indices.size(), indices[0].size());
 
     for (IndexType x(0); x < indices.size(); ++x) {
-        // We separate the number indices into i and j
-        IndexType i, j;
-        j = indices[x] / matrixR.rows();
-        i = indices[x] % matrixR.rows();
+        for (IndexType y(0); y < indices[x].size(); ++y) {
+            // We separate the number indices into i and j
+            IndexType i, j;
+            j = indices[x][y] / matrixR.rows();
+            i = indices[x][y] % matrixR.rows();
 
-        result.matrixR(x,0) = matrixR(i,j);
-        if (isComplex)
-            result.matrixI(x,0) = matrixI(i,j);
+            result.matrixR(x,y) = matrixR(i,j);
+            if (isComplex)
+                result.matrixI(x,y) = matrixI(i,j);
+        }
     }
 
     result.checkComplexity();
@@ -960,24 +963,27 @@ GmpEigenMatrix GmpEigenMatrix::subsref(const vector<IndexType>& indices) const
     return result;
 }
 
-/* This function extracts a sub-matrix with single set of index b = a([1,2,3]) */
-GmpEigenMatrix& GmpEigenMatrix::subsref_new(const vector<IndexType>& indices) const
+/* This function extracts a sub-matrix with single set of index b = a([1,2,3])
+   or b = a([1 2; 2 2]) */
+GmpEigenMatrix& GmpEigenMatrix::subsref_new(const vector<vector<IndexType> >& indices) const
 {
     GmpEigenMatrix& result(*(new GmpEigenMatrix));
 
-    result.matrixR.resize(indices.size(), 1);
+    result.matrixR.resize(indices.size(), indices[0].size());
     if (isComplex)
-        result.matrixI.resize(indices.size(), 1);
+        result.matrixI.resize(indices.size(), indices[0].size());
 
     for (IndexType x(0); x < indices.size(); ++x) {
-        // We separate the number indices into i and j
-        IndexType i, j;
-        j = indices[x] / matrixR.rows();
-        i = indices[x] % matrixR.rows();
+        for (IndexType y(0); y < indices[x].size(); ++y) {
+            // We separate the number indices into i and j
+            IndexType i, j;
+            j = indices[x][y] / matrixR.rows();
+            i = indices[x][y] % matrixR.rows();
 
-        result.matrixR(x,0) = matrixR(i,j);
-        if (isComplex)
-            result.matrixI(x,0) = matrixI(i,j);
+            result.matrixR(x,y) = matrixR(i,j);
+            if (isComplex)
+                result.matrixI(x,y) = matrixI(i,j);
+        }
     }
 
     result.checkComplexity();
