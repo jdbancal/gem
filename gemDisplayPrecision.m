@@ -13,7 +13,7 @@ function precision = gemDisplayPrecision(precision)
     else
         tmp.setDisplayPrecision(precision);
         % We also set the precision for the sparse objects
-%        stmp = gem(0);
-%        stmp.setDisplayPrecision(precision);
+        stmp = sgem(0);
+        stmp.setDisplayPrecision(precision);
     end
 end
