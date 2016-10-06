@@ -72,6 +72,18 @@ Here is a detailed overview of the steps to follow if you want to add one functi
 
 
 
+Included functions
+------------------
+
+
+| function  |   |   |   |   |
+|---|---|---|---|---|
+| 1  |   |   |   |   |
+| 2  |   |   |   |   |
+| 3  |  rwe |   |   |   |
+
+
+
 Design considerations
 ---------------------
 
