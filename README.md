@@ -6,8 +6,8 @@ The GEM library is an open source variable precision library for [matlab](http:/
 500-fold overheads when performing simple comparison operations (c.f. below) and the absence of support for high-precision sparse matrices are hardly admissible constraints for building innovative high precision algorithms, just like proprietary code. The GEM library is an attempt to address these problems by providing high precision capabilities for basic matlab functions in an open source way.
 
 The library provides two data types:
- - 'gem' for high precision dense matrices
- - 'sgem' for high precision sparse matrices
+ - `gem` for high precision dense matrices
+ - `sgem` for high precision sparse matrices
 and overloads numerous matlab functions.
 
 The library is coded in C++. It relies on [GMP](https://gmplib.org/) for the high precision arithmetic (through [MPFR C++](http://www.holoborodko.com/pavel/mpfr/) and [MPFR](http://www.mpfr.org/)) and on [Eigen](http://eigen.tuxfamily.org/) for matrix manipulations.
@@ -22,11 +22,11 @@ Usage examples
 
  - ```gem(2)```, ```gem(1.23)``` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
  - ```gem('1.23456789123456789+2i')``` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
- - gemWorkingPrecision(100) updates the working precision to 100 digits
- - eig(gemRand(100,100)) : computes the eigenvalues of a random 100x100 matrix
- - notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1) gives 262537412640768743.9999999999992500725971981856889 (a precision of -1 displays all available digits)
- - sgem(eye(3)) creates a high precision sparse representation of the 3x3 identity matrix
- - a=1./gem([1:7]); save('filename','a'); load('filename'); saves and loads a gem object
+ - ```gemWorkingPrecision(100)``` updates the working precision to 100 digits
+ - ```eig(gemRand(100,100))``` : computes the eigenvalues of a random 100x100 matrix
+ - ```notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1) gives 262537412640768743.9999999999992500725971981856889``` (a precision of -1 displays all available digits)
+ - ```sgem(eye(3))``` creates a high precision sparse representation of the 3x3 identity matrix
+ - ```a=1./gem([1:7]); save('filename','a'); load('filename');``` saves and loads a gem object
 
 
 Installation
