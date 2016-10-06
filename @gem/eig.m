@@ -20,7 +20,7 @@ function [V D] = eig(this, varargin)
         % option 'nobalance' is passed (once this option is implemented).
         V = V*diag(1./sqrt(diag(V'*V)));
 
-        if nargout == 1
+        if nargout <= 1
             V = diag(D);
         end
         

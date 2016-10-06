@@ -3582,6 +3582,7 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
         Vreal.matrixR = es.pseudoEigenvectors();
         Vreal.matrixI.resize(0,0);
 
+        /*V = Vreal;*/
         // Now we analyse the result and extract the complex eigenvalues and eigenvectors
         // Columns go by pairs, so we can extract one eigenvector from every odd column
         // We write the indices we'll need to use
@@ -3635,11 +3636,25 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
         V.subsasgn(indicesAll, indicesBlock, V.subsref(indicesAll, indicesBlock) + V.subsref(indicesAll, indicesBlockP1).times(constI()));
         V.subsasgn(indicesAll, indicesBlockP1, V.subsref(indicesAll, indicesBlock).conj());
 
-        // Now recompute the complex eigenvalues (to make sure they are
+        // Now we also recombine the eigenvalues
+        if (indicesBlock.size() > 0) {
+            result.isComplex = true;
+            result.matrixI.resize(result.matrixR.rows(), result.matrixR.cols());
+            for (IndexType i(0); i < indicesBlock.size(); ++i) {
+                IndexType j(indicesBlock[i]);
+                result.matrixI(j,j) = result.matrixR(j,j+1);
+                result.matrixI(j+1,j+1) = result.matrixR(j+1,j);
+                result.matrixR(j,j+1) = 0;
+                result.matrixR(j+1,j) = 0;
+            }
+        }
+
+/*        // Now recompute the complex eigenvalues (to make sure they are
         // associated to the correct eigenvector...)
+        // This seems not needed since the code above works
         GmpEigenMatrix tmp = (V.inv()*(*this)*V);
         tmp = tmp.diagExtract(0).diagCreate(0);
-        result.subsasgn(indicesFullBlock, indicesFullBlock, tmp.subsref(indicesFullBlock, indicesFullBlock));
+        result.subsasgn(indicesFullBlock, indicesFullBlock, tmp.subsref(indicesFullBlock, indicesFullBlock));*/
     }
 
     return result;
