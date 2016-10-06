@@ -285,6 +285,7 @@ public:
     Eigen::SparseMatrix <bool> eq(const SparseGmpEigenMatrix& b) const;
     Eigen::SparseMatrix <bool> ne(const SparseGmpEigenMatrix& b) const;
     bool identicalValues(const SparseGmpEigenMatrix& b) const;
+    bool identicalValuesNaNok(const SparseGmpEigenMatrix& b) const;
 
     // isreal
     inline bool isreal() const { return (!isComplex); }

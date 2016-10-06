@@ -331,6 +331,7 @@ public:
     Eigen::Matrix <bool, Eigen::Dynamic, Eigen::Dynamic> eq(const GmpEigenMatrix& b) const;
     Eigen::Matrix <bool, Eigen::Dynamic, Eigen::Dynamic> ne(const GmpEigenMatrix& b) const;
     bool identicalValues(const GmpEigenMatrix& b) const;
+    bool identicalValuesNaNok(const GmpEigenMatrix& b) const;
 
     // isreal
     inline bool isreal() const { return (!isComplex); }

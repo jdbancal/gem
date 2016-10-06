@@ -1294,6 +1294,31 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+    /* Call the class method "identicalValuesNaNok" (checks whether all numerical values match, assuming all other characteristics already match) */
+    if (!strcmp("identicalValuesNaNok", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 3))
+            mexErrMsgTxt("identicalValuesNaNok: Unexpected arguments.");
+
+        // We allocate space for the result
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
+
+        // We check where the output data should be places
+        int* outputMatrix = (int*)mxGetData(plhs[0]);
+
+        // Check whether values match
+        bool result(SparseGmpEigenMatrix_instance.identicalValuesNaNok(SparseGmpEigenMatrix_instance2));
+
+        // And stock the result at the right place
+        if (result)
+            outputMatrix[0] = 1;
+        else
+            outputMatrix[0] = 0;
+
+        return;
+    }
+
+
     /* Call the class method "min" (element-wise minimum) */
     if (!strcmp("ewMin", cmd)) {
         // Check parameters

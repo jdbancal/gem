@@ -1,13 +1,14 @@
-% isequal - True if arrays are numerically equal (both in type, size,
-%           digits and in precision)
-%           Sparsity is not required to match.
+% isequaln - True if arrays are numerically equal (both in type, size,
+%            digits and in precision)
+%            Sparsity is not required to match.
+%            NaN numbers are treated are equal.
 %
-% example : isequal(gem([1 0 1.2]), sparse([1 0 1.2])) gives 1
-function result = isequal(varargin)
+% example : isequaln(gem([1 NaN]), gem([1 NaN])) gives 1
+function result = isequaln(varargin)
     % This is a function which involves a second instance of a similar object,
     % so we check if this second instance was also provided
     if length(varargin) < 2
-        error('Wrong number of arguments in gem::isequal');
+        error('Wrong number of arguments in gem::isequaln');
     end
     
     % If there are more than two items to compare, we iterate the
@@ -15,7 +16,7 @@ function result = isequal(varargin)
     if length(varargin) > 2
         result = zeros(1,length(varargin)-1);
         for i = 1:length(varargin)-1
-            result(i) = isequal(varargin{i}, varargin{i+1});
+            result(i) = isequaln(varargin{i}, varargin{i+1});
         end
         result = (sum(result) == length(varargin)-1);
         return;
@@ -54,5 +55,5 @@ function result = isequal(varargin)
     end
     
     % Finally, we check whether the numerical values match
-    result = logical(gem_mex('identicalValues', varargin{1}.objectIdentifier, varargin{2}.objectIdentifier));
+    result = logical(gem_mex('identicalValuesNaNok', varargin{1}.objectIdentifier, varargin{2}.objectIdentifier));
 end

@@ -90,9 +90,9 @@ classdef gem < handle
                     % this data to the C++ library, and let it decide how to
                     % create a class instance from it. Upon completion, we
                     % return the newly created object containing this data.
-                    if issparse(varargin{1})
-                        warning('Creating a dense gem object from a sparse matrix. Use ''sgem'' or ''gemify'' to create a sparse gem object.');
-                    end
+%                    if issparse(varargin{1})
+%                        warning('Creating a dense gem object from a sparse matrix. Use ''sgem'' or ''gemify'' to create a sparse gem object.');
+%                    end
                     this.objectIdentifier = gem_mex('newFromMatlab', full(varargin{1}), this.getWorkingPrecision);
                 elseif ischar(varargin{1})
                     % We embed the string into a cell array so that the c++

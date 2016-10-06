@@ -1,5 +1,8 @@
 % isequal - True if arrays are numerically equal (both in type, size,
 %           digits and in precision)
+%           Sparsity is not required to match.
+%
+% example : isequal(sgem([1 0 1.2]), [1 0 1.2]) gives 1
 function result = isequal(varargin)
     % This is a function which involves a second instance of a similar object,
     % so we check if this second instance was also provided
@@ -31,17 +34,17 @@ function result = isequal(varargin)
         return;
     end
 
-    % We also check whether both objects are sparse
-    if ~issparse(varargin{1}) || ~issparse(varargin{2})
-        result = false;
-        return;
-    end
+% We allow sparse object to be equal to full ones (so no check of sparsity)
+%     if ~issparse(varargin{1}) || ~issparse(varargin{2})
+%         result = false;
+%         return;
+%     end
 
-    % We make sure both objects are sgem objects
-    if ~isequal(class(this), 'sgem')
-        this = sgem(this);
-    elseif ~isequal(class(varargin{1}), 'sgem')
+    % Now, we make sure that both objects are sgem objects
+    if ~isequal(class(varargin{1}), 'sgem')
         varargin{1} = sgem(varargin{1});
+    elseif ~isequal(class(varargin{2}), 'sgem')
+        varargin{2} = sgem(varargin{2});
     end
     
     % Now we check whether the precision of both matrices match

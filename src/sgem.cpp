@@ -5877,6 +5877,152 @@ bool SparseGmpEigenMatrix::identicalValues(const SparseGmpEigenMatrix& b) const
                 } else if (((itR) && (itRb)) && (itR.row() == itRb.row())) {
                     if (itR.value() != itRb.value())
                         return false;
+                    ++itR;
+                    ++itRb;
+                } else {
+                    if (0 != itRb.value())
+                        return false;
+                    ++itRb;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+/* Test whether the numerical values match
+   this function is called by c = isequal(a, b)
+   This function makes no difference between NaN numbers.
+   at this stage, we already know that both tables have the same size, that both
+   are either real or complex, and that all their precision match. */
+bool SparseGmpEigenMatrix::identicalValuesNaNok(const SparseGmpEigenMatrix& b) const
+{
+    if (isComplex) {
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+            SparseMatrix<mpreal>::InnerIterator itI(matrixI,k);
+            SparseMatrix<mpreal>::InnerIterator itRb(b.matrixR,k);
+            SparseMatrix<mpreal>::InnerIterator itIb(b.matrixI,k);
+
+            while ((itR) || (itI) || (itRb) || (itIb)) {
+                IndexType row, rowb;
+                if ((itR) || (itI)) {
+                    if ((itR) && (itI))
+                        row = min(itR.row(), itI.row());
+                    else if (itR)
+                        row = itR.row();
+                    else
+                        row = itI.row();
+                }
+                if ((itRb) || (itIb)) {
+                    if ((itRb) && (itIb))
+                        rowb = min(itRb.row(), itIb.row());
+                    else if (itRb)
+                        rowb = itRb.row();
+                    else
+                        rowb = itIb.row();
+                }
+
+                if (((((itR) || (itI)) && ((itRb) || (itIb))) && (row < rowb)) || ((!itRb) && (!itIb))) {
+                    if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
+                        if (itR.value() != 0)
+                            return false;
+                        ++itR;
+                    } else if ((itR) && (itI) && (itR.row() == itI.row())) {
+                        if ((itR.value() != 0) || (itI.value() != 0))
+                            return false;
+                        ++itR;
+                        ++itI;
+                    } else {
+                        if (itI.value() != 0)
+                            return false;
+                        ++itI;
+                    }
+                } else if ((((itR) || (itI)) && ((itRb) || (itIb))) && (row == rowb)) {
+                    if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
+                        if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
+                            if (!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value()))))
+                                return false;
+                            ++itRb;
+                        } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
+                            if ((!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value())))) || (0 != itIb.value()))
+                                return false;
+                            ++itRb;
+                            ++itIb;
+                        } else {
+                            if (0 != itIb.value())
+                                return false;
+                            ++itIb;
+                        }
+                        ++itR;
+                    } else if ((itR) && (itI) && (itR.row() == itI.row())) {
+                        if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
+                            if ((!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value())))) || (itI.value() != 0))
+                                return false;
+                            ++itRb;
+                        } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
+                            if ((!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value())))) || (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value())))))
+                                return false;
+                            ++itRb;
+                            ++itIb;
+                        } else {
+                            if ((itR.value() != 0) || (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value())))))
+                                return false;
+                            ++itIb;
+                        }
+                        ++itR;
+                        ++itI;
+                    } else {
+                        if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
+                            if ((0 != itRb.value()) || (itI.value() != 0))
+                                return false;
+                            ++itRb;
+                        } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
+                            if ((0 != itRb.value()) || (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value())))))
+                                return false;
+                            ++itRb;
+                            ++itIb;
+                        } else {
+                            if (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value()))))
+                                return false;
+                            ++itIb;
+                        }
+                        ++itI;
+                    }
+                } else {
+                    if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
+                        if (0 != itRb.value())
+                            return false;
+                        ++itRb;
+                    } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
+                        if ((0 != itRb.value()) || (0 != itIb.value()))
+                            return false;
+                        ++itRb;
+                        ++itIb;
+                    } else {
+                        if (0 != itIb.value())
+                            return false;
+                        ++itIb;
+                    }
+                }
+            }
+        }
+    } else {
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+            SparseMatrix<mpreal>::InnerIterator itRb(b.matrixR,k);
+
+            cout << "k = " << k << endl;
+            while ((itR) || (itRb)) {
+                if ((((itR) && (itRb)) && (itR.row() < itRb.row())) || (!itRb)) {
+                    if (itR.value() != 0)
+                        return false;
+                    ++itR;
+                } else if (((itR) && (itRb)) && (itR.row() == itRb.row())) {
+                    if (!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value()))))
+                        return false;
+                    ++itR;
                     ++itRb;
                 } else {
                     if (0 != itRb.value())

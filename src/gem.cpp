@@ -3841,6 +3841,25 @@ bool GmpEigenMatrix::identicalValues(const GmpEigenMatrix& b) const
     return true;
 }
 
+/* Test whether the numerical values match
+   this function is called by c = isequaln(a, b)
+   This function makes no difference between NaN numbers.
+   at this stage, we already know that both tables have the same size, that both
+   are either real or complex, and that all their precision match. */
+bool GmpEigenMatrix::identicalValuesNaNok(const GmpEigenMatrix& b) const
+{
+    for (IndexType j(0); j < matrixR.cols(); ++j)
+        for (IndexType i(0); i < matrixR.rows(); ++i)
+        {
+            bool result((matrixR(i,j) == b.matrixR(i,j)) || (isnan(matrixR(i,j)) && isnan(b.matrixR(i,j))));
+            if ((isComplex) && (b.isComplex))
+                result = result && ((matrixI(i,j) == b.matrixI(i,j)) || (isnan(matrixI(i,j)) && isnan(b.matrixI(i,j))));
+            if (!result)
+                return false;
+        }
+
+    return true;
+}
 
 
 
