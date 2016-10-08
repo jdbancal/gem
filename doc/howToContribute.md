@@ -17,3 +17,14 @@ Here is a detailed overview of the steps to follow if you want to add one functi
  - When all is fine, send a pull request on gitlab to add your new feature to the library!
 
 
+Design considerations
+---------------------
+
+- Truly sparse operations are implemented only if there is a chance that the result of the operation applied to a sparse matrix produces a sparse result. This diverges from matlab's default behavior. However, matlab's default behavior can be restored through the function 'gemSparseLikeMatlab'.
+
+This means that sin(x) has a sparse implementation, but not cos(x) (sin(0) = 0, but cos(0) is not 0). Also the matrix inverse function inv(X) admits a sparse implementation, even though the inverse of most sparse matrices is not sparse. This is because there exist sparse matrices X whose inverse is also sparse (e.g. X = eye).
+
+- The library uses the type *mpreal* provided by the mpfrc++ library. Therefore, it deal with complex numbers by itself. In particular, all interactions with the Eigen library involves purely real numbers.
+
+Note that relying on std::complex has been shown to lead to problems, because several algorithms assume that 'std::complex' comes with double precision, hence leading to a loss of precision (c.f. comment from April 20, 2016 on http://www.holoborodko.com/pavel/mpfr/).
+

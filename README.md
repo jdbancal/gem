@@ -8,14 +8,15 @@ The absence of support for high-precision sparse matrices in matlab, 500-fold ov
 The library provides two data types:
  - **gem** for high precision dense matrices
  - **sgem** for high precision sparse matrices
-and overloads [numerous matlab functions](https://gitlab.com/jdbancal/gem/blob/master/doc/functions.md).
+and overloads [numerous matlab functions](doc/functions.md).
 
 The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for the high precision arithmetic (through [MPFR C++](http://www.holoborodko.com/pavel/mpfr/) and [MPFR](http://www.mpfr.org/)) and on [Eigen](http://eigen.tuxfamily.org/) for matrix manipulations.
 
-At the moment, priority is given to functionality over performance. Nevertheless, appreciable perforance improvement is already available compared to matlab's builtin vpa type. With 100 digits of precision, for instance, a 100x100 matrix is transfered from _double to high precision_ 10x faster, from _high precision to double_ format 250x faster, and its _column-wise minimum_ is computed 25x faster. _Multiplication_ of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects compared to matlab 2016a's vpa type. For a matrix of size 1000x1000 these ratios become respectively 14x, 1500~20000x, 500x, 10x (without even activating the library's multithreading capabilities). Below is a very short overview of some ways in which .
+At the moment, priority is given to functionality over performance. Nevertheless, appreciable perforance improvement is already available compared to matlab's builtin vpa type. With 100 digits of precision, for instance, a 100x100 matrix is transfered from _double to high precision_ 10x faster, from _high precision to double_ format 250x faster, and its _column-wise minimum_ is computed 25x faster. _Multiplication_ of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects compared to matlab 2016a's vpa type. For a matrix of size 1000x1000 these ratios become respectively 14x, 1500~20000x, 500x, 10x (without even activating the library's multithreading capabilities).
 
 Usage examples
 --------------
+Here is a very short overview of some ways in which . Once a high precision matrix has been created, it can be manipulated by applying to it the usual matlab functions.
 
  - `gem(2)`, `gem(1.23)` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
  - `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
@@ -34,10 +35,10 @@ This library comes pre-compiled for ubuntu 64bits. It is therefore straightforwa
 If you are using a different platform (32 bits, mac os or windows), or in case you use an older version of linux/matlab than the one on which this was compiled, you need to compile it. Below are instructions
 
 
-Installation (compilation)
---------------------------
+Installation with compilation
+-----------------------------
 
-Here are the instructions for compiling GEM on *ubuntu* (please update this file on [gitlab](https://gitlab.com/jdbancal/gem) with instructions if you find out how to install it on other platforms, unfortunately I don't have any of those to play with).
+Here are the instructions for compiling the GEM library on *ubuntu*.
 
 1. Check out this repository in the folder of your choice
 2. Download the latest version of Eigen on [eigen.tuxfamily.org](eigen.tuxfamily.org) and place it into the src folder.
@@ -47,21 +48,11 @@ Here are the instructions for compiling GEM on *ubuntu* (please update this file
 5. Type `make`. This will launch the compilation of the library. If everything goes fine, the program will return 'Compilation successful'.
 6. Add the gem folder to your matlab path. You can now safely play with high precision objects :-)
 
-
-Design considerations
----------------------
-
-- The library uses the type *mpreal* provided by the mpfrc++ library. Therefore, it deal with complex numbers by itself. In particular, all interactions with the Eigen library involves purely real numbers.
-
-Note that relying on std::complex has been shown to lead to problems, because several algorithms assume that 'std::complex' comes with double precision, hence leading to a loss of precision (c.f. comment from April 20, 2016 on http://www.holoborodko.com/pavel/mpfr/).
-
-- Truly sparse operations are implemented only if there is a chance that the result of the operation applied to a sparse matrix produces a sparse result. This diverges from matlab's default behavior. However, matlab's default behavior can be restored through the function 'gemSparseLikeMatlab'.
-
-This means that sin(x) has a sparse implementation, but not cos(x) (sin(0) = 0, but cos(0) is not 0). Also the matrix inverse function inv(X) admits a sparse implementation, even though the inverse of most sparse matrices is not sparse. This is because there exist sparse matrices X whose inverse is also sparse (e.g. X = eye).
+Compilation on another platform: unfortunately, I don't have such platform to make tests. Due to the simplifity of the compilation instructions involved, it should be rather straightforward to compile the GEM library on MacOSX or Windows. The best way to start is to make sure that a running version of [gcc](https://gcc.gnu.org/) is installed on your machine. Once this is done, you can try running the `make` program from within matlab and follow the instructions. If you manage to complete such compilation, please make sure to update this file on [gitlab](https://gitlab.com/jdbancal/gem) to describe your experience. Many people will thank you.
 
 
 License
 -------
 
-The GEM library is free and open source. It is therefore also free for academic use. Anyone can [contribute](https://gitlab.com/jdbancal/gem/blob/master/doc/howToContribute.md) on the [gitlab page](https://gitlab.com/jdbancal/gem). The source code is distributed under a MPL2 license. See [LICENSE.md](https://gitlab.com/jdbancal/gem/blob/master/COPYING.md) for more details.
+The GEM library is free and open source. It is therefore also free for academic use. Anyone can [contribute](https://gitlab.com/jdbancal/gem/blob/master/doc/howToContribute.md) on the [gitlab page](https://gitlab.com/jdbancal/gem). The source code is distributed under a MPL2 license. See [COPYING.md](https://gitlab.com/jdbancal/gem/blob/master/COPYING.md) for more details.
 
