@@ -1,7 +1,7 @@
 How to contribute
 -----------------
 
-Here is a detailed overview of the steps to follow if you want to add one function to the GEM library:
+Here is a detailed overview of the steps to follow if you want to add one function to the GEM library. In case you are done and wonder what else could be worth implementing, you can have a look at the list at the [bottom](#Desired Features) of this file.
 
  - First of all, find out:
     - How many parameters does the function depends on? Which of these parameters can be gem objects, which ones must be indices? If there are several input gem parameters, do they all need to be of the same size, or can the function mix matrices and scalars?
@@ -27,4 +27,19 @@ This means that sin(x) has a sparse implementation, but not cos(x) (sin(0) = 0, 
 - The library uses the type *mpreal* provided by the mpfrc++ library. Therefore, it deal with complex numbers by itself. In particular, all interactions with the Eigen library involves purely real numbers.
 
 Note that relying on std::complex has been shown to lead to problems, because several algorithms assume that 'std::complex' comes with double precision, hence leading to a loss of precision (c.f. comment from April 20, 2016 on http://www.holoborodko.com/pavel/mpfr/).
+
+
+Desired Features
+----------------
+
+Here is a list of some features/functions that would be nice to add to the library. (Yes, this section is not called _todo_, because no contributor is forced to do anything, the whole project relies on free contributions.)
+
+ - Some sorting functions such as `sort`, `sortrow` and `unique`
+ - Singular value decomposition `svd`, this would allow computing the 2-norm of a matrix as well as `cond`
+ - Add eigenvalue decomposition for sparse matrices. This is most likely going to happen throught the function `eigs` (use [this library](https://github.com/yixuan/arpack-eigen)?)
+ - Add linear system solvers (`\` operator) -- something like this is already done in the function `inv`.
+ - Implement the matrix `mpow` function for powers different from +/-1.
+ - Add a function that checks whether a matrix is `symmetric` or `hermitian`. Then, allow functions such as `eig`, `eigs`, `svd`, `inv` and `\` to adjust their algorithm choice accordingly.
+ - Parallelize the for loops appearing in simple functions such as `sin`.
+
 
