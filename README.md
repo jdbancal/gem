@@ -14,7 +14,7 @@ The library is coded in C++. It relies on [GMP](https://gmplib.org/) for the hig
 
 At the moment, priority is given to functionality over performance. Nevertheless, appreciable perforance improvement is already availble compared to matlab's builtin vpa type. With 100 digits of precision, for instance, a 100x100 matrix is transfered from double to high precision 10x faster, from high precision to double format 250x faster, and its column-wise minimum is computed 25x faster. Multiplication of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects compared to matlab 2016a's vpa type. For a matrix of size 1000x100 these ratios become respectively 14x, 1500~20000x, 500x, 10x (with multithreading desactivated).
 
-The GEM library is free and open source. It is therefore also free for academic use. Anyone can contribute on the [gitlab page](https://gitlab.com/jdbancal/gem) (see below for more details). It is distributed under a ... license.
+The GEM library is free and open source. It is therefore also free for academic use. Anyone can contribute on the [gitlab page](https://gitlab.com/jdbancal/gem) (see below for more details). It is distributed under a MPL2 license. See [LICENSE.md](https://gitlab.com/jdbancal/gem/LICENSE.md) for more details.
 
 
 Usage examples
@@ -24,7 +24,7 @@ Usage examples
  - `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
  - `gemWorkingPrecision(100)` updates the working precision to 100 digits
  - `eig(gemRand(100,100))` : computes the eigenvalues of a random 100x100 matrix
- - `notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1) gives 262537412640768743.9999999999992500725971981856889` (a precision of -1 displays all available digits)
+ - `notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1)` gives 262537412640768743.9999999999992500725971981856889 (a precision of -1 displays all available digits)
  - `sgem(eye(3))` creates a high precision sparse representation of the 3x3 identity matrix
  - `a=1./gem([1:7]); save('filename','a'); load('filename');` saves and loads a gem object
 

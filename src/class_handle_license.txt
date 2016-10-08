@@ -2,6 +2,9 @@ Copyright (c) 2012, Oliver Woodford
 Copyright (c) 2016, Jean-Daniel Bancal
 All rights reserved.
 
+This file is provided as requested by Oliver Woodford, writer of the
+original class_handle library.
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:

@@ -10,6 +10,11 @@
   output functions tailored for matlab.
 */
 
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
 using namespace std;
 using namespace mpfr;
 using namespace Eigen;
@@ -3582,7 +3587,6 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
         Vreal.matrixR = es.pseudoEigenvectors();
         Vreal.matrixI.resize(0,0);
 
-        /*V = Vreal;*/
         // Now we analyse the result and extract the complex eigenvalues and eigenvectors
         // Columns go by pairs, so we can extract one eigenvector from every odd column
         // We write the indices we'll need to use
@@ -3601,15 +3605,6 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
 
         // Now we extract the eigenvalues
         result = (V.inv()*(*this)*V);
-
-/*      // This is another way to extract the eigenvalues, but sometimes it
-        // rather gives the conjugate of the eigenvalues...
-        GmpEigenMatrix lambdaR(result.diagExtract(0)), lambdaI(result.diagExtract(1));
-        lambdaR = lambdaR.subsref(indicesB);
-        lambdaI = lambdaI.subsref(indicesB);//.times(pm1pattern);
-        result.matrixR = lambdaR.matrixR;
-        result.matrixI = lambdaI.matrixR;
-        result.checkComplexity();*/
     } else {
         EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(matrixR);
 
@@ -3620,7 +3615,7 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
         V.matrixR = es.pseudoEigenvectors();
         V.matrixI.resize(0,0);
 
-        // Now, we take care of complex eigenvalues, if there are any.
+        // Now, we take care of complex eigenvectors, if there are any.
         // Their presence is signified by 2x2 blocks on the pseudo eigenvalue
         // matrix.
         vector < IndexType > indicesAll, indicesBlock, indicesBlockP1, indicesFullBlock;
