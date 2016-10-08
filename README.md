@@ -3,19 +3,16 @@ Gmp Eigen Matrix Library
 
 The GEM library is an open source variable precision library for [matlab](http://www.mathworks.com/products/matlab/). It provides a simple way to perform matlab computations with a high precision.
 
-500-fold overheads when performing simple comparison operations (c.f. below) and the absence of support for high-precision sparse matrices are hardly admissible constraints for building innovative high precision algorithms, just like proprietary code. The GEM library is an attempt to address these problems by providing high precision capabilities for basic matlab functions in an open source way.
+The absence of support for high-precision sparse matrices in matlab, 500-fold overhead when performing simple comparison operations on high-precision dense matrices in matlab, and little choice outside of proprietary codes: here is a set of constraints which is hardly admissible when trying to build innovative high precision algorithms. In this context, the GEM library is an attempt to provide an open source option for basic high precision capabilities in matlab.
 
 The library provides two data types:
  - **gem** for high precision dense matrices
  - **sgem** for high precision sparse matrices
-and overloads numerous matlab functions.
+and overloads [numerous matlab functions](https://gitlab.com/jdbancal/gem/blob/master/doc/functions.md).
 
-The library is coded in C++. It relies on [GMP](https://gmplib.org/) for the high precision arithmetic (through [MPFR C++](http://www.holoborodko.com/pavel/mpfr/) and [MPFR](http://www.mpfr.org/)) and on [Eigen](http://eigen.tuxfamily.org/) for matrix manipulations.
+The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for the high precision arithmetic (through [MPFR C++](http://www.holoborodko.com/pavel/mpfr/) and [MPFR](http://www.mpfr.org/)) and on [Eigen](http://eigen.tuxfamily.org/) for matrix manipulations.
 
-At the moment, priority is given to functionality over performance. Nevertheless, appreciable perforance improvement is already availble compared to matlab's builtin vpa type. With 100 digits of precision, for instance, a 100x100 matrix is transfered from double to high precision 10x faster, from high precision to double format 250x faster, and its column-wise minimum is computed 25x faster. Multiplication of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects compared to matlab 2016a's vpa type. For a matrix of size 1000x100 these ratios become respectively 14x, 1500~20000x, 500x, 10x (with multithreading desactivated).
-
-The GEM library is free and open source. It is therefore also free for academic use. Anyone can contribute on the [gitlab page](https://gitlab.com/jdbancal/gem) (see below for more details). It is distributed under a MPL2 license. See [LICENSE.md](https://gitlab.com/jdbancal/gem/LICENSE.md) for more details.
-
+At the moment, priority is given to functionality over performance. Nevertheless, appreciable perforance improvement is already available compared to matlab's builtin vpa type. With 100 digits of precision, for instance, a 100x100 matrix is transfered from _double to high precision_ 10x faster, from _high precision to double_ format 250x faster, and its _column-wise minimum_ is computed 25x faster. _Multiplication_ of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects compared to matlab 2016a's vpa type. For a matrix of size 1000x1000 these ratios become respectively 14x, 1500~20000x, 500x, 10x (without even activating the library's multithreading capabilities). Below is a very short overview of some ways in which .
 
 Usage examples
 --------------
@@ -51,142 +48,6 @@ Here are the instructions for compiling GEM on *ubuntu* (please update this file
 6. Add the gem folder to your matlab path. You can now safely play with high precision objects :-)
 
 
-
-Included functions
-------------------
-
-
-| function | full support | sparse support | remarks |
-|----------|---|---|---|
-| gem | ✔ | ✔ | gem object constructor |
-| sgem | ✔ | ✔ | sparse gem object constructor |
-| gemify | ✔ | ✔ | converts a matrix to gem or sgem object, preserving is sparsity |
-| gemRand | ✔ | ✗ | generates high precision random numbers |
-| gemRng | ✔ | ✗ | gemRand random seed |
-| gemWorkingPrecision | ✔ | ✔ | sets the working precision of the library |
-| gemDisplayPrecision | ✔ | ✔ | sets the precision used when displaying gem and sgem objects |
-| gemSparseLikeMatlab | ✗ | ✔ | sets whether functions not preserving zeros should be allowed to produce sparse matrices |
-| make | ✔ | ✔ | compiles the library |
-
-
-| methods | full support | sparse support | remarks |
-|----------|---|---|---|
-| abs  | ✔  | ✔  |   |
-| acos | ✔ | ✔ |  |
-| acot | ✔ | ✔ |  |
-| acsc | ✔ | ✔ |  |
-| and | ✔ | ✔ |  |
-| angle | ✔ | ✔ |  |
-| asec | ✔ | ✔ |  |
-| asin | ✔ | ✔ |  |
-| atan | ✔ | ✔ |  |
-| cat | ✔ | ✔ |  |
-| cbrt | ✔ | ✔ |  |
-| clean | ✗ | ✔ |  |
-| ceil | ✔ | ✔ |  |
-| colon | ✔ | ✔ |  |
-| complex | ✔ | ✔ |  |
-| conj | ✔ | ✔ |  |
-| cos | ✔ | ✔ |  |
-| cot | ✔ | ✔ |  |
-| csc | ✔ | ✔ |  |
-| ctranspose | ✔ | ✔ |  |
-| diag | ✔ | ✔ |  |
-| disp | ✔ | ✔ |  |
-| display | ✔ | ✔ |  |
-| double | ✔ | ✔ |  |
-| eig | ✔ |  |  |
-| end | ✔ | ✔ |  |
-| eq | ✔ | ✔ |  |
-| exp | ✔ | ✔ |  |
-| find | ✔ | ✔ |  |
-| fix | ✔ | ✔ |  |
-| floor | ✔ | ✔ |  |
-| full | ✔ | ✔ |  |
-| ge | ✔ | ✔ |  |
-| gt | ✔ | ✔ |  |
-| horzcat | ✔ | ✔ |  |
-| imag | ✔ | ✔ |  |
-| inv | ✔ | ✔ |  |
-| isempty | ✔ | ✔ |  |
-| isequal | ✔ | ✔ |  |
-| isequaln | ✔ | ✔ |  |
-| isfinite | ✔ | ✔ |  |
-| isinf | ✔ | ✔ |  |
-| isnan | ✔ | ✔ |  |
-| isnumeric | ✔ | ✔ |  |
-| isreal | ✔ | ✔ |  |
-| issparse | ✔ | ✔ |  |
-| kron | ✔ | ✔ | supports more than 2 inputs, as in kron({A,B,C}) |
-| ldivide | ✔ | ✔ |  |
-| le | ✔ | ✔ |  |
-| length | ✔ | ✔ |  |
-| loadobj | ✔ | ✔ |  |
-| log | ✔ | ✔ |  |
-| log10 | ✔ | ✔ |  |
-| log2 | ✔ | ✔ |  |
-| logical | ✔ | ✔ |  |
-| lt | ✔ | ✔ |  |
-| max | ✔ | ✔ |  |
-| min | ✔ | ✔ |  |
-| minus | ✔ | ✔ |  |
-| mldivide | ✔ | ✔ |  |
-| mpower | ✔ |  | supports two scalars or matrices with +/-1 exponent |
-| mrdivide | ✔ | ✔ |  |
-| mtimes | ✔ | ✔ |  |
-| ne | ✔ | ✔ |  |
-| norm | ✔ |  |  |
-| not | ✔ | ✔ |  |
-| numel | ✔ | ✔ |  |
-| or | ✔ | ✔ |  |
-| plot | ✔ | ✔ |  |
-| plus | ✔ | ✔ |  |
-| power | ✔ | ✔ |  |
-| precision | ✔ | ✔ |  |
-| prod | ✔ | ✔ |  |
-| rdivide | ✔ | ✔ |  |
-| real | ✔ | ✔ |  |
-| reshape | ✔ | ✔ |  |
-| round | ✔ | ✔ |  |
-| saveobj | ✔ | ✔ |  |
-| sec | ✔ | ✔ |  |
-| sin | ✔ | ✔ |  |
-| size | ✔ | ✔ |  |
-| sparse | ✔ | ✔ |  |
-| sqrt | ✔ | ✔ |  |
-| subsasgn | ✔ | ✔ |  |
-| subsref | ✔ | ✔ |  |
-| sum | ✔ | ✔ |  |
-| tan | ✔ | ✔ |  |
-| times | ✔ | ✔ |  |
-| toStrings | ✔ | ✔ |  |
-| transpose | ✔ | ✔ |  |
-| uminus | ✔ | ✔ |  |
-| uplus | ✔ | ✔ |  |
-| vertcat | ✔ | ✔ |  |
-
-
-
-How to contribute
------------------
-
-Here is a detailed overview of the steps to follow if you want to add one function to the GEM library:
-
- - First of all, find out:
-    - How many parameters does the function depends on? Which of these parameters can be gem objects, which ones must be indices? If there are several input gem parameters, do they all need to be of the same size, or can the function mix matrices and scalars?
-    - How many outputs does this function produce? Which ones are gem objects or indices?
-    - Does the function preserve sparsity? (i.e. are there sparse inputs which can produce sparse outputs? This is not the case of the cosine functions, for instance.)
- - Identify an existing gem function which has identical or similar properties (e.g. tan(x) is similar to sin(x), plus(x,y) is not similar to find(x))
- - Copy this function and rename it to you new function. Do this in the @gem folder, src/gem_mex.cpp file, src/gem.hpp file, src/gem.cpp file first.
- - Now you can modify these new pieces of code to do what you wish.
- - Compile your code and test it.
- - Now you can implement you function for sparse matrices as well by copying and modifying the files/functions in the @sgem folder, src/sgem_mex.cpp file, src/sgem.hpp file, src/sgem.cpp file. If your function never preserves sparsity, you only need to perform modification at the matlab code in the @sgem folder (i.e. no modification in the src folder at this stage).
- - Compile and check your code.
- - Make sure that your code has a minimal amount of help information and that it contains a few helpful comments that explain what is happening.
- - When all is fine, send a pull request on gitlab to add your new feature to the library!
-
-
-
 Design considerations
 ---------------------
 
@@ -199,5 +60,8 @@ Note that relying on std::complex has been shown to lead to problems, because se
 This means that sin(x) has a sparse implementation, but not cos(x) (sin(0) = 0, but cos(0) is not 0). Also the matrix inverse function inv(X) admits a sparse implementation, even though the inverse of most sparse matrices is not sparse. This is because there exist sparse matrices X whose inverse is also sparse (e.g. X = eye).
 
 
+License
+-------
 
+The GEM library is free and open source. It is therefore also free for academic use. Anyone can [contribute](https://gitlab.com/jdbancal/gem/blob/master/doc/howToContribute.md) on the [gitlab page](https://gitlab.com/jdbancal/gem). The source code is distributed under a MPL2 license. See [LICENSE.md](https://gitlab.com/jdbancal/gem/blob/master/COPYING.md) for more details.
 

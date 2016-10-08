@@ -1,21 +1,3 @@
-The Gmp Eigen Matrix Library (GEM Library) is released under the Mozilla Public License 2 (MPL2) license. The license is included below.
-
-Here is a summary of licenses on which this work relies:
-
-Included dependency:
---------------------
- - class_handle.hpp : Massachusets Institute of Technology license (MIT)
-
-Dependencies:
--------------
- - Eigen : Mozilla Public License 2 (MPL2)
- - GMP : GNU's Not Unix Lesser General Public License v3 (LGPL3) and GNU's Not Unix General Public License v2 (GPL2)
- - MPFR : GNU's Not Unix Lesser General Public License v3 (LGPL3)
- - MPFRC++ : GNU's Not Unix General Public License (GPL)
-
-
-
-
 Mozilla Public License Version 2.0
 ==================================
 

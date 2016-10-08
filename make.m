@@ -55,7 +55,7 @@ if eigenFound == 0
     error('The eigen library was not found in the gem/src folder. Please download it from http://eigen.tuxfamily.org');
 end
 
-optimizationFlag = '';%'-O3';
+optimizationFlag = '';%'-DEIGEN_MPL2_ONLY';%'-O3';
 
 %% Now we proceed to compilation
 if useSharedGmpAndMpfr == 1
