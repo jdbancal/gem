@@ -54,5 +54,5 @@ Compilation on another platform: unfortunately, I don't have such platform to ma
 License
 -------
 
-The GEM library is free and open source. It is therefore also free for academic use. Anyone can [contribute](https://gitlab.com/jdbancal/gem/blob/master/doc/howToContribute.md) on the [gitlab page](https://gitlab.com/jdbancal/gem). The source code is distributed under a MPL2 license. See [COPYING.md](https://gitlab.com/jdbancal/gem/blob/master/COPYING.md) for more details.
+The GEM library is free and open source. It is therefore also free for academic use. Anyone can [contribute](doc/howToContribute.md) on the [gitlab page](https://gitlab.com/jdbancal/gem). The source code is distributed under a MPL2 license. See [COPYING.md](COPYING.md) for more details.
 
