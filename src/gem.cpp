@@ -3483,51 +3483,97 @@ GmpEigenMatrix GmpEigenMatrix::eig(GmpEigenMatrix& V) const
     GmpEigenMatrix result;
 
     if (isComplex) {
-        // WARNING : According to http://www.holoborodko.com/pavel/mpfr/ , using
+        // NOTE : According to http://www.holoborodko.com/pavel/mpfr/ , using
         // std::complex<mpfr::mpreal> can lead to dramatic losses of precision
         // in the eigenvalue computation, because Eigen's algorithm uses
         // std::abs(std::complex) on those numbers, which are then implicitely
         // transformed as doubles. (c.f. comment from April 20, 2016)
-        // So we should try to avoid this std::complex ...
+        // But we can avoid std::complex!
 
-        // First, we solve a complex version of the problem
-        GmpEigenMatrix Vreal; // This matrix will hold an isometry of the eigenvectors
+        IndexType size(matrixR.rows());
+
+        // First, we solve a real version of the problem
+        GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
         EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(complexIsometry().matrixR);
 
-        result.isComplex = false;
-        result.matrixR = es.pseudoEigenvalueMatrix();
+        Dreal.isComplex = false;
+        Dreal.matrixR = es.pseudoEigenvalueMatrix();
+        Dreal.matrixI.resize(0,0);
 
         Vreal.isComplex = false;
         Vreal.matrixR = es.pseudoEigenvectors();
         Vreal.matrixI.resize(0,0);
 
-        // Now we analyse the result and extract the complex eigenvalues and eigenvectors
-        // Columns go by pairs, so we can extract one eigenvector from every odd column
-        // We write the indices we'll need to use
-        vector < IndexType > indices1, indicesAR, indicesAI, indicesB;
-        GmpEigenMatrix tmp;
-        indices1.push_back(0);
-        for (IndexType i(0); i < matrixR.rows(); ++i) {
-            indicesAR.push_back(i);
-            indicesAI.push_back(matrixR.rows()+i);
-            indicesB.push_back(2*i);
+        // Now we analyse the result and extract the complex eigenvalues and eigenvectors.
+        // Note that the solver does not provide the eigenvalues in an ordered
+        // way... so we cannot trust the order of the columns of Vrel.
+        // However, the solver always groups together in a 2x2 block any couple
+        // of complex eigenvalues. The only order we need to check for them is
+        // thus whether the first coefficient of the block is real and the
+        // second imaginary, or the reverse, i.e. whether the eigenvectors
+        // column pairs are of the form [r i; -i r] or [i r; r -i].
+        // Concerning the real eigenvalues, however, random order of the columns
+        // means that in order to remove the double real eigenvalues, we need to
+        //  sort them out.
+
+        // So we start by identifying the complex 2x2 blocks and the real 1x1 blocks
+        GmpEigenMatrix eigenvalues;
+        eigenvalues.isComplex = true;
+        eigenvalues.matrixR.resize(size,1);
+        eigenvalues.matrixI.resize(size,1);
+        V.isComplex = true;
+        V.matrixR.resize(size, size);
+        V.matrixI.resize(size, size);
+        vector < pair < mpreal, IndexType > > realEigenvaluesAndColumns;
+        IndexType i(0), nbEigsWritten(0);
+        while (i < Vreal.matrixR.cols()) {
+            if ((i == Vreal.matrixR.cols()-1) || (Dreal.matrixR(i,i+1) == 0)) {
+                // The next eigenvalue is real
+                realEigenvaluesAndColumns.push_back(make_pair(Dreal.matrixR(i,i), i));
+                ++i;
+            } else {
+                // The next eigenvalue is complex
+                // We directly take care of this case
+                if (mpfr::abs(Vreal.matrixR(0,i)+Vreal.matrixR(size,i+1)) > mpfr::abs(Vreal.matrixR(size,i)+Vreal.matrixR(0,i+1))) {
+                    // We are in the [r i; -i r] case
+                    eigenvalues.matrixR(nbEigsWritten,0) = Dreal.matrixR(i,i);
+                    eigenvalues.matrixI(nbEigsWritten,0) = Dreal.matrixR(i,i+1);
+                    V.matrixR.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i,size,1);
+                    V.matrixI.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i+1,size,1);
+                } else {
+                    // We are in the [i r; r -i] case
+                    eigenvalues.matrixR(nbEigsWritten,0) = Dreal.matrixR(i,i);
+                    eigenvalues.matrixI(nbEigsWritten,0) = Dreal.matrixR(i+1,i); // this is the same as -result(i,i+1)
+                    V.matrixR.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i+1,size,1);
+                    V.matrixI.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i,size,1);
+                }
+                ++nbEigsWritten;
+                ++i; ++i; // iterate by two columns
+            }
         }
-        V = Vreal.subsref(indicesAR, indicesB);
-        tmp = -Vreal.subsref(indicesAI, indicesB);
-        V.matrixI = tmp.matrixR;
+
+        // WARNING : WE SHOULD CHECK THE FOLLOWING IN THE CASE OF DEGENERATE REAL EIGENVALUES!!!
+        // We may have to check sort out better the eigenvectors of degenerate eigenvalues...
+
+        // Now we add the real eigenvalues and the corresponding eigenvectors
+        // First, we sort them
+        sort(realEigenvaluesAndColumns.begin(),realEigenvaluesAndColumns.end());
+        // Now we can extract the values and eigenvectors one by one
+        i = 0;
+        while (i < realEigenvaluesAndColumns.size()) {
+            eigenvalues.matrixR(nbEigsWritten,0) = realEigenvaluesAndColumns[i].first;
+            // This way of extracting the eigenvector always works ;-)
+            V.matrixR.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,realEigenvaluesAndColumns[i].second,size,1);
+            V.matrixI.block(0,nbEigsWritten,size,1) = -Vreal.matrixR.block(size,realEigenvaluesAndColumns[i].second,size,1);
+            ++nbEigsWritten;
+            ++i; ++i; // We iterate eigenvalues by pairs
+        }
+        eigenvalues.checkComplexity();
         V.checkComplexity();
 
-        // Now we extract the eigenvalues
-        result = (V.inv()*(*this)*V);
 
-/*      // This is another way to extract the eigenvalues, but sometimes it
-        // rather gives the conjugate of the eigenvalues...
-        GmpEigenMatrix lambdaR(result.diagExtract(0)), lambdaI(result.diagExtract(1));
-        lambdaR = lambdaR.subsref(indicesB);
-        lambdaI = lambdaI.subsref(indicesB);//.times(pm1pattern);
-        result.matrixR = lambdaR.matrixR;
-        result.matrixI = lambdaI.matrixR;
-        result.checkComplexity();*/
+        // Now we put the eigenvalues in a matrix
+        result = eigenvalues.diagCreate(0);
     } else {
         EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(matrixR);
 
@@ -3538,7 +3584,7 @@ GmpEigenMatrix GmpEigenMatrix::eig(GmpEigenMatrix& V) const
         V.matrixR = es.pseudoEigenvectors();
         V.matrixI.resize(0,0);
 
-        // Now, we take care of complex eigenvalues, if there are any.
+        // Now, we take care of complex eigenvectors, if there are any.
         // Their presence is signified by 2x2 blocks on the pseudo eigenvalue
         // matrix.
         vector < IndexType > indicesAll, indicesBlock, indicesBlockP1, indicesFullBlock;
@@ -3554,10 +3600,25 @@ GmpEigenMatrix GmpEigenMatrix::eig(GmpEigenMatrix& V) const
         V.subsasgn(indicesAll, indicesBlock, V.subsref(indicesAll, indicesBlock) + V.subsref(indicesAll, indicesBlockP1).times(constI()));
         V.subsasgn(indicesAll, indicesBlockP1, V.subsref(indicesAll, indicesBlock).conj());
 
-        // Now recompute the complex eigenvalues (to make sure they are
+        // Now we also recombine the eigenvalues
+        if (indicesBlock.size() > 0) {
+            result.isComplex = true;
+            result.matrixI.resize(result.matrixR.rows(), result.matrixR.cols());
+            for (IndexType i(0); i < indicesBlock.size(); ++i) {
+                IndexType j(indicesBlock[i]);
+                result.matrixI(j,j) = result.matrixR(j,j+1);
+                result.matrixI(j+1,j+1) = result.matrixR(j+1,j);
+                result.matrixR(j,j+1) = 0;
+                result.matrixR(j+1,j) = 0;
+            }
+        }
+
+/*        // Now recompute the complex eigenvalues (to make sure they are
         // associated to the correct eigenvector...)
+        // This seems not needed since the code above works
         GmpEigenMatrix tmp = (V.inv()*(*this)*V);
-        result.subsasgn(indicesFullBlock, indicesFullBlock, tmp.subsref(indicesFullBlock, indicesFullBlock));
+        tmp = tmp.diagExtract(0).diagCreate(0);
+        result.subsasgn(indicesFullBlock, indicesFullBlock, tmp.subsref(indicesFullBlock, indicesFullBlock));*/
     }
 
     return result;
@@ -3569,42 +3630,96 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
     GmpEigenMatrix& result(*(new GmpEigenMatrix));
 
     if (isComplex) {
-        // WARNING : According to http://www.holoborodko.com/pavel/mpfr/ , using
+        // NOTE : According to http://www.holoborodko.com/pavel/mpfr/ , using
         // std::complex<mpfr::mpreal> can lead to dramatic losses of precision
         // in the eigenvalue computation, because Eigen's algorithm uses
         // std::abs(std::complex) on those numbers, which are then implicitely
         // transformed as doubles. (c.f. comment from April 20, 2016)
-        // So we should try to avoid this std::complex ...
+        // But we can avoid std::complex!
 
-        // First, we solve a complex version of the problem
-        GmpEigenMatrix Vreal; // This matrix will hold an isometry of the eigenvectors
+        IndexType size(matrixR.rows());
+
+        // First, we solve a real version of the problem
+        GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
         EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(complexIsometry().matrixR);
 
-        result.isComplex = false;
-        result.matrixR = es.pseudoEigenvalueMatrix();
+        Dreal.isComplex = false;
+        Dreal.matrixR = es.pseudoEigenvalueMatrix();
+        Dreal.matrixI.resize(0,0);
 
         Vreal.isComplex = false;
         Vreal.matrixR = es.pseudoEigenvectors();
         Vreal.matrixI.resize(0,0);
 
-        // Now we analyse the result and extract the complex eigenvalues and eigenvectors
-        // Columns go by pairs, so we can extract one eigenvector from every odd column
-        // We write the indices we'll need to use
-        vector < IndexType > indices1, indicesAR, indicesAI, indicesB;
-        GmpEigenMatrix tmp;
-        indices1.push_back(0);
-        for (IndexType i(0); i < matrixR.rows(); ++i) {
-            indicesAR.push_back(i);
-            indicesAI.push_back(matrixR.rows()+i);
-            indicesB.push_back(2*i);
+        // Now we analyse the result and extract the complex eigenvalues and eigenvectors.
+        // Note that the solver does not provide the eigenvalues in an ordered
+        // way... so we cannot trust the order of the columns of Vrel.
+        // However, the solver always groups together in a 2x2 block any couple
+        // of complex eigenvalues. The only order we need to check for them is
+        // thus whether the first coefficient of the block is real and the
+        // second imaginary, or the reverse, i.e. whether the eigenvectors
+        // column pairs are of the form [r i; -i r] or [i r; r -i].
+        // Concerning the real eigenvalues, however, random order of the columns
+        // means that in order to remove the double real eigenvalues, we need to
+        //  sort them out.
+
+        // So we start by identifying the complex 2x2 blocks and the real 1x1 blocks
+        GmpEigenMatrix eigenvalues;
+        eigenvalues.isComplex = true;
+        eigenvalues.matrixR.resize(size,1);
+        eigenvalues.matrixI.resize(size,1);
+        V.isComplex = true;
+        V.matrixR.resize(size, size);
+        V.matrixI.resize(size, size);
+        vector < pair < mpreal, IndexType > > realEigenvaluesAndColumns;
+        IndexType i(0), nbEigsWritten(0);
+        while (i < Vreal.matrixR.cols()) {
+            if ((i == Vreal.matrixR.cols()-1) || (Dreal.matrixR(i,i+1) == 0)) {
+                // The next eigenvalue is real
+                realEigenvaluesAndColumns.push_back(make_pair(Dreal.matrixR(i,i), i));
+                ++i;
+            } else {
+                // The next eigenvalue is complex
+                // We directly take care of this case
+                if (mpfr::abs(Vreal.matrixR(0,i)+Vreal.matrixR(size,i+1)) > mpfr::abs(Vreal.matrixR(size,i)+Vreal.matrixR(0,i+1))) {
+                    // We are in the [r i; -i r] case
+                    eigenvalues.matrixR(nbEigsWritten,0) = Dreal.matrixR(i,i);
+                    eigenvalues.matrixI(nbEigsWritten,0) = Dreal.matrixR(i,i+1);
+                    V.matrixR.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i,size,1);
+                    V.matrixI.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i+1,size,1);
+                } else {
+                    // We are in the [i r; r -i] case
+                    eigenvalues.matrixR(nbEigsWritten,0) = Dreal.matrixR(i,i);
+                    eigenvalues.matrixI(nbEigsWritten,0) = Dreal.matrixR(i+1,i); // this is the same as -result(i,i+1)
+                    V.matrixR.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i+1,size,1);
+                    V.matrixI.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,i,size,1);
+                }
+                ++nbEigsWritten;
+                ++i; ++i; // iterate by two columns
+            }
         }
-        V = Vreal.subsref(indicesAR, indicesB);
-        tmp = -Vreal.subsref(indicesAI, indicesB);
-        V.matrixI = tmp.matrixR;
+
+        // WARNING : WE SHOULD CHECK THE FOLLOWING IN THE CASE OF DEGENERATE REAL EIGENVALUES!!!
+
+        // Now we add the real eigenvalues and the corresponding eigenvectors
+        // First, we sort them
+        sort(realEigenvaluesAndColumns.begin(),realEigenvaluesAndColumns.end());
+        // Now we can extract the values and eigenvectors one by one
+        i = 0;
+        while (i < realEigenvaluesAndColumns.size()) {
+            eigenvalues.matrixR(nbEigsWritten,0) = realEigenvaluesAndColumns[i].first;
+            // This way of extracting the eigenvector always works ;-)
+            V.matrixR.block(0,nbEigsWritten,size,1) = Vreal.matrixR.block(0,realEigenvaluesAndColumns[i].second,size,1);
+            V.matrixI.block(0,nbEigsWritten,size,1) = -Vreal.matrixR.block(size,realEigenvaluesAndColumns[i].second,size,1);
+            ++nbEigsWritten;
+            ++i; ++i; // We iterate eigenvalues by pairs
+        }
+        eigenvalues.checkComplexity();
         V.checkComplexity();
 
-        // Now we extract the eigenvalues
-        result = (V.inv()*(*this)*V);
+
+        // Now we put the eigenvalues in a matrix
+        result = eigenvalues.diagCreate(0);
     } else {
         EigenSolver< Matrix<mpreal,Dynamic,Dynamic> > es(matrixR);
 

@@ -34,12 +34,19 @@ Desired Features
 
 Here is a list of some features/functions that would be nice to add to the library. (Yes, this section is not called _todo_, because no contributor is forced to do anything, the whole project relies on free contributions.)
 
+ - It seems that sometimes `gemRand` produces random number with only 15 digits precision (maybe only after recompilation without `clear all`...)
+ - Fix the eig function for full complex matrices : in the case where there are real eigenvalues, they come out un-ordered... so we need to identify the ones which are doubles of the other ones.
+
+ - `num2str` gives works fine on most gem 1x1 numbers, but fails for integers, so we would need something like `int2str`
  - Some sorting functions such as `sort`, `sortrow` and `unique`
  - Singular value decomposition `svd`, this would allow computing the 2-norm of a matrix as well as `cond`
  - Add eigenvalue decomposition for sparse matrices. This is most likely going to happen throught the function `eigs` (use [this library](https://github.com/yixuan/arpack-eigen)?)
  - Add linear system solvers (`\` operator) -- something like this is already done in the function `inv`.
  - Implement the matrix `mpow` function for powers different from +/-1.
+ - Implement the matrix exponential function `expm`
  - Add a function that checks whether a matrix is `symmetric` or `hermitian`. Then, allow functions such as `eig`, `eigs`, `svd`, `inv` and `\` to adjust their algorithm choice accordingly.
  - Parallelize the for loops appearing in simple functions such as `sin`.
+ - `triu`, `tril`
+ - For ways to contribute, check [here](http://gitlab.com/jdbancal/gem/issues)
 
 

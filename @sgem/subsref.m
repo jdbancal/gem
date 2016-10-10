@@ -97,6 +97,13 @@ if length(indices) == 1
 
     % ...  and create a new matlab object to keep this handle
     result = sgem('encapsulate', newObjectIdentifier);
+
+    % If both this and the indices are 1-dimensional, then we keep the same
+    % shape for the output as this (by default otherwise it takes the shape 
+    % of the indices)
+    if ((size(this,2) == 1) && (size(indices{1},1) == 1)) || ((size(this,1) == 1) && (size(indices{1},2) == 1))
+        result = result.';
+    end
 else
     % Then indices have been specified for both dimensions, as in a(1:2,:)
     % so we call the subsref procedure. Since the function creates a
