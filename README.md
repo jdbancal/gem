@@ -23,8 +23,6 @@ Here is a very short overview of some ways in which . Once a high precision matr
 
 *   A list item with a code block:
 
-        < code box >
-
         `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
 
  - `gemWorkingPrecision(100)` updates the working precision to 100 digits
