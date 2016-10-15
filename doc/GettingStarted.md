@@ -23,6 +23,11 @@ A *negative* display precision prints out all digits in memory:
 
     > 3.2
 
+try again:
+
+ - `display(gem('pi'),-1)` prints the same 50 digits as above.
+
+        > 3.2
 
 
 ### ...
