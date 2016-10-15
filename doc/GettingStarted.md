@@ -5,23 +5,19 @@ Here is a short introduction to the usage of GEM library in matlab. This introdu
 
 ### Precision
 
-The GEM library works with numbers that can have a large precision. This precision is defined by the number of digits that are used to describe numbers. By default, the library takes 50 digits into account. This means that the library can distinguish between numbers that differ at the 50th decimal place:
+The GEM library works with numbers that can have a large precision. This precision is defined by the number of digits that are used to describe numbers. By default, the library takes 50 digits into account. This means that the library can distinguish between numbers that differ at the 50th decimal place: `gem('12345678901234567890123456789012345678901234567891') - gem('12345678901234567890123456789012345678901234567890')` produces the result
 
- - `gem('12345678901234567890123456789012345678901234567891') - gem('12345678901234567890123456789012345678901234567890')` produces the result
-
-> 1
+    > 1
 
 The precision at which the GEM library works can be adjusted throught the function `gemWorkingPrecision`.
 
 Note that the actual precision of the result of an operation is not only determined by the number of decimals that the library takes into account to define numbers, but it may also depend on the [number of elementary manipulations](https://en.wikipedia.org/wiki/Numerical_error) that were used to produce the result.
 
-If you enter only one of the two gem numbers above in the matlab prompt, you will see that only part of the number is printed out. This is the default behavior, because long string of digits can quickly become cumbersome (it is not because additional digits are not printed that they are not in memory). The function `gemDisplayPrecision` can be used to adjust the number of digits printed. Alternatively, the display precision can also be directly specified as a second argument of the `display` function:
+If you enter only one of the two gem numbers above in the matlab prompt, you will see that only part of the number is printed out. This is the default behavior, because long string of digits can quickly become cumbersome (it is not because additional digits are not printed that they are not in memory). The function `gemDisplayPrecision` can be used to adjust the number of digits printed. Alternatively, the display precision can also be directly specified as a second argument of the `display` function: `display(gem('pi'),50)` prints 50 digits
 
- - `display(gem('pi'),50)` prints 50 digits
+    > 3.1415926535897932384626433832795028841971693993751
 
-> 3.1415926535897932384626433832795028841971693993751
-
-A /negative/ display precision prints out all digits in memory:
+A *negative* display precision prints out all digits in memory:
 
  - `display(gem('pi'),-1)` prints the same 50 digits as above.
 
