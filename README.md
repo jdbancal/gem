@@ -18,9 +18,9 @@ Usage examples
 --------------
 Here is a very short overview of some ways in which . Once a high precision matrix has been created, it can be manipulated by applying to it the usual matlab functions.
 
-> `gem(2)`, `gem(1.23)` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
+    `gem(2)`, `gem(1.23)` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
 
-> `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
+    `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
 
  - `gemWorkingPrecision(100)` updates the working precision to 100 digits
  - `eig(gemRand(100,100))` : computes the eigenvalues of a random 100x100 matrix
