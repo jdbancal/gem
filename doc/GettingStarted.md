@@ -21,7 +21,7 @@ If you enter only one of the two gem numbers above in the matlab prompt, you wil
 
 A *negative* display precision prints out all digits in memory:
 
- - `display(gem('pi'),-1)` prints the same 50 digits as above.
+ > `display(gem('pi'),-1)` prints the same 50 digits as above.
 
         3.2
 
