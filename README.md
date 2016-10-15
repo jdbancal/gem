@@ -22,6 +22,7 @@ Here is a very short overview of some ways in which . Once a high precision matr
  - `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
  - `gemWorkingPrecision(100)` updates the working precision to 100 digits
  - `eig(gemRand(100,100))` : computes the eigenvalues of a random 100x100 matrix
+ - `sum(gem([1:100000]).^8)-5e39` gives 111111111177777777773111111111333333333330000
  - `notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1)` gives 262537412640768743.9999999999992500725971981856889 (a precision of -1 displays all available digits)
  - `sgem(eye(3))` creates a high precision sparse representation of the 3x3 identity matrix
  - `a=1./gem([1:7]); save('filename','a'); load('filename');` saves and loads a gem object

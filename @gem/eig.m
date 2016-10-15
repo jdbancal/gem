@@ -20,57 +20,17 @@ function [V D] = eig(this, varargin)
         % option 'nobalance' is passed (once this option is implemented).
         V = V*diag(1./sqrt(diag(V'*V)));
 
-        % We check whether the eigendecomposition is correct
-        %V*D*inv(D)-(this)
-        precision = double(abs(norm(mtimes(V,mtimes(D,inv(V))) - this,1)));
-        disp(['Eigenvalue decomposition precision: ', num2str(precision)]);
-        if (precision > 1e-30)
-            disp('WARNING : BIG EIGENDECOMPOSITION ERROR!!!');
-        end
+        % To check whether the eigendecomposition is correct:
+        % V*D*inv(D)-(this)
+%         precision = double(abs(norm(mtimes(V,mtimes(D,inv(V))) - this,1)));
+%         disp(['Eigenvalue decomposition precision: ', num2str(precision)]);
+%         if (precision > 1e-30)
+%             disp('WARNING : big eigendecomposition error!!!');
+%         end
         
         if nargout <= 1
             V = diag(D);
         end
-        
-%         % The following has been now coded into the c++ library
-%         % We extract the complex information
-%         if isreal(this)
-%             % Now we check if D has a block structure
-%             blocks = find(diag(D,1));
-% 
-%             % Eigenvalues in 1x1 blocks are simple
-%             simple = setdiff(1:3,[blocks blocks+1]);
-% 
-%             % Eigenvalues in 2x2 blocks are doubled
-%             sub1.type = '()';
-%             sub1.subs = {':',blocks};
-%             sub2.type = '()';
-%             sub2.subs = {':',blocks+1};
-%             V = subsasgn(V, sub1, subsref(V,sub1) + 1i*subsref(V,sub2));
-%             V = subsasgn(V, sub2, conj(subsref(V,sub1)));
-% 
-%             % The other ones are simple
-%             if nargout == 1
-%                 V = diag(D);
-%             end
-%             
-% 
-%         else
-%             % For complex matrices, we extract one eigenvector and one
-%             % eigenvalue per block.
-% 
-%             % We normalize the eigenvectors (this should not be done if the
-%             % option 'nobalance' is passed (once this option is implemented).
-%             %V = V(1:end/2,1:2:end)-1i*V(end/2+1:end,1:2:end);
-%             V = V*diag(1./sqrt(diag(V'*V)));
-%             
-%             % If we want to check that the decomposition is correct
-%             %   vv*dd*inv(vv)-m
-%             
-%             if nargout == 1
-%                 V = diag(D);
-%             end
-%         end
         
     else
         error('Unsupported call to gem::eig')
