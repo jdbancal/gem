@@ -8,23 +8,19 @@ The absence of support for high-precision sparse matrices in matlab, 500-fold ov
 The library provides two data types:
  - **gem** for high precision dense matrices
  - **sgem** for high precision sparse matrices
+
 and overloads [numerous matlab functions](doc/functions.md).
 
-The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for the high precision arithmetic (through [MPFR C++](http://www.holoborodko.com/pavel/mpfr/) and [MPFR](http://www.mpfr.org/)) and on [Eigen](http://eigen.tuxfamily.org/) for matrix manipulations.
+The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for the high precision arithmetic (through [MPFR](http://www.mpfr.org/) and [MPFR C++](http://www.holoborodko.com/pavel/mpfr/)) and on [Eigen](http://eigen.tuxfamily.org/) for matrix manipulations.
 
-At the moment, priority is given to functionality over performance: this code comes with no garantee of optimality. Nevertheless, appreciable perforance improvement is already available compared to matlab's builtin vpa type. With 100 digits of precision, for instance, a 100x100 matrix is transfered from _double to high precision_ 10x faster, from _high precision to double_ format 250x faster, and its _column-wise minimum_ is computed 25x faster. _Multiplication_ of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects compared to matlab 2016a's vpa type. For a matrix of size 1000x1000 these ratios become respectively 14x, 1500~20000x, 500x, 10x (the GEM library's multithreading capabilities were disactivated when performing these comparisions).
+At the moment, priority is given to functionality over performance: this code comes with no garantee of optimality. Nevertheless, appreciable perforance improvement is already available compared to matlab's builtin types. With 100 digits of precision, for instance, a 100x100 matrix is transfered from _double to high precision_ 10x faster, from _high precision to double_ format 250x faster, and its _column-wise minimum_ is computed 25x faster. _Multiplication_ of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects compared to matlab 2016a's vpa type. For a matrix of size 1000x1000 these ratios become respectively 14x, 1500~20000x, 500x, 10x (the GEM library's multithreading capabilities were disactivated when performing these comparisions).
 
 Usage examples
 --------------
-Here is a very short overview of some ways in which . Once a high precision matrix has been created, it can be manipulated by applying to it the usual matlab functions.
-
+Here are a few example of what  some ways in which . Once a high precision matrix has been created, it can be manipulated by applying to it the usual matlab functions.
 
  - `gem(2)`, `gem(1.23)` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
-
-*   A list item with a code block:
-
-        `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
-
+ - `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
  - `gemWorkingPrecision(100)` updates the working precision to 100 digits
  - `eig(gemRand(100,100))` : computes the eigenvalues of a random 100x100 matrix
  - `sum(gem([1:100000]).^8)-5e39` gives 111111111177777777773111111111333333333330000
