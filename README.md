@@ -23,7 +23,7 @@ Here is a very short overview of some ways in which . Once a high precision matr
 
  - A list item with a code block:
 
-        <`gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account>
+        `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
 
  - `gemWorkingPrecision(100)` updates the working precision to 100 digits
  - `eig(gemRand(100,100))` : computes the eigenvalues of a random 100x100 matrix
