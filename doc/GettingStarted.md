@@ -18,11 +18,13 @@ Note that the actual precision of the result of an operation is not only determi
 If you enter only one of the two gem numbers above in the matlab prompt, you will see that only part of the number is printed out. This is the default behavior, because long string of digits can quickly become cumbersome (it is not because additional digits are not printed that they are not in memory). The function `gemDisplayPrecision` can be used to adjust the number of digits printed. Alternatively, the display precision can also be directly specified as a second argument of the `display` function:
 
  - `display(gem('pi'),50)` prints 50 digits
+
 > 3.1415926535897932384626433832795028841971693993751
 
 A /negative/ display precision prints out all digits in memory:
 
  - `display(gem('pi'),-1)` prints the same 50 digits as above.
+
     > 3.2
 
 
