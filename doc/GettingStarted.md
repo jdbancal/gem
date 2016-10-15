@@ -7,7 +7,8 @@ Here is a short introduction to the usage of GEM library in matlab. This introdu
 
 The GEM library works with numbers that can have a large precision. This precision is defined by the number of digits that are used to describe numbers. By default, the library takes 50 digits into account. This means that the library can distinguish between numbers that differ at the 50th decimal place:
 
- [x] `gem('12345678901234567890123456789012345678901234567891') - gem('12345678901234567890123456789012345678901234567890')` produces the result
+ - `gem('12345678901234567890123456789012345678901234567891') - gem('12345678901234567890123456789012345678901234567890')` produces the result
+
 > 1
 
 The precision at which the GEM library works can be adjusted throught the function `gemWorkingPrecision`.
@@ -22,7 +23,7 @@ If you enter only one of the two gem numbers above in the matlab prompt, you wil
 A /negative/ display precision prints out all digits in memory:
 
  - `display(gem('pi'),-1)` prints the same 50 digits as above.
-
+    > 3.2
 
 
 
