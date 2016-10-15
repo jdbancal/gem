@@ -21,7 +21,9 @@ Here is a very short overview of some ways in which . Once a high precision matr
 
  - `gem(2)`, `gem(1.23)` create 50-digits precision representations of the numbers 2 and 1.23. When translating a number from double form, exactly 15 digits are taken into account.
 
- -  A list item with a code block:
+*   A list item with a code block:
+
+        < code box >
 
         `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account
 
