@@ -312,6 +312,10 @@ public:
         return maximum;
     }
 
+    // symmetry tests
+    bool issymmetric() const;
+    bool ishermitian() const;
+
     // column-wise minimum b = min(a)
     SparseGmpEigenMatrix colMin(std::vector<IndexType>& indices) const;
     inline SparseGmpEigenMatrix colMin() const

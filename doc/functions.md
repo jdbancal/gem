@@ -65,11 +65,13 @@ The following function can be applied to gem/sgem objects directly.
 | isequal | ✔ | ✔ |  |
 | isequaln | ✔ | ✔ |  |
 | isfinite | ✔ | ✔ |  |
+| ishermitian | ✔ | ✔ |  |
 | isinf | ✔ | ✔ |  |
 | isnan | ✔ | ✔ |  |
 | isnumeric | ✔ | ✔ |  |
 | isreal | ✔ | ✔ |  |
 | issparse | ✔ | ✔ |  |
+| issymmetric | ✔ | ✔ |  |
 | kron | ✔ | ✔ | supports more than 2 inputs, as in kron({A,B,C}) |
 | ldivide | ✔ | ✔ |  |
 | le | ✔ | ✔ |  |

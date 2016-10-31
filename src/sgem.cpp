@@ -5408,18 +5408,15 @@ SparseMatrix <bool> SparseGmpEigenMatrix::ne(const SparseGmpEigenMatrix& b) cons
 
                     while ((itR) || (itI)) {
                         if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                            cout << itR.value() << " <-> " << b.matrixR.coeff(0,0) << ", " << "0" << " <-> " << b.matrixI.coeff(0,0) << endl;
                             if ((itR.value() != b.matrixR.coeff(0,0)) || (0 != b.matrixI.coeff(0,0)))
                                 tripletList.push_back(Triplet<bool>(itR.row(), k, true));
                             ++itR;
                         } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                            cout << itR.value() << " <-> " << b.matrixR.coeff(0,0) << ", " << itI.value() << " <-> " << b.matrixI.coeff(0,0) << endl;
                             if ((itR.value() != b.matrixR.coeff(0,0)) || (itI.value() != b.matrixI.coeff(0,0)))
                                 tripletList.push_back(Triplet<bool>(itR.row(), k, true));
                             ++itR;
                             ++itI;
                         } else {
-                            cout << 0 << " <-> " << b.matrixR.coeff(0,0) << ", " << itI.value() << " <-> " << b.matrixI.coeff(0,0) << endl;
                             if ((0 != b.matrixR.coeff(0,0)) || (itI.value() != b.matrixI.coeff(0,0)))
                                 tripletList.push_back(Triplet<bool>(itI.row(), k, true));
                             ++itI;
@@ -6018,7 +6015,6 @@ bool SparseGmpEigenMatrix::identicalValuesNaNok(const SparseGmpEigenMatrix& b) c
             SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
             SparseMatrix<mpreal>::InnerIterator itRb(b.matrixR,k);
 
-            cout << "k = " << k << endl;
             while ((itR) || (itRb)) {
                 if ((((itR) && (itRb)) && (itR.row() < itRb.row())) || (!itRb)) {
                     if (itR.value() != 0)
@@ -6041,6 +6037,88 @@ bool SparseGmpEigenMatrix::identicalValuesNaNok(const SparseGmpEigenMatrix& b) c
     return true;
 }
 
+
+
+
+
+// symmetry tests
+bool SparseGmpEigenMatrix::issymmetric() const
+{
+    if (isComplex) {
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+            SparseMatrix<mpreal>::InnerIterator itI(matrixI,k);
+
+            while ((itR) || (itI)) {
+                if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
+                    if (itR.value() != matrixR.coeff(itR.col(), itR.row()))
+                        return false;
+                    ++itR;
+                } else if ((itR) && (itI) && (itR.row() == itI.row())) {
+                    if ((itR.value() != matrixR.coeff(itR.col(), itR.row())) || (itI.value() != matrixI.coeff(itR.col(), itR.row())))
+                        return false;
+                    ++itR;
+                    ++itI;
+                } else {
+                    if (itI.value() != matrixI.coeff(itI.col(), itI.row()))
+                        return false;
+                    ++itI;
+                }
+            }
+        }
+    } else {
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+
+            while (itR) {
+                if (itR.value() != matrixR.coeff(itR.col(), itR.row()))
+                    return false;
+                ++itR;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool SparseGmpEigenMatrix::ishermitian() const
+{
+    if (isComplex) {
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+            SparseMatrix<mpreal>::InnerIterator itI(matrixI,k);
+
+            while ((itR) || (itI)) {
+                if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
+                    if (itR.value() != matrixR.coeff(itR.col(), itR.row()))
+                        return false;
+                    ++itR;
+                } else if ((itR) && (itI) && (itR.row() == itI.row())) {
+                    if ((itR.value() != matrixR.coeff(itR.col(), itR.row())) || (itI.value() != -matrixI.coeff(itR.col(), itR.row())))
+                        return false;
+                    ++itR;
+                    ++itI;
+                } else {
+                    if (itI.value() != -matrixI.coeff(itI.col(), itI.row()))
+                        return false;
+                    ++itI;
+                }
+            }
+        }
+    } else {
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+
+            while (itR) {
+                if (itR.value() != matrixR.coeff(itR.col(), itR.row()))
+                    return false;
+                ++itR;
+            }
+        }
+    }
+
+    return true;
+}
 
 
 

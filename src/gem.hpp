@@ -336,6 +336,10 @@ public:
     // isreal
     inline bool isreal() const { return (!isComplex); }
 
+    // symmetry tests
+    bool issymmetric() const;
+    bool ishermitian() const;
+
     // column-wise minimum b = min(a)
     GmpEigenMatrix colMin(std::vector<IndexType>& indices) const;
     inline GmpEigenMatrix colMin() const

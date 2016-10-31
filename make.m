@@ -2,7 +2,7 @@ function make(parallelization)
 % make(parallelization)
 %
 % Run this file from matlab to compile the C++ part of the GEM library. Use
-% parallelization = 1 to enable openmp, parallelization = 0 otherwise.
+% parallelization = 0 to disable openmp, parallelization = 1 otherwise.
 %
 % Note : the code relies on the gmp, mpfrc++ and eigen libraries. The Eigen
 % library should be dowloaded from http://eigen.tuxfamily.org and placed in
@@ -16,14 +16,16 @@ function make(parallelization)
 % - Download the gmp source code should from https://gmplib.org/#DOWNLOAD
 %   and unpack it into the 'src' folder (this creates the folder src/gmp*)
 % - Download the mpfr source code from http://www.mpfr.org/mpfr-current/#download
-%   and unpack it into the 'src' folder
+%   and unpack it into the 'src' folder (this creates the folder src/mpfr*)
+% - Download the mpfrc++ source from http://www.holoborodko.com/pavel/mpfr/
+%   and place it into the 'src' folder (this creates the folder src/mpfrc++*)
 % - Set the value of 'useSharedGmpAndMpfr' to 0 in this file
 % - Run this file from matlab
 
 
 %% Settings
 if nargin < 1
-    parallelization = 0;
+    parallelization = 1;
 end
 
 % Set the following variable to 0 in order to compile a library which does
@@ -52,7 +54,7 @@ for i=1:length(list)
     eigenFound = eigenFound + isequal(list(i).name,'eigen');
 end
 if eigenFound == 0
-    error('The eigen library was not found in the gem/src folder. Please download it from http://eigen.tuxfamily.org');
+    error('The eigen folder was not found in the gem/src folder. Please download the eigen library from http://eigen.tuxfamily.org');
 end
 
 optimizationFlag = '';%'-DEIGEN_MPL2_ONLY';%'-O3';

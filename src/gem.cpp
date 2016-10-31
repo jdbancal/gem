@@ -3970,6 +3970,42 @@ bool GmpEigenMatrix::identicalValuesNaNok(const GmpEigenMatrix& b) const
 }
 
 
+// symmetry tests
+bool GmpEigenMatrix::issymmetric() const
+{
+    if (isComplex) {
+        for (IndexType i(0); i < matrixR.rows(); ++i)
+            for (IndexType j(i+1); j < matrixR.cols(); ++j)
+                if ((matrixR(i,j) != matrixR(j,i)) || (matrixI(i,j) != matrixI(j,i)))
+                    return false;
+    } else {
+        for (IndexType i(0); i < matrixR.rows(); ++i)
+            for (IndexType j(i+1); j < matrixR.cols(); ++j)
+                if (matrixR(i,j) != matrixR(j,i))
+                    return false;
+    }
+
+    return true;
+}
+
+bool GmpEigenMatrix::ishermitian() const
+{
+    if (isComplex) {
+        for (IndexType i(0); i < matrixR.rows(); ++i) {
+            for (IndexType j(i); j < matrixR.cols(); ++j)
+                if ((matrixR(i,j) != matrixR(j,i)) || (matrixI(i,j) != -matrixI(j,i)))
+                    return false;
+        }
+    } else {
+        for (IndexType i(0); i < matrixR.rows(); ++i)
+            for (IndexType j(i+1); j < matrixR.cols(); ++j)
+                if (matrixR(i,j) != matrixR(j,i))
+                    return false;
+    }
+
+    return true;
+}
+
 
 
 // Note : Eigen's minCoeff function behaves differently than matlab's min

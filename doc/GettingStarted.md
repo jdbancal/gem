@@ -34,15 +34,6 @@ The `precision` function can be used to determin how many digits are used to des
 
         5
 
-This is a test:
-```markdown
-`precision(gem('3.2'))` is
-
-        50
-while `precision(gem('e',5))` is
-
-> 5
-```
 
 ### Display precision
 
