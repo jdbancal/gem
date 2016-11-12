@@ -49,6 +49,7 @@ The following function can be applied to gem/sgem objects directly.
 | display | ✔ | ✔ |  |
 | double | ✔ | ✔ |  |
 | eig | ✔ |  |  |
+| eigs | ✔ |  |  |
 | end | ✔ | ✔ |  |
 | eq | ✔ | ✔ |  |
 | exp | ✔ | ✔ |  |
@@ -112,6 +113,8 @@ The following function can be applied to gem/sgem objects directly.
 | subsasgn | ✔ | ✔ |  |
 | subsref | ✔ | ✔ |  |
 | sum | ✔ | ✔ |  |
+| svd | ✔ |   |  |
+| svds | ✔ |   |  |
 | tan | ✔ | ✔ |  |
 | times | ✔ | ✔ |  |
 | toStrings | ✔ | ✔ |  |

@@ -6,7 +6,10 @@
 #include <vector>
 #include <Eigen/MPRealSupport>
 #include <Eigen/LU>
+#include <Eigen/SVD>
 #include "utils.hpp"
+#include <SymEigsSolver.h>
+#include <GenEigsSolver.h>
 
 /*
   This file contains the description of our c++ class, including all its
@@ -315,6 +318,10 @@ public:
     GmpEigenMatrix& inv_new() const;
     GmpEigenMatrix eig(GmpEigenMatrix& V) const;
     GmpEigenMatrix& eig_new(GmpEigenMatrix& V) const;
+    GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
+    GmpEigenMatrix& eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
+    GmpEigenMatrix svd(GmpEigenMatrix& U, GmpEigenMatrix& V) const;
+    GmpEigenMatrix& svd_new(GmpEigenMatrix& U, GmpEigenMatrix& V) const;
 
 
 
@@ -593,6 +600,9 @@ inline GmpEigenMatrix& constCatalan_new()
 // Random matrix
 GmpEigenMatrix gemRand(const IndexType& m, const IndexType& n);
 GmpEigenMatrix& gemRand_new(const IndexType& m, const IndexType& n);
+
+
+
 
 
 #endif // __GmpEigenMatrix_HPP__

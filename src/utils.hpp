@@ -24,6 +24,7 @@
 typedef Eigen::Matrix<mpfr::mpreal,Eigen::Dynamic,Eigen::Dynamic>::Index IndexType;
 
 
+
 // WARNING : The mpreal library uses a different default precision for all threads (!!!)
 //   By default, this means that all threads can work with their own precision
 //   level (even though with openmp we typicallz don't control which part of which

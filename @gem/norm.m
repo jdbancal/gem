@@ -14,7 +14,7 @@ function result = norm(this, p)
             error('gem::norm : unsupported vector norm');
         end
     else
-        if (~isequal(p, 1)) && (~isequal(p, Inf)) && (~isequal(p,'fro')) % && (~isequal(p, 2)) % to be supported soon
+        if (~isequal(p, 1)) && (~isequal(p, Inf)) && (~isequal(p,'fro')) && (~isequal(p, 2))
             error('gem::norm : unsupported matrix norm');
         end
     end
@@ -22,11 +22,11 @@ function result = norm(this, p)
     % We computing the requires norm, possibly not in the most efficient
     % way
     if min(size(this)) == 1
-        if (p == 2) || (p == gem(2))
-            result = sqrt(sum(this.^gem(2)));
-        elseif (p == Inf) || (p == gem(Inf))
+        if double(p) == 2
+            result = sqrt(sum(abs(this).^gem(2)));
+        elseif double(p) == Inf
             result = max(abs(this));
-        elseif (p == -Inf) || (p == gem(-Inf))
+        elseif double(p) == -Inf
             result = min(abs(this));
         else
             result = sum(abs(this).^gem(p)).^(1/gem(p));
@@ -34,9 +34,11 @@ function result = norm(this, p)
     else
         switch p
             case 1
-                result = max(sum(this));
+                result = max(sum(abs(this)));
+            case 2
+                result = svds(this, 1, 'largest');
             case Inf
-                result = max(sum(this,2));
+                result = max(sum(abs(this),2));
             case 'fro'
                 result = sum(sum(abs(this).^gem(2)))^(1/gem(2));
         end

@@ -14,4 +14,4 @@ Linked dependencies:
  - GMP : GNU's Not Unix Lesser General Public License v3 (LGPL3) and GNU's Not Unix General Public License v2 (GPL2)
  - MPFR : GNU's Not Unix Lesser General Public License v3 (LGPL3)
  - MPFRC++ : GNU's Not Unix General Public License (GPL)
-
+ - Spectra : Mozilla Public License 2 (MPL2)

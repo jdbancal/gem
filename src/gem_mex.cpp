@@ -917,13 +917,53 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         GmpEigenMatrix& result(GmpEigenMatrix_instance.eig_new(Vmatrix));
 
         // We return the reference to these objects to matlab
-        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(result);
-        plhs[1] = createMatlabIdFromObj<GmpEigenMatrix>(Vmatrix);
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(Vmatrix);
+        plhs[1] = createMatlabIdFromObj<GmpEigenMatrix>(result);
 
         return;
     }
 
 
+    /* Call the class method "eigs" */
+    if (!strcmp("eigs", cmd)) {
+        // Check parameters
+        if ((nlhs != 2) || (nrhs != 4))
+            mexErrMsgTxt("eigs: Unexpected arguments.");
+
+        // We extract the number of eigenvalues requested
+        long int nbEigenvalues = mxGetScalar(prhs[2]);
+        long int type = mxGetScalar(prhs[3]);
+
+        // Compute the eigen decomposition
+        GmpEigenMatrix& Vmatrix(*(new GmpEigenMatrix));
+        GmpEigenMatrix& result(GmpEigenMatrix_instance.eigs_new(nbEigenvalues, Vmatrix, type));
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(Vmatrix);
+        plhs[1] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+
+        return;
+    }
+
+
+    /* Call the class method "svd" */
+    if (!strcmp("svd", cmd)) {
+        // Check parameters
+        if ((nlhs != 3) || (nrhs != 2))
+            mexErrMsgTxt("svd: Unexpected arguments.");
+
+        // Compute the singular decomposition
+        GmpEigenMatrix& Umatrix(*(new GmpEigenMatrix));
+        GmpEigenMatrix& Vmatrix(*(new GmpEigenMatrix));
+        GmpEigenMatrix& result(GmpEigenMatrix_instance.svd_new(Umatrix, Vmatrix));
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(Umatrix);
+        plhs[1] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+        plhs[2] = createMatlabIdFromObj<GmpEigenMatrix>(Vmatrix);
+
+        return;
+    }
 
 
 
