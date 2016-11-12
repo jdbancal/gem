@@ -33,6 +33,8 @@ Note that relying on std::complex has been shown to lead to problems, because se
   - `method_new` which performs the same operation but returns the result in a dynamic variable (this variable remains in memory between to calls from matlab).
 The code of both functions must be identical, except for the variable definition.
 
+- 
+
 
 Desired Features
 ----------------

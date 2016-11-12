@@ -13,11 +13,11 @@
 function [U S V] = svds(this, varargin)
     % This function can involve at most two parameters
     if length(varargin) > 2
-        error('Wrong number of arguments in gem::svds');
+        error('Wrong number of arguments in sgem::svds');
     end
     
     if (length(varargin) > 0) && (~isnumeric(varargin{1}) || (numel(varargin{1}) ~= 1))
-        error('The second argument of gem::svds must be a single number');
+        error('The second argument of sgem::svds must be a single number');
     elseif (length(varargin) > 0) && ~isequal(class(varargin{1}), 'double')
         % We make sure that the number of eigenvalues to be computed was
         % specified as a double
@@ -33,27 +33,17 @@ function [U S V] = svds(this, varargin)
     
     % The number of singular values computed must be larger than zero
     if nbSingularvalues < 1
-        error('gem::svds cannot compute less than 1 singular value');
+        error('sgem::svds cannot compute less than 1 singular value');
     end
     
     if nbSingularvalues > size(this,1) - 2 + ishermitian(this)
-        % This time, matlab's svds function doesn't complain if the
-        % dimension is smaller than the number of requested singular
-        % values, so we also don't...
-
         % We use svd to compute all singular values
-        warning('Too many singular values for svds, using svd instead.');
-        if nargout >= 2
-            [U S D] = svd(this,'econ');
-        else
-            U = svd(this);
-        end
-        return;
+        error('Too many singular values for sgem::svds.');
     end
     
     % We check if there is a second parameter
     if (length(varargin) > 1) && (~ischar(varargin{2}))
-        error('The third argument of gem::svds must be a text');
+        error('The third argument of sgem::svds must be a text');
     end
 
     % We extract the requested type of singular values
@@ -67,7 +57,7 @@ function [U S V] = svds(this, varargin)
                 % Smallest singular values
                 type = 'sm';
             otherwise
-                error('Third argument of gem::svds not recognized');
+                error('Third argument of sgem::svds not recognized');
         end
     end
     
@@ -76,7 +66,7 @@ function [U S V] = svds(this, varargin)
         % We only compute the eigenvalues of a*a'
         vals = eigs(this*this', nbSingularvalues, type);
         U = sqrt(vals);
-        
+
         % We make sure the order of the singular values is decreasing
         if isequal(type,'sm')
             subU.type='()';
@@ -105,7 +95,7 @@ function [U S V] = svds(this, varargin)
         
         % We check that the same singular values were found on both sides
         if max(abs(valsU-valsV)) > 10^(-gemWorkingPrecision*2/3 + 2)
-            warning('The left and right singular values don''t match in gem::svds')
+            warning('The left and right singular values don''t match in sgem::svds')
         end
         
         % We correct the phases of V
@@ -124,7 +114,7 @@ function [U S V] = svds(this, varargin)
             V = subsref(V, subV);
         end
     else
-        error('Unsupported call to gem::svds')
+        error('Unsupported call to sgem::svds')
     end
 
 end

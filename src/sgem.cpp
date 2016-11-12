@@ -4642,6 +4642,445 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::inv_new()
     return result;
 }
 
+GmpEigenMatrix SparseGmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const
+{
+    GmpEigenMatrix result;
+
+    // NOTE : At the moment, it seems that spectra only garantees of precision
+    // of eps^(2/3). Hence only ~34 digits of precision with 50-digits mpreals
+
+    // NOTE : In presence of degenerate eigenvalues, it seems that the second
+    // largest eigenvalue can sometimes be found before the second copy of the
+    // largest eigenvalue...
+
+    if (ishermitian()) {
+        if (isComplex) {
+            IndexType size(matrixR.rows());
+
+            // First, we solve a real version of the problem
+            GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+
+            // Since the eigenvalues are sorted and are supposed to come by pair,
+            // we can easily remove duplicates. So we select the eigenvalues and
+            // form the corresponding eigenvectors
+            result.isComplex = false;
+            result.matrixR.setZero(nbEigenvalues, nbEigenvalues);
+            result.matrixI.resize(0,0);
+            V.matrixR.setZero(size,nbEigenvalues);
+            V.matrixI.setZero(size,nbEigenvalues);
+            for (IndexType i(0); i < nbEigenvalues; ++i) {
+                result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                // This way of extracting the eigenvector always works ;-)
+                V.matrixR.block(0,i,size,1) = Vreal.matrixR.block(0,2*i,size,1);
+                V.matrixI.block(0,i,size,1) = -Vreal.matrixR.block(size,2*i,size,1);
+            }
+            V.checkComplexity();
+        } else {
+            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            switch (type) {
+                case 1: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseSymMatProd<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::SymEigsSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseSymMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    result.isComplex = false;
+                    result.matrixR = eigs.eigenvalues();
+                    result.matrixI.resize(0,0);
+                    result = result.diagCreate(0);
+
+                    V.isComplex = false;
+                    V.matrixR = eigs.eigenvectors();
+                    V.matrixI.resize(0,0);
+
+                    break;
+                }
+                case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseSymShiftSolve<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    result.isComplex = false;
+                    result.matrixR = eigs.eigenvalues();
+                    result.matrixI.resize(0,0);
+                    result = result.diagCreate(0);
+
+                    V.isComplex = false;
+                    V.matrixR = eigs.eigenvectors();
+                    V.matrixI.resize(0,0);
+
+                    break;
+                }
+            }
+        }
+    } else {
+        if (isComplex) {
+            IndexType size(matrixR.rows());
+
+            // First, we solve a real version of the problem
+            GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+
+            // Since the eigenvalues are sorted and are supposed to come by pair,
+            // we now remove duplicates. Just like in the eig function, we need
+            // to take special care for complex eigenvalues : they come in
+            // conjugate form, but only one of them is correct. For pairs of
+            // real eigenvalues, any of the two eigenvalues can be chosen
+            // equivalently.
+
+            // So we select the eigenvalues and
+            // form the corresponding eigenvectors
+            result.isComplex = false;
+            result.matrixR.setZero(nbEigenvalues, nbEigenvalues);
+            result.matrixI.setZero(nbEigenvalues, nbEigenvalues);
+            V.matrixR.setZero(size,nbEigenvalues);
+            V.matrixI.setZero(size,nbEigenvalues);
+            for (IndexType i(0); i < nbEigenvalues; ++i) {
+                // This way of extracting the eigenvector always works ;-)
+                V.matrixR.block(0,i,size,1) = Vreal.matrixR.block(0,2*i,size,1);
+                V.matrixI.block(0,i,size,1) = -Vreal.matrixR.block(size,2*i,size,1);
+                if (Vreal.isComplex) {
+                    if ( (Vreal.matrixR.block(0,2*i,size,1)+Vreal.matrixI.block(size,2*i,size,1)).array().abs().maxCoeff() >= (Vreal.matrixI.block(0,2*i,size,1)+Vreal.matrixR.block(size,2*i,size,1)).array().abs().maxCoeff() ) {
+                        // The eigenvalue is correct
+                        result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                        if (Dreal.isComplex)
+                            result.matrixI(i,i) = Dreal.matrixI(2*i,2*i);
+                    } else {
+                        // The eigenvalue needs to be conjugated
+                        // (it should also appear in the next column, but to be
+                        // safe we compute it from this column)
+                        result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                        if (Dreal.isComplex)
+                            result.matrixI(i,i) = -Dreal.matrixI(2*i,2*i);
+                    }
+                } else {
+                    // We just pick the eigenvalue on the diagonal
+                    result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                    if (Dreal.isComplex)
+                        result.matrixI(i,i) = Dreal.matrixI(2*i,2*i);
+                }
+            }
+            result.checkComplexity();
+            V.checkComplexity();
+        } else {
+            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            switch (type) {
+                case 1: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseGenMatProd<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::GenEigsSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseGenMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    Matrix< complex<mpreal>, Dynamic, 1> evalues(eigs.eigenvalues());
+                    Matrix< complex<mpreal>, Dynamic, Dynamic> evectors(eigs.eigenvectors());
+
+                    result.matrixR = evalues.real();
+                    result.matrixI = evalues.imag();
+                    result.checkComplexity();
+                    result = result.diagCreate(0);
+
+                    V.matrixR = evectors.real();
+                    V.matrixI = evectors.imag();
+                    V.checkComplexity();
+
+                    break;
+                }
+                case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseGenRealShiftSolve<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::GenEigsRealShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseGenRealShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    Matrix< complex<mpreal>, Dynamic, 1> evalues(eigs.eigenvalues());
+                    Matrix< complex<mpreal>, Dynamic, Dynamic> evectors(eigs.eigenvectors());
+
+                    result.matrixR = evalues.real();
+                    result.matrixI = evalues.imag();
+                    result.checkComplexity();
+                    result = result.diagCreate(0);
+
+                    V.matrixR = evectors.real();
+                    V.matrixI = evectors.imag();
+                    V.checkComplexity();
+
+                    break;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+GmpEigenMatrix& SparseGmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix));
+
+    // NOTE : At the moment, it seems that spectra only garantees of precision
+    // of eps^(2/3). Hence only ~34 digits of precision with 50-digits mpreals
+
+    // NOTE : In presence of degenerate eigenvalues, it seems that the second
+    // largest eigenvalue can sometimes be found before the second copy of the
+    // largest eigenvalue...
+
+    if (ishermitian()) {
+        if (isComplex) {
+            IndexType size(matrixR.rows());
+
+            // First, we solve a real version of the problem
+            GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+
+            // Since the eigenvalues are sorted and are supposed to come by pair,
+            // we can easily remove duplicates. So we select the eigenvalues and
+            // form the corresponding eigenvectors
+            result.isComplex = false;
+            result.matrixR.setZero(nbEigenvalues, nbEigenvalues);
+            result.matrixI.resize(0,0);
+            V.matrixR.setZero(size,nbEigenvalues);
+            V.matrixI.setZero(size,nbEigenvalues);
+            for (IndexType i(0); i < nbEigenvalues; ++i) {
+                result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                // This way of extracting the eigenvector always works ;-)
+                V.matrixR.block(0,i,size,1) = Vreal.matrixR.block(0,2*i,size,1);
+                V.matrixI.block(0,i,size,1) = -Vreal.matrixR.block(size,2*i,size,1);
+            }
+            V.checkComplexity();
+        } else {
+            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            switch (type) {
+                case 1: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseSymMatProd<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::SymEigsSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseSymMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    result.isComplex = false;
+                    result.matrixR = eigs.eigenvalues();
+                    result.matrixI.resize(0,0);
+                    result = result.diagCreate(0);
+
+                    V.isComplex = false;
+                    V.matrixR = eigs.eigenvectors();
+                    V.matrixI.resize(0,0);
+
+                    break;
+                }
+                case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseSymShiftSolve<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    result.isComplex = false;
+                    result.matrixR = eigs.eigenvalues();
+                    result.matrixI.resize(0,0);
+                    result = result.diagCreate(0);
+
+                    V.isComplex = false;
+                    V.matrixR = eigs.eigenvectors();
+                    V.matrixI.resize(0,0);
+
+                    break;
+                }
+            }
+        }
+    } else {
+        if (isComplex) {
+            IndexType size(matrixR.rows());
+
+            // First, we solve a real version of the problem
+            GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+
+            // Since the eigenvalues are sorted and are supposed to come by pair,
+            // we now remove duplicates. Just like in the eig function, we need
+            // to take special care for complex eigenvalues : they come in
+            // conjugate form, but only one of them is correct. For pairs of
+            // real eigenvalues, any of the two eigenvalues can be chosen
+            // equivalently.
+
+            // So we select the eigenvalues and
+            // form the corresponding eigenvectors
+            result.isComplex = false;
+            result.matrixR.setZero(nbEigenvalues, nbEigenvalues);
+            result.matrixI.setZero(nbEigenvalues, nbEigenvalues);
+            V.matrixR.setZero(size,nbEigenvalues);
+            V.matrixI.setZero(size,nbEigenvalues);
+            for (IndexType i(0); i < nbEigenvalues; ++i) {
+                // This way of extracting the eigenvector always works ;-)
+                V.matrixR.block(0,i,size,1) = Vreal.matrixR.block(0,2*i,size,1);
+                V.matrixI.block(0,i,size,1) = -Vreal.matrixR.block(size,2*i,size,1);
+                if (Vreal.isComplex) {
+                    if ( (Vreal.matrixR.block(0,2*i,size,1)+Vreal.matrixI.block(size,2*i,size,1)).array().abs().maxCoeff() >= (Vreal.matrixI.block(0,2*i,size,1)+Vreal.matrixR.block(size,2*i,size,1)).array().abs().maxCoeff() ) {
+                        // The eigenvalue is correct
+                        result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                        if (Dreal.isComplex)
+                            result.matrixI(i,i) = Dreal.matrixI(2*i,2*i);
+                    } else {
+                        // The eigenvalue needs to be conjugated
+                        // (it should also appear in the next column, but to be
+                        // safe we compute it from this column)
+                        result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                        if (Dreal.isComplex)
+                            result.matrixI(i,i) = -Dreal.matrixI(2*i,2*i);
+                    }
+                } else {
+                    // We just pick the eigenvalue on the diagonal
+                    result.matrixR(i,i) = Dreal.matrixR(2*i,2*i);
+                    if (Dreal.isComplex)
+                        result.matrixI(i,i) = Dreal.matrixI(2*i,2*i);
+                }
+            }
+            result.checkComplexity();
+            V.checkComplexity();
+        } else {
+            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            switch (type) {
+                case 1: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseGenMatProd<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::GenEigsSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseGenMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    Matrix< complex<mpreal>, Dynamic, 1> evalues(eigs.eigenvalues());
+                    Matrix< complex<mpreal>, Dynamic, Dynamic> evectors(eigs.eigenvectors());
+
+                    result.matrixR = evalues.real();
+                    result.matrixI = evalues.imag();
+                    result.checkComplexity();
+                    result = result.diagCreate(0);
+
+                    V.matrixR = evectors.real();
+                    V.matrixI = evectors.imag();
+                    V.checkComplexity();
+
+                    break;
+                }
+                case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::SparseGenRealShiftSolve<mpreal> op(matrixR);
+
+                    // Construct eigen solver object, requesting desired eigenvalues
+                    Spectra::GenEigsRealShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::SparseGenRealShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
+
+                    // Initialize and compute
+                    eigs.init();
+                    int maxIter(1000);
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
+
+                    // Check for error
+                    if(eigs.info() != Spectra::SUCCESSFUL)
+                        mexErrMsgTxt("Eigenvalue decomposition failed.");
+
+                    // Retrieve results
+                    Matrix< complex<mpreal>, Dynamic, 1> evalues(eigs.eigenvalues());
+                    Matrix< complex<mpreal>, Dynamic, Dynamic> evectors(eigs.eigenvectors());
+
+                    result.matrixR = evalues.real();
+                    result.matrixI = evalues.imag();
+                    result.checkComplexity();
+                    result = result.diagCreate(0);
+
+                    V.matrixR = evectors.real();
+                    V.matrixI = evectors.imag();
+                    V.checkComplexity();
+
+                    break;
+                }
+            }
+        }
+    }
+
+    return result;
+}
 
 
 
@@ -7866,7 +8305,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMax(vector<IndexType>& indices) co
         // We find the maximum
         for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
             mpreal maxValue;
-            maxValue.setInf(+1);
+            maxValue.setInf(-1);
             IndexType firstZero(0); // This variable is incremented until there is a gap in column enumeration
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it) {
                 if (firstZero == it.row())
@@ -8003,7 +8442,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMax_new(vector<IndexType>& indice
         // We find the maximum
         for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
             mpreal maxValue;
-            maxValue.setInf(+1);
+            maxValue.setInf(-1);
             IndexType firstZero(0); // This variable is incremented until there is a gap in column enumeration
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it) {
                 if (firstZero == it.row())

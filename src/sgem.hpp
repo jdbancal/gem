@@ -9,6 +9,14 @@
 #include <Eigen/OrderingMethods>
 #include <Eigen/SparseLU>
 #include "utils.hpp"
+#include <SymEigsSolver.h>
+#include <GenEigsSolver.h>
+#include <MatOp/SparseSymMatProd.h>
+#include <MatOp/SparseGenMatProd.h>
+#include <SymEigsShiftSolver.h>
+#include <GenEigsRealShiftSolver.h>
+#include <MatOp/SparseSymShiftSolve.h>
+#include <MatOp/SparseGenRealShiftSolve.h>
 
 /*
   This file contains the description of our c++ class, including all its
@@ -270,7 +278,8 @@ public:
 
     SparseGmpEigenMatrix inv();
     SparseGmpEigenMatrix& inv_new();
-    SparseGmpEigenMatrix& eig_new(SparseGmpEigenMatrix& V) const;
+    GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
+    GmpEigenMatrix& eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
 
 
 

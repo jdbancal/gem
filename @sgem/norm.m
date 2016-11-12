@@ -14,11 +14,11 @@ function result = norm(this, p)
     % Some norms are only supported for vectors
     if min(size(this)) == 1
         if isequal(p,'fro') || ~isnumeric(p) || (p <= 0 && p ~= -Inf)
-            error('gem::norm : unsupported vector norm');
+            error('sgem::norm : unsupported vector norm');
         end
     else
         if (~isequal(p, 1)) && (~isequal(p, Inf)) && (~isequal(p,'fro')) && (~isequal(p, 2))
-            error('gem::norm : unsupported matrix norm');
+            error('sgem::norm : unsupported matrix norm');
         end
     end
     

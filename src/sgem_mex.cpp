@@ -757,6 +757,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+    /* Call the class method "eigs" */
+    if (!strcmp("eigs", cmd)) {
+        // Check parameters
+        if ((nlhs != 2) || (nrhs != 4))
+            mexErrMsgTxt("eigs: Unexpected arguments.");
+
+        // We extract the number of eigenvalues requested
+        long int nbEigenvalues = mxGetScalar(prhs[2]);
+        long int type = mxGetScalar(prhs[3]);
+
+        // Compute the eigen decomposition
+        GmpEigenMatrix& Vmatrix(*(new GmpEigenMatrix));
+        GmpEigenMatrix& result(SparseGmpEigenMatrix_instance.eigs_new(nbEigenvalues, Vmatrix, type));
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(Vmatrix);
+        plhs[1] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+
+        return;
+    }
+
+
 
 
 

@@ -10,6 +10,10 @@
 #include "utils.hpp"
 #include <SymEigsSolver.h>
 #include <GenEigsSolver.h>
+#include <SymEigsShiftSolver.h>
+#include <GenEigsComplexShiftSolver.h>
+#include <MatOp/DenseSymShiftSolve.h>
+#include <MatOp/DenseGenComplexShiftSolve.h>
 
 /*
   This file contains the description of our c++ class, including all its

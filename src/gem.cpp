@@ -3878,8 +3878,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
             // Construct matrix operation object using the wrapper class
             Spectra::DenseSymMatProd<mpreal> op(matrixR);
 
-            long int ncv(min(min(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
-            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct eigen solver object, requesting desired eigenvalues
@@ -3889,7 +3888,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)
@@ -3908,14 +3907,17 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     break;
                 }
                 case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::DenseSymShiftSolve<mpreal> op(matrixR);
+
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::SymEigsSolver< mpreal, Spectra::SMALLEST_MAGN, Spectra::DenseSymMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
 
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)
@@ -3985,13 +3987,12 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
             result.checkComplexity();
             V.checkComplexity();
         } else {
-            // Construct matrix operation object using the wrapper class
-            Spectra::DenseGenMatProd<mpreal> op(matrixR);
-
-            long int ncv(min(min(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
-            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::DenseGenMatProd<mpreal> op(matrixR);
+
                     // Construct eigen solver object, requesting desired eigenvalues
                     Spectra::GenEigsSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
 
@@ -3999,7 +4000,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)
@@ -4021,14 +4022,17 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     break;
                 }
                 case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::DenseGenComplexShiftSolve<mpreal> op(matrixR);
+
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::GenEigsSolver< mpreal, Spectra::SMALLEST_MAGN, Spectra::DenseGenMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+                    Spectra::GenEigsComplexShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenComplexShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0), mpreal(0));
 
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)
@@ -4095,8 +4099,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
             // Construct matrix operation object using the wrapper class
             Spectra::DenseSymMatProd<mpreal> op(matrixR);
 
-            long int ncv(min(min(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
-            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct eigen solver object, requesting desired eigenvalues
@@ -4106,7 +4109,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)
@@ -4125,14 +4128,17 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     break;
                 }
                 case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::DenseSymShiftSolve<mpreal> op(matrixR);
+
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::SymEigsSolver< mpreal, Spectra::SMALLEST_MAGN, Spectra::DenseSymMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
 
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)
@@ -4202,13 +4208,12 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
             result.checkComplexity();
             V.checkComplexity();
         } else {
-            // Construct matrix operation object using the wrapper class
-            Spectra::DenseGenMatProd<mpreal> op(matrixR);
-
-            long int ncv(min(min(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
-            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::DenseGenMatProd<mpreal> op(matrixR);
+
                     // Construct eigen solver object, requesting desired eigenvalues
                     Spectra::GenEigsSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
 
@@ -4216,7 +4221,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)
@@ -4238,14 +4243,17 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     break;
                 }
                 case 2: {
+                    // Construct matrix operation object using the wrapper class
+                    Spectra::DenseGenComplexShiftSolve<mpreal> op(matrixR);
+
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::GenEigsSolver< mpreal, Spectra::SMALLEST_MAGN, Spectra::DenseGenMatProd<mpreal> > eigs(&op, nbEigenvalues, ncv);
+                    Spectra::GenEigsComplexShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenComplexShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0), mpreal(0));
 
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
                     mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
-                    int nconv = eigs.compute(maxIter, tolerance);
+                    int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
                     if(eigs.info() != Spectra::SUCCESSFUL)

@@ -48,8 +48,8 @@ The following function can be applied to gem/sgem objects directly.
 | disp | ✔ | ✔ |  |
 | display | ✔ | ✔ |  |
 | double | ✔ | ✔ |  |
-| eig | ✔ |  |  |
-| eigs | ✔ |  |  |
+| eig | ✔ | ✗ |  |
+| eigs | ✔ | ✔ |  |
 | end | ✔ | ✔ |  |
 | eq | ✔ | ✔ |  |
 | exp | ✔ | ✔ |  |
@@ -91,7 +91,7 @@ The following function can be applied to gem/sgem objects directly.
 | mrdivide | ✔ | ✔ |  |
 | mtimes | ✔ | ✔ |  |
 | ne | ✔ | ✔ |  |
-| norm | ✔ |  |  |
+| norm | ✔ | ✔ |  |
 | not | ✔ | ✔ |  |
 | numel | ✔ | ✔ |  |
 | or | ✔ | ✔ |  |
@@ -113,8 +113,8 @@ The following function can be applied to gem/sgem objects directly.
 | subsasgn | ✔ | ✔ |  |
 | subsref | ✔ | ✔ |  |
 | sum | ✔ | ✔ |  |
-| svd | ✔ |   |  |
-| svds | ✔ |   |  |
+| svd | ✔ | ✗ |  |
+| svds | ✔ | ✔ |  |
 | tan | ✔ | ✔ |  |
 | times | ✔ | ✔ |  |
 | toStrings | ✔ | ✔ |  |
