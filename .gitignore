@@ -3,8 +3,8 @@ src/eigen
 *.mex*
 .syncthing*
 *~
-gmp-*
-mpfr-*
-mpfrc++-*
-
+src/gmp-*
+src/mpfr-*
+src/mpfrc++-*
+src/spectra
 /src/staticLibraries/
