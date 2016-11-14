@@ -3887,7 +3887,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
@@ -3916,7 +3916,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
@@ -3999,7 +3999,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
@@ -4031,7 +4031,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
@@ -4108,7 +4108,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
@@ -4137,7 +4137,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
@@ -4220,7 +4220,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::LARGEST_MAGN);
 
                     // Check for error
@@ -4252,7 +4252,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     // Initialize and compute
                     eigs.init();
                     int maxIter(1000);
-                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())*2/3));
+                    mpreal tolerance(pow(10,-mpfr::bits2digits(mpfr::mpreal::get_default_prec())));
                     int nconv = eigs.compute(maxIter, tolerance, Spectra::SMALLEST_MAGN);
 
                     // Check for error
