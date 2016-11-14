@@ -34,7 +34,7 @@ end
 
 % Set the following variable to 0 in order to compile a library which does
 % not depend on shared gmp and mpfr libraries:
-useSharedGmpAndMpfr = 1;
+useSharedGmpAndMpfr = 0;
 
 
 %% We perform some checks
@@ -66,38 +66,32 @@ if spectraFound == 0
     error('The spectra folder was not found in the gem/src folder. Please download it from http://yixuan.cos.name/spectra/index.html');
 end
 
+
+% We set the flags needed for parallelization (if requested)
+if parallelization == 1
+    parallelizationFlag = '-pthread -fopenmp';
+else
+    parallelizationFlag = '';
+end
+
+
+% additional flags
 optimizationFlag = '';%'-DEIGEN_MPL2_ONLY';%'-O3';
+
 
 %% Now we proceed to compilation
 if useSharedGmpAndMpfr == 1
-    if parallelization == 1
-        % Compilation with parallelization
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp src/utils.cpp -o src/utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp src/gem.cpp -o src/gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp src/gem_mex.cpp -o src/gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp src/sgem.cpp -o src/sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp src/sgem_mex.cpp -o src/sgem_mex.o']);
-        flags(6) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" src/gem_mex.o src/gem.o src/sgem.o src/utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -fopenmp -o gem_mex.', mexext]);
-        flags(7) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" src/sgem_mex.o src/sgem.o src/gem.o src/utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -fopenmp -o sgem_mex.', mexext]);
-        if sum(flags) == 0
-            display('Compilation successful.');
-        else
-            error('Compilation error.');
-        end
+    flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/utils.cpp -o src/utils.o']);
+    flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/gem.cpp -o src/gem.o']);
+    flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/gem_mex.cpp -o src/gem_mex.o']);
+    flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/sgem.cpp -o src/sgem.o']);
+    flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/sgem_mex.cpp -o src/sgem_mex.o']);
+    flags(6) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" src/gem_mex.o src/gem.o src/sgem.o src/utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o gem_mex.', mexext]);
+    flags(7) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" src/sgem_mex.o src/sgem.o src/gem.o src/utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o sgem_mex.', mexext]);
+    if sum(flags) == 0
+        display('Compilation successful.');
     else
-        % Compilation without parallelization
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/utils.cpp -o src/utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/gem.cpp -o src/gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/gem_mex.cpp -o src/gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/sgem.cpp -o src/sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/sgem_mex.cpp -o src/sgem_mex.o']);
-        flags(6) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" src/gem_mex.o src/gem.o src/sgem.o src/utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o gem_mex.', mexext]);
-        flags(7) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" src/sgem_mex.o src/sgem.o src/gem.o src/utils.o   -lmpfr  -lgmp   -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o sgem_mex.', mexext]);
-        if sum(flags) == 0
-            display('Compilation successful.');
-        else
-            error('Compilation error.');
-        end
+        error('Compilation error.');
     end
 else
     % Here we compile a version of the library which does not rely on gmp 
@@ -166,38 +160,19 @@ else
     end
 
     % Now gmp and mpfr should be ready, we can compile gem
-    if parallelization == 1
-        % Compilation with parallelization
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp utils.cpp -o utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem.cpp -o gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp gem_mex.cpp -o gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem.cpp -o sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -pthread -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG -fopenmp sgem_mex.cpp -o sgem_mex.o']);
-        flags(6) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -fopenmp -o ../gem_mex.', mexext]);
-        flags(7) = unix(['g++ -pthread -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -fopenmp -o ../sgem_mex.', mexext]);
-        cd ..
-        if sum(flags) == 0
-            display('Compilation successful.');
-        else
-            error('Compilation error.');
-        end
+    flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
+    flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
+    flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG gem_mex.cpp -o gem_mex.o']);
+    flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG sgem.cpp -o sgem.o']);
+    flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
+    flags(6) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o ../gem_mex.', mexext]);
+    flags(7) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o ../sgem_mex.', mexext]);
+    cd ..
+    if sum(flags) == 0
+        display('Compilation successful.');
     else
-        % Compilation without parallelization
-        flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
-        flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
-        flags(3) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG gem_mex.cpp -o gem_mex.o']);
-        flags(4) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG sgem.cpp -o sgem.o']);
-        flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
-        flags(6) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o ../gem_mex.', mexext]);
-        flags(7) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/glnxa64/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/glnxa64 -L"', matlabroot, '/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++ ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o ../sgem_mex.', mexext]);
-        cd ..
-        if sum(flags) == 0
-            display('Compilation successful.');
-        else
-            error('Compilation error.');
-        end
+        error('Compilation error.');
     end
-
 end
 
 return;
