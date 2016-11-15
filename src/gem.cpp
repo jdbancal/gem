@@ -3449,6 +3449,25 @@ GmpEigenMatrix& GmpEigenMatrix::cosh_new() const
    |   Some linear algebra operations    |
    --------------------------------------- */
 
+/* Matrix rank b = rank(a) */
+IndexType GmpEigenMatrix::rank() const
+{
+   IndexType result;
+
+   if (isComplex) {
+       result = complexIsometry().rank()/2;
+   } else {
+       // We use a QR solver to compute the matrix rank
+
+       //matrixR.makeCompressed(); // The matrix is supposed to be alread compressed at this stage...
+       ColPivHouseholderQR< Matrix<mpreal, Dynamic, Dynamic> > solver(matrixR);
+
+       result = solver.rank();
+   }
+
+   return result;
+}
+
 /* Matrix inverse b = inv(a) */
 GmpEigenMatrix GmpEigenMatrix::inv() const
 {
@@ -3878,7 +3897,8 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
             // Construct matrix operation object using the wrapper class
             Spectra::DenseSymMatProd<mpreal> op(matrixR);
 
-            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows())); // the tightest bounds... don't always converge
+            long int ncv(min(3+max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct eigen solver object, requesting desired eigenvalues
@@ -3987,7 +4007,8 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
             result.checkComplexity();
             V.checkComplexity();
         } else {
-            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));  // the tightest bounds... don't always converge
+            long int ncv(min(3+max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct matrix operation object using the wrapper class
@@ -4099,7 +4120,8 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
             // Construct matrix operation object using the wrapper class
             Spectra::DenseSymMatProd<mpreal> op(matrixR);
 
-            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows())); // the tightest bounds... don't always converge
+            long int ncv(min(3+max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct eigen solver object, requesting desired eigenvalues
@@ -4208,7 +4230,8 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
             result.checkComplexity();
             V.checkComplexity();
         } else {
-            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));  // the tightest bounds... don't always converge
+            long int ncv(min(3+max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct matrix operation object using the wrapper class

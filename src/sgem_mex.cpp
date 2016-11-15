@@ -94,18 +94,31 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ((nlhs != 1) || (nrhs != 7))
             mexErrMsgTxt("newFromMatlab: Unexpected arguments.");
 
-        if (!(mxIsDouble(prhs[1])) || !(mxIsDouble(prhs[2])) || !(mxIsDouble(prhs[3])) || !(mxIsDouble(prhs[4])) || !(mxIsDouble(prhs[5])) || !(mxIsDouble(prhs[6])))
+        if (!(mxIsDouble(prhs[1])) || !(mxIsDouble(prhs[2])) || !(mxIsDouble(prhs[4])) || !(mxIsDouble(prhs[5])) || !(mxIsDouble(prhs[6])))
             mexErrMsgTxt("newFromMatlab: Unexpected arguments.");
 
         // We extract the size and required precision
         IndexType m = mxGetScalar(prhs[4]);
         IndexType n = mxGetScalar(prhs[5]);
         int precision = mxGetScalar(prhs[6]);
+        if (mxIsDouble(prhs[3])) {
+            // The values have been provided in double format
 
-        // We now forward the matlab pointer to the data to the constructor
-        // of GmpEigenMatrix to let it copy the data into a new object. We then
-        // send back the identifier of the newly created object to matlab.
-        plhs[0] = createMatlabIdFromObj<SparseGmpEigenMatrix>(*(new SparseGmpEigenMatrix(prhs[1], prhs[2], prhs[3], m, n, precision)));
+            // We now forward the matlab pointer to the data to the constructor
+            // of GmpEigenMatrix to let it copy the data into a new object. We then
+            // send back the identifier of the newly created object to matlab.
+            plhs[0] = createMatlabIdFromObj<SparseGmpEigenMatrix>(*(new SparseGmpEigenMatrix(prhs[1], prhs[2], prhs[3], m, n, precision)));
+        } else {
+            // The values have been provided in a gem variable
+
+            // We extract this gem object
+            GmpEigenMatrix& GmpEigenMatrix_values = recoverObjFromMatlabId<GmpEigenMatrix>(prhs[3]);
+
+            // We now forward the matlab pointer to the data to the constructor
+            // of GmpEigenMatrix to let it copy the data into a new object. We then
+            // send back the identifier of the newly created object to matlab.
+            plhs[0] = createMatlabIdFromObj<SparseGmpEigenMatrix>(*(new SparseGmpEigenMatrix(prhs[1], prhs[2], GmpEigenMatrix_values, m, n, precision)));
+        }
 
         return;
     }
@@ -511,6 +524,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+    /* Call the class method "nnz" */
+    if (!strcmp("nnz", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 2))
+            mexErrMsgTxt("nnz: Unexpected arguments.");
+
+        // We allocate space for the result
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
+
+        // We check where the output data should be places
+        int* output = (int*)mxGetData(plhs[0]);
+
+        // We return the answer to matlab
+        output[0] = SparseGmpEigenMatrix_instance.nnz();
+
+        return;
+    }
+
+
     /* Call the class method "round" */
     if (!strcmp("round", cmd)) {
         // Check parameters
@@ -739,6 +771,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 
 
+
+
+    /* Call the class method "rank" */
+    if (!strcmp("rank", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 2))
+            mexErrMsgTxt("rank: Unexpected arguments.");
+
+        // We allocate space for the result
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
+
+        // We check where the output data should be places
+        int* output = (int*)mxGetData(plhs[0]);
+
+        // We return the answer to matlab
+        output[0] = SparseGmpEigenMatrix_instance.rank();
+
+        return;
+    }
 
 
     /* Call the class method "inv" */

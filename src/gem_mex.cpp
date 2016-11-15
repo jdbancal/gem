@@ -890,6 +890,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 
 
+    /* Call the class method "rank" */
+    if (!strcmp("rank", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 2))
+            mexErrMsgTxt("rank: Unexpected arguments.");
+
+        // We allocate space for the result
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
+
+        // We check where the output data should be places
+        int* output = (int*)mxGetData(plhs[0]);
+
+        // We return the answer to matlab
+        output[0] = GmpEigenMatrix_instance.rank();
+
+        return;
+    }
+
+
     /* Call the class method "inv" */
     if (!strcmp("inv", cmd)) {
         // Check parameters

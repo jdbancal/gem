@@ -237,6 +237,66 @@ SparseGmpEigenMatrix::SparseGmpEigenMatrix(const mxArray* rows, const mxArray* c
 }
 
 
+/* Construction from a list of values in gem format */
+SparseGmpEigenMatrix::SparseGmpEigenMatrix(const mxArray* rows, const mxArray* cols, const GmpEigenMatrix& values, const IndexType& m, const IndexType& n, const int& precision) {
+
+    // We set the required precision
+    mp_prec_t precisionInBits(mpfr::digits2bits(precision));
+
+    /* Get the size and pointers to input data */
+    double* prows(mxGetPr(rows));
+    double* pcols(mxGetPr(cols));
+    isComplex = values.isComplex;
+
+    // If the input is real, we set the imaginary data to nothing
+    if (isComplex == 0)
+        matrixI = SparseMatrix<mpfr::mpreal>();
+
+    // We set the size
+    matrixR.resize(m,n);
+    if (isComplex)
+        matrixI.resize(m,n);
+
+    // The number of nonzero elements in the matrix
+    mwSize nbElementsR(mxGetM(rows));
+
+    // Now we copy the data over. First to triplet
+    vector< Triplet<mpreal> > tripletList;
+    tripletList.reserve(nbElementsR);
+    for (IndexType index = 0; index < nbElementsR; ++index) {
+        if ((!isComplex) || (values.matrixR(index,0) != 0)){
+            tripletList.push_back(Triplet<mpreal>(prows[index]-1, pcols[index]-1, values.matrixR(index,0)));
+        }
+    }
+
+    // now into the sparse matrix
+    matrixR.setFromTriplets(tripletList.begin(), tripletList.end());
+
+    // This should not be needed if the , but just in case the struct array was
+    // provided by a user, we need to make sure that there are no zeros in the
+    // matrix. So we compress the output if possible
+    matrixR.prune(0,0);
+    matrixR.makeCompressed();
+
+    if (isComplex) {
+        // Now we copy the data over. First to triplet
+        vector< Triplet<mpreal> > tripletList;
+        tripletList.reserve(nbElementsR);
+        for (IndexType index = 0; index < nbElementsR; ++index) {
+            if (values.matrixI(index,0) != 0)
+                tripletList.push_back(Triplet<mpreal>(prows[index]-1, pcols[index]-1, values.matrixI(index,0)));
+        }
+        // now into the sparse matrix
+        matrixI.setFromTriplets(tripletList.begin(), tripletList.end());
+
+        // We compress the output if possible
+        matrixI.prune(0,0);
+        matrixI.makeCompressed();
+        checkComplexity();
+    }
+}
+
+
 /* Saving procedure
    This function returns a structure to matlab which contains all the data
    that define the SparseGemEigenMatrix instance
@@ -3587,8 +3647,8 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::mtimes_new(const SparseGmpEigenMatri
             result.matrixI.makeCompressed();
             result.checkComplexity();
         } else {
-            result.matrixR = (matrixR*b.matrixR).pruned();
-            result.matrixI = (matrixR*b.matrixI).pruned();
+            result.matrixR = matrixR*b.matrixR;//).pruned(); // Using the pruned multiplication seems not to always remove all zeros, e.g. in m=[1 2; 3 5]; inv(sgem(m))*sgem(m). Moreover, it now gives segmentation faults... (!)
+            result.matrixI = matrixR*b.matrixI;//).pruned();
             result.matrixR.prune(0,0);
             result.matrixI.prune(0,0);
             result.matrixR.makeCompressed();
@@ -3596,16 +3656,16 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::mtimes_new(const SparseGmpEigenMatri
             result.checkComplexity();
         }
     } else if (isComplex) {
-        result.matrixR = (matrixR*b.matrixR).pruned();
-        result.matrixI = (matrixI*b.matrixR).pruned();
+        result.matrixR = matrixR*b.matrixR;//).pruned();
+        result.matrixI = matrixI*b.matrixR;//).pruned();
         result.matrixR.prune(0,0);
         result.matrixI.prune(0,0);
         result.matrixR.makeCompressed();
         result.matrixI.makeCompressed();
         result.checkComplexity();
     } else {
-        result.matrixR = (matrixR*b.matrixR).pruned();
-        result.matrixR.prune(0,0); // It looks like pruned() above does not always remove all zeros, e.g. in m=[1 2; 3 5]; inv(sgem(m))*sgem(m)
+        result.matrixR = matrixR*b.matrixR;//).pruned();
+        result.matrixR.prune(0,0);
         result.matrixR.makeCompressed();
         result.isComplex = false;
     }
@@ -4566,8 +4626,27 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::atan_new() const
    |   Some linear algebra operations    |
    --------------------------------------- */
 
+/* Matrix rank b = rank(a) */
+IndexType SparseGmpEigenMatrix::rank() const
+{
+    IndexType result;
+
+    if (isComplex) {
+        result = complexIsometry().rank()/2;
+    } else {
+        // We use a QR solver to compute the matrix rank
+
+        //matrixR.makeCompressed(); // The matrix is supposed to be alread compressed at this stage...
+        SparseQR< SparseMatrix<mpreal, ColMajor>, COLAMDOrdering<int> > solver(matrixR);
+
+        result = solver.rank();
+    }
+
+    return result;
+}
+
 /* Matrix inverse b = inv(a) */
-SparseGmpEigenMatrix SparseGmpEigenMatrix::inv()
+SparseGmpEigenMatrix SparseGmpEigenMatrix::inv() const
 {
     SparseGmpEigenMatrix result;
 
@@ -4605,7 +4684,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::inv()
 }
 
 /* Matrix inverse b = inv(a) */
-SparseGmpEigenMatrix& SparseGmpEigenMatrix::inv_new()
+SparseGmpEigenMatrix& SparseGmpEigenMatrix::inv_new() const
 {
     SparseGmpEigenMatrix& result(*(new SparseGmpEigenMatrix));
 
@@ -4677,7 +4756,8 @@ GmpEigenMatrix SparseGmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEige
             }
             V.checkComplexity();
         } else {
-            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows())); // the tightest bounds... don't always converge
+            long int ncv(min(3+max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct matrix operation object using the wrapper class
@@ -4789,7 +4869,8 @@ GmpEigenMatrix SparseGmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEige
             result.checkComplexity();
             V.checkComplexity();
         } else {
-            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows())); // the tightest bounds... don't always converge
+            long int ncv(min(3+max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct matrix operation object using the wrapper class
@@ -4897,7 +4978,8 @@ GmpEigenMatrix& SparseGmpEigenMatrix::eigs_new(const long int& nbEigenvalues, Gm
             }
             V.checkComplexity();
         } else {
-            long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows())); // the tightest bounds... don't always converge
+            long int ncv(min(3+max(1+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct matrix operation object using the wrapper class
@@ -5009,7 +5091,8 @@ GmpEigenMatrix& SparseGmpEigenMatrix::eigs_new(const long int& nbEigenvalues, Gm
             result.checkComplexity();
             V.checkComplexity();
         } else {
-            long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
+            //long int ncv(min(max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows())); // the tightest bounds... don't always converge
+            long int ncv(min(3+max(2+nbEigenvalues,2*nbEigenvalues),matrixR.rows()));
             switch (type) {
                 case 1: {
                     // Construct matrix operation object using the wrapper class

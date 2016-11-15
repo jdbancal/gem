@@ -91,6 +91,8 @@ The following function can be applied to gem/sgem objects directly.
 | mrdivide | ✔ | ✔ |  |
 | mtimes | ✔ | ✔ |  |
 | ne | ✔ | ✔ |  |
+| nnz | ✔ | ✔ |  |
+| nonzeros | ✔ | ✔ |  |
 | norm | ✔ | ✔ |  |
 | not | ✔ | ✔ |  |
 | numel | ✔ | ✔ |  |
@@ -100,6 +102,7 @@ The following function can be applied to gem/sgem objects directly.
 | power | ✔ | ✔ |  |
 | precision | ✔ | ✔ |  |
 | prod | ✔ | ✔ |  |
+| rank | ✔ | ✔ |  |
 | rdivide | ✔ | ✔ |  |
 | real | ✔ | ✔ |  |
 | reshape | ✔ | ✔ |  |

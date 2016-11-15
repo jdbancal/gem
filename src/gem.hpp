@@ -318,6 +318,7 @@ public:
        |   Some linear algebra operations    |
        --------------------------------------- */
 
+    IndexType rank() const;
     GmpEigenMatrix inv() const;
     GmpEigenMatrix& inv_new() const;
     GmpEigenMatrix eig(GmpEigenMatrix& V) const;

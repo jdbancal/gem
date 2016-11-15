@@ -33,7 +33,7 @@ Note that relying on std::complex has been shown to lead to problems, because se
   - `method_new` which performs the same operation but returns the result in a dynamic variable (this variable remains in memory between to calls from matlab).
 The code of both functions must be identical, except for the variable definition.
 
-- 
+- The matlab code must perform all parameters checks before calling the c++ library. So for instance it must check that the size of two matrices are compatible before asking the c++ library to multiply these matrices. No such checks should be expected to be performed on the c++ side. This is meant to lighten the c++ code, which is already complex enough as is.
 
 
 Desired Features
