@@ -39,6 +39,7 @@ The following function can be applied to gem/sgem objects directly.
 | ceil | ✔ | ✔ |  |
 | colon | ✔ | ✔ |  |
 | complex | ✔ | ✔ |  |
+| cond | ✔ | ✔ |  |
 | conj | ✔ | ✔ |  |
 | cos | ✔ | ✔ |  |
 | cot | ✔ | ✔ |  |
