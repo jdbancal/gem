@@ -65,6 +65,7 @@ function [U S V] = svds(this, varargin)
     if nargout <= 1
         % We only compute the eigenvalues of a*a'
         vals = eigs(this*this', nbSingularvalues, type);
+        vals = max(vals,0); % We round up eventual slightly negative values
         U = sqrt(vals);
 
         % We make sure the order of the singular values is decreasing
@@ -76,6 +77,7 @@ function [U S V] = svds(this, varargin)
     elseif nargout <= 2
         % We compute the eigenvalues and eigenvectors of a*a'
         [U valsU] = eigs(this*this', nbSingularvalues, type);
+        valsU = max(valsU,0); % We round up eventual slightly negative values
         S = sqrt(valsU);
 
         % We make sure the order of the singular values is decreasing
@@ -91,6 +93,8 @@ function [U S V] = svds(this, varargin)
         % We compute the eigenvalues on both sides
         [U valsU] = eigs(this*this', nbSingularvalues, type);
         [V valsV] = eigs(this'*this, nbSingularvalues, type);
+        valsU = max(valsU,0); % We round up eventual slightly negative values
+        valsV = max(valsV,0); % We round up eventual slightly negative values
         S = sqrt(valsU);
         
         % We check that the same singular values were found on both sides
