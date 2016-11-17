@@ -3859,7 +3859,7 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
 }
 
 /* Partial eigenvalue decopmosition: similar to [V D] = eigs(A, k) */
-GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const
+GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const
 {
     GmpEigenMatrix result;
 
@@ -3876,7 +3876,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
 
             // First, we solve a real version of the problem
             GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
-            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type, sigma);
 
             // Since the eigenvalues are sorted and are supposed to come by pair,
             // we can easily remove duplicates. So we select the eigenvalues and
@@ -3931,7 +3931,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     Spectra::DenseSymShiftSolve<mpreal> op(matrixR);
 
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
+                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, sigma.matrixR(0,0));
 
                     // Initialize and compute
                     eigs.init();
@@ -3963,7 +3963,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
 
             // First, we solve a real version of the problem
             GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
-            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type, sigma);
 
             // Since the eigenvalues are sorted and are supposed to come by pair,
             // we now remove duplicates. Just like in the eig function, we need
@@ -4047,7 +4047,10 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
                     Spectra::DenseGenComplexShiftSolve<mpreal> op(matrixR);
 
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::GenEigsComplexShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenComplexShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0), mpreal(0));
+                    mpreal sigmaI(0);
+                    if (sigma.isComplex)
+                        sigmaI = sigma.matrixI(0,0);
+                    Spectra::GenEigsComplexShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenComplexShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, sigma.matrixR(0,0), sigmaI);
 
                     // Initialize and compute
                     eigs.init();
@@ -4082,7 +4085,7 @@ GmpEigenMatrix GmpEigenMatrix::eigs(const long int& nbEigenvalues, GmpEigenMatri
 }
 
 /* Partial eigenvalue decopmosition: similar to [V D] = eigs(A, k) */
-GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const
+GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const
 {
     GmpEigenMatrix& result(*(new GmpEigenMatrix));
 
@@ -4099,7 +4102,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
 
             // First, we solve a real version of the problem
             GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
-            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type, sigma);
 
             // Since the eigenvalues are sorted and are supposed to come by pair,
             // we can easily remove duplicates. So we select the eigenvalues and
@@ -4154,7 +4157,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     Spectra::DenseSymShiftSolve<mpreal> op(matrixR);
 
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0));
+                    Spectra::SymEigsShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseSymShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, sigma.matrixR(0,0));
 
                     // Initialize and compute
                     eigs.init();
@@ -4186,7 +4189,7 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
 
             // First, we solve a real version of the problem
             GmpEigenMatrix Dreal, Vreal; // These matrices will hold an isometry of the eigenvalues and eigenvectors
-            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type);
+            Dreal = complexIsometry().eigs(2*nbEigenvalues, Vreal, type, sigma);
 
             // Since the eigenvalues are sorted and are supposed to come by pair,
             // we now remove duplicates. Just like in the eig function, we need
@@ -4270,7 +4273,10 @@ GmpEigenMatrix& GmpEigenMatrix::eigs_new(const long int& nbEigenvalues, GmpEigen
                     Spectra::DenseGenComplexShiftSolve<mpreal> op(matrixR);
 
                     // Construct eigen solver object, requesting desired eigenvalues
-                    Spectra::GenEigsComplexShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenComplexShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, mpreal(0), mpreal(0));
+                    mpreal sigmaI(0);
+                    if (sigma.isComplex)
+                        sigmaI = sigma.matrixI(0,0);
+                    Spectra::GenEigsComplexShiftSolver< mpreal, Spectra::LARGEST_MAGN, Spectra::DenseGenComplexShiftSolve<mpreal> > eigs(&op, nbEigenvalues, ncv, sigma.matrixR(0,0), sigmaI);
 
                     // Initialize and compute
                     eigs.init();

@@ -281,8 +281,8 @@ public:
     IndexType rank() const;
     SparseGmpEigenMatrix inv() const;
     SparseGmpEigenMatrix& inv_new() const;
-    GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
-    GmpEigenMatrix& eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
+    GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const;
+    GmpEigenMatrix& eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const;
 
 
 

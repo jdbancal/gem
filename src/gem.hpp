@@ -323,8 +323,8 @@ public:
     GmpEigenMatrix& inv_new() const;
     GmpEigenMatrix eig(GmpEigenMatrix& V) const;
     GmpEigenMatrix& eig_new(GmpEigenMatrix& V) const;
-    GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
-    GmpEigenMatrix& eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type) const;
+    GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const;
+    GmpEigenMatrix& eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const;
     GmpEigenMatrix svd(GmpEigenMatrix& U, GmpEigenMatrix& V) const;
     GmpEigenMatrix& svd_new(GmpEigenMatrix& U, GmpEigenMatrix& V) const;
 

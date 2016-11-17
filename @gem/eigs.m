@@ -5,8 +5,9 @@
 %   [v d] = eigs(a, [k])      : k eigenvectors and eigenvalues of a 
 %                               with largest magnitude (a*v = v*d)
 %   [v d] = eigs(a, k, sigma) : first k eigenvectors and eigenvalues of a
-%                               with sigma = 'lm', 'sm' for the eigenvalues
-%                               with largest or smallest magnitude
+%                               smallest in magnitude to sigma.
+%                               With sigma = 'lm', 'sm', eigenvalues
+%                               with largest or smallest magnitude.
 % 
 % The default value of k is 6.
 %
@@ -56,34 +57,43 @@ function [V D] = eigs(this, varargin)
     end
     
     % We check if there is a second parameter
-    if (length(varargin) > 1) && (~ischar(varargin{2}))
-        error('The third argument of gem::eigs must be a text');
-    end
-
-    % We extract the requested type of eigenvalues
     type = 1;
+    sigma = 0;
     if length(varargin) > 1
-        switch lower(varargin{2})
-            case 'lm'
-                % Largest magnitude
-                type = 1;
-            case 'sm'
-                % Smallest magnitude
-                type = 2;
+        if ischar(varargin{2})
+            switch lower(varargin{2})
+                case 'lm'
+                    % Largest magnitude
+                    type = 1;
+                case 'sm'
+                    % Smallest magnitude
+                    type = 2;
 % % The following cases are not implemented at the moment:
-%             case 'lr'
-%                 % Largest real component
-%             case 'sr'
-%                 % Smallest real component
-%             case 'li'
-%                 % Largest imaginary component
-%             case 'si'
-%                 % Smallest imaginary component
-            otherwise
-                error('Third argument of gem::eigs not recognized');
+%                 case 'lr'
+%                     % Largest real component
+%                 case 'sr'
+%                     % Smallest real component
+%                 case 'li'
+%                     % Largest imaginary component
+%                 case 'si'
+%                     % Smallest imaginary component
+                otherwise
+                    error('Third argument of gem::eigs not recognized');
+            end
+        else
+            if numel(varargin{2}) > 1
+                error('sigma must be a single number in gem::eigs');
+            end
+            type = 2;
+            sigma = varargin{2};
         end
     end
     
+    % There should be no more parameters
+    if length(varargin) > 2
+        error('Too many arguments in gem::eigs');
+    end
+
     % We check how many outputs are
     if nargout <= 2
         % The matrix must be square
@@ -91,7 +101,24 @@ function [V D] = eigs(this, varargin)
             error('Matrix must be square in gem::eigs');
         end
         
-        [newObjectIdentifierV newObjectIdentifierD] = gem_mex('eigs', this.objectIdentifier, nbEigenvalues, type);
+        % We make sure sigma is a gem object
+        if ~isequal(class(sigma),'gem')
+            sigma = gem(sigma);
+        end
+
+        % We check that we won't try to invert a singular matrix
+        if isequal(type,2)
+            if rank(this-sigma*eye(size(this))) < size(this,1)
+                if (nargout < 2) && (nbEigenvalues == 1)
+                    % We know what is the eigenvalue of smallest magnitude
+                    V = gem(0);
+                    return;
+                end
+                error('Sigma cannot be an eigenvalue of the considered matrix.');
+            end
+        end
+        
+        [newObjectIdentifierV newObjectIdentifierD] = gem_mex('eigs', this.objectIdentifier, nbEigenvalues, type, objectIdentifier(sigma));
 
         % ...  and create a new matlab object to keep this handle
         V = gem('encapsulate', newObjectIdentifierV);
