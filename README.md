@@ -1,5 +1,3 @@
-![](logo1.png)
-
 Gmp Eigen Matrix Library
 ========================
 
