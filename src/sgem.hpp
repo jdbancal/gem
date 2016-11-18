@@ -9,6 +9,14 @@
 #include <Eigen/OrderingMethods>
 #include <Eigen/SparseLU>
 #include "utils.hpp"
+#include <SymEigsSolver.h>
+#include <GenEigsSolver.h>
+#include <MatOp/SparseSymMatProd.h>
+#include <MatOp/SparseGenMatProd.h>
+#include <SymEigsShiftSolver.h>
+#include <GenEigsRealShiftSolver.h>
+#include <MatOp/SparseSymShiftSolve.h>
+#include <MatOp/SparseGenRealShiftSolve.h>
 
 /*
   This file contains the description of our c++ class, including all its
@@ -48,6 +56,8 @@ public:
     SparseGmpEigenMatrix(const mxArray* prhs);
     /* Construction from a matlab table.*/
     SparseGmpEigenMatrix(const mxArray* rows, const mxArray* cols, const mxArray* values, const IndexType& m, const IndexType& n, const int& precision);
+    /* Construction from a gem table.*/
+    SparseGmpEigenMatrix(const mxArray* rows, const mxArray* cols, const GmpEigenMatrix& values, const IndexType& m, const IndexType& n, const int& precision);
 
     /* Destructor */
     virtual ~SparseGmpEigenMatrix() {};
@@ -268,9 +278,11 @@ public:
        |   Some linear algebra operations    |
        --------------------------------------- */
 
-    SparseGmpEigenMatrix inv();
-    SparseGmpEigenMatrix& inv_new();
-    SparseGmpEigenMatrix& eig_new(SparseGmpEigenMatrix& V) const;
+    IndexType rank() const;
+    SparseGmpEigenMatrix inv() const;
+    SparseGmpEigenMatrix& inv_new() const;
+    GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const;
+    GmpEigenMatrix& eigs_new(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const;
 
 
 
@@ -311,6 +323,10 @@ public:
                     maximum = it.value();
         return maximum;
     }
+
+    // symmetry tests
+    bool issymmetric() const;
+    bool ishermitian() const;
 
     // column-wise minimum b = min(a)
     SparseGmpEigenMatrix colMin(std::vector<IndexType>& indices) const;
@@ -454,6 +470,43 @@ public:
     inline IndexType numel() const
     {
         return matrixR.cols()*matrixR.rows();
+    }
+
+    /* This function returns the number of non-zero elements */
+    inline IndexType nnz() const
+    {
+        if (!isComplex)
+            return matrixR.nonZeros();
+
+        IndexType co(0);
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            Eigen::SparseMatrix<mpfr::mpreal>::InnerIterator itR(matrixR,k);
+            Eigen::SparseMatrix<mpfr::mpreal>::InnerIterator itI(matrixI,k);
+
+            while ((itR) || (itI)) {
+                if ((itR) && (itI)) {
+                    if (itR.row() < itI.row()) {
+                        ++co;
+                        ++itR;
+                    } else if (itR.row() == itI.row()) {
+                        ++co;
+                        ++itR;
+                        ++itI;
+                    } else {
+                        ++co;
+                        ++itI;
+                    }
+                } else if (itR) {
+                    ++co;
+                    ++itR;
+                } else {
+                    ++co;
+                    ++itI;
+                }
+            }
+        }
+
+        return co;
     }
 
 public:

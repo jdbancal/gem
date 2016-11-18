@@ -1,20 +1,26 @@
 % eig - eigenvalues and eigenvectors
 %
 % supported formats :
-%   e = eig(a) : eigenvalues of a
+%   e = eig(a)     : eigenvalues of a
+%   [v d] = eig(a) : eigenvectors and eigenvalues of a (a*v = v*d)
 function [V D] = eig(this, varargin)
-    % This function can involve up to two argument
+    % This function can involve only one argument
     if length(varargin) > 1
         error('Wrong number of arguments in gem::eig');
     end
     
     % We check how many outputs are 
     if nargout <= 2
-        [newObjectIdentifierD newObjectIdentifierV] = gem_mex('eig', this.objectIdentifier);
+        % The matrix must be square
+        if size(this, 1) ~= size(this,2)
+            error('Matrix must be square in gem::eig');
+        end
+        
+        [newObjectIdentifierV newObjectIdentifierD] = gem_mex('eig', this.objectIdentifier);
 
         % ...  and create a new matlab object to keep this handle
-        D = gem('encapsulate', newObjectIdentifierD);
         V = gem('encapsulate', newObjectIdentifierV);
+        D = gem('encapsulate', newObjectIdentifierD);
         
         % We normalize the eigenvectors (this should not be done if the
         % option 'nobalance' is passed (once this option is implemented).

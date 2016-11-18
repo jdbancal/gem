@@ -39,6 +39,7 @@ The following function can be applied to gem/sgem objects directly.
 | ceil | ✔ | ✔ |  |
 | colon | ✔ | ✔ |  |
 | complex | ✔ | ✔ |  |
+| cond | ✔ | ✔ |  |
 | conj | ✔ | ✔ |  |
 | cos | ✔ | ✔ |  |
 | cot | ✔ | ✔ |  |
@@ -48,7 +49,8 @@ The following function can be applied to gem/sgem objects directly.
 | disp | ✔ | ✔ |  |
 | display | ✔ | ✔ |  |
 | double | ✔ | ✔ |  |
-| eig | ✔ |  |  |
+| eig | ✔ | ✗ |  |
+| eigs | ✔ | ✔ |  |
 | end | ✔ | ✔ |  |
 | eq | ✔ | ✔ |  |
 | exp | ✔ | ✔ |  |
@@ -65,11 +67,13 @@ The following function can be applied to gem/sgem objects directly.
 | isequal | ✔ | ✔ |  |
 | isequaln | ✔ | ✔ |  |
 | isfinite | ✔ | ✔ |  |
+| ishermitian | ✔ | ✔ |  |
 | isinf | ✔ | ✔ |  |
 | isnan | ✔ | ✔ |  |
 | isnumeric | ✔ | ✔ |  |
 | isreal | ✔ | ✔ |  |
 | issparse | ✔ | ✔ |  |
+| issymmetric | ✔ | ✔ |  |
 | kron | ✔ | ✔ | supports more than 2 inputs, as in kron({A,B,C}) |
 | ldivide | ✔ | ✔ |  |
 | le | ✔ | ✔ |  |
@@ -88,7 +92,9 @@ The following function can be applied to gem/sgem objects directly.
 | mrdivide | ✔ | ✔ |  |
 | mtimes | ✔ | ✔ |  |
 | ne | ✔ | ✔ |  |
-| norm | ✔ |  |  |
+| nnz | ✔ | ✔ |  |
+| nonzeros | ✔ | ✔ |  |
+| norm | ✔ | ✔ |  |
 | not | ✔ | ✔ |  |
 | numel | ✔ | ✔ |  |
 | or | ✔ | ✔ |  |
@@ -97,6 +103,7 @@ The following function can be applied to gem/sgem objects directly.
 | power | ✔ | ✔ |  |
 | precision | ✔ | ✔ |  |
 | prod | ✔ | ✔ |  |
+| rank | ✔ | ✔ |  |
 | rdivide | ✔ | ✔ |  |
 | real | ✔ | ✔ |  |
 | reshape | ✔ | ✔ |  |
@@ -110,6 +117,8 @@ The following function can be applied to gem/sgem objects directly.
 | subsasgn | ✔ | ✔ |  |
 | subsref | ✔ | ✔ |  |
 | sum | ✔ | ✔ |  |
+| svd | ✔ | ✗ |  |
+| svds | ✔ | ✔ |  |
 | tan | ✔ | ✔ |  |
 | times | ✔ | ✔ |  |
 | toStrings | ✔ | ✔ |  |

@@ -107,7 +107,11 @@ classdef sgem < handle
                         s = [];
                     end
                     [m n] = size(varargin{1});
-                    this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                    if isequal(class(s),'gem') % in principle this case should not occur
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                    else
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                    end
                 elseif ischar(varargin{1}) || iscell(varargin{1})
                     % We first create a dense gem object, then return its
                     % sparse version
@@ -179,9 +183,9 @@ classdef sgem < handle
                     % this data to the C++ library. Since we are creating a
                     % sparse object, we transfer the information in an
                     % optimized way
-                    i = varargin{1};
-                    j = varargin{2};
-                    s = varargin{3};
+                    i = double(varargin{1}); % We make sure i and j are double arrays
+                    j = double(varargin{2});
+                    s = full(varargin{3}); % We make sure s is not sparse
                     if size(i,1) < size(i,2) % We make sure all vectors are in column form
                         i = i.';
                     end
@@ -193,7 +197,7 @@ classdef sgem < handle
                     end
                     % We verify that s contains no zero element
                     sel = find(s);
-                    if ~isequal(sel,1:numel(s))
+                    if ~isequal(sel',1:numel(s))
                         i = i(sel);
                         j = j(sel);
                         s = s(sel);
@@ -205,7 +209,11 @@ classdef sgem < handle
                     end
                     m = max(i);
                     n = max(j);
-                    this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                    if isequal(class(s),'gem')
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                    else
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                    end
                 else
                     error('Wrong instruction upon creation of a new sgem object.');
                 end
@@ -246,9 +254,9 @@ classdef sgem < handle
                     % this data to the C++ library. Since we are creating a
                     % sparse object, we transfer the information in an
                     % optimized way
-                    i = varargin{1};
-                    j = varargin{2};
-                    s = varargin{3};
+                    i = double(varargin{1}); % We make sure i and j are double arrays
+                    j = double(varargin{2});
+                    s = full(varargin{3}); % We make sure s is not sparse
                     if size(i,1) < size(i,2) % We make sure all vectors are in column form
                         i = i.';
                     end
@@ -270,12 +278,16 @@ classdef sgem < handle
                         j = [];
                         s = [];
                     end
-                    m = varargin{4};
-                    n = varargin{5};
-                    if (min(i) < 1) || (max(i) > m) || (min(j) < 1) || (max(j) > n)
+                    m = double(varargin{4}); % We make sure m and n are doubles
+                    n = double(varargin{5});
+                    if (numel(s) > 0) && ((min(i) < 1) || (max(i) > m) || (min(j) < 1) || (max(j) > n))
                         error('Incompatible sizes in construction of an sgem object.');
                     end
-                    this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                    if isequal(class(s),'gem')
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                    else
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                    end
                 else
                     error('Wrong instruction upon creation of a new sgem object.');
                 end

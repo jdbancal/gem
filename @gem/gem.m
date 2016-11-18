@@ -68,6 +68,10 @@ classdef gem < handle
         %  - Create a C++ class instance for any of the mathematical
         %    constants above
         function this = gem(varargin)
+            % The following variable is used in some instances to tell the
+            % constructor to use the precision requested by the user rather
+            % than the one it thinks is better for the considered number
+            persistent forceDefaultPrecision;
             if nargin == 0
                 % Without further argument we construct a new empty instance
                 this.objectIdentifier = gem_mex('new');
@@ -147,7 +151,13 @@ classdef gem < handle
                     end
 
                     % Now we set the precision and construct the c++ object
-                    precision = max(this.getWorkingPrecision, nbDigitsFromString(varargin{1}));
+                    if isempty(forceDefaultPrecision) || (forceDefaultPrecision ~= 1)
+                        precision = max(this.getWorkingPrecision, nbDigitsFromString(varargin{1}));
+                    else
+                        % We force the precision to be the one requested by
+                        % the user
+                        precision = this.getWorkingPrecision;
+                    end
                     this.objectIdentifier = gem_mex('newFromMatlab', {varargin{1}}, precision);
                 elseif iscell(varargin{1})
                     % First, we check that the cell only contains a real
@@ -233,8 +243,15 @@ classdef gem < handle
                     % Assigned desired precision
                     this.setWorkingPrecision(varargin{2});
 
+                    % We tell the library that the precision must be
+                    % enforced
+                    forceDefaultPrecision = 1;
+                    
                     % Create object
                     this = gem(varargin{1});
+                    
+                    % We don't need precision enforcement anymore
+                    forceDefaultPrecision = 0;
                     
                     % We restore the default precision
                     this.setWorkingPrecision(previousPrecision);

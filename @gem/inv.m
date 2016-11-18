@@ -5,6 +5,13 @@ function result = inv(this)
         error('Matrix must be square in gem::inv');
     end
 
+    % We first check whether the rank of the matrix is maximal
+    if rank(this) < size(this,1)
+        warning('Matrix is singular to working precision');
+        result = Inf*gem(ones(size(this)));
+        return;
+    end
+    
     % We call the inv procedure. Since the function creates a
     % new object with the result, we keep the corresponding handle...
     newObjectIdentifier = gem_mex('inv', this.objectIdentifier);
