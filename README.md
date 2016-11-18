@@ -1,4 +1,4 @@
-![](logo1.png)
+| ![](logo1.png) | # GMP Eigen Matrix Library |
 
 Gmp Eigen Matrix Library
 ========================
