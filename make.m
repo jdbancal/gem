@@ -76,7 +76,7 @@ end
 
 
 % additional flags
-optimizationFlag = '';%'-DEIGEN_MPL2_ONLY';%'-O3';
+optimizationFlag = '-O3';
 
 
 %% Now we proceed to compilation

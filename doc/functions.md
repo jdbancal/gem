@@ -1,7 +1,7 @@
 Included functions
 ==================
 
-Here is a list of the functions currently implemented in the GEM library. The first table shows functions which can be called without reference to a gem/sgem object (this can be used to create a gem instance or to adjust some library parameters for instance).
+Here is a list of the functions currently implemented in the GEM library. The first table shows functions which can be called without reference to a gem/sgem object (to create a gem instance for instance, or to adjust some library parameters).
 
 
 | function | full support | sparse support | remarks |

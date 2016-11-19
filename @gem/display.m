@@ -27,8 +27,8 @@ function display(this, arg2, arg3)
 
     if ~isempty(name)
         disp(' ');
-%        disp([name, ' = ']);
-        disp([name, ' (id: ', num2str(this.objectIdentifier), ') = ']);
+        disp([name, ' = ']);
+%        disp([name, ' (id: ', num2str(this.objectIdentifier), ') = ']);
         disp(' ');
     end
     
