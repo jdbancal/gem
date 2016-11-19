@@ -88,7 +88,7 @@ The following function can be applied to gem/sgem objects directly.
 | min | ✔ | ✔ |  |
 | minus | ✔ | ✔ |  |
 | mldivide | ✔ | ✔ |  |
-| mpower | ✔ |  | supports two scalars or matrices with +/-1 exponent |
+| mpower | ✔ | ✔ | supports two scalars or matrices with +/-1 exponent |
 | mrdivide | ✔ | ✔ |  |
 | mtimes | ✔ | ✔ |  |
 | ne | ✔ | ✔ |  |
