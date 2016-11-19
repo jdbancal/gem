@@ -39,7 +39,7 @@ Check out [Getting started with gem](doc/GettingStarted.md) for more usage examp
 Installation
 ------------
 
-The library comes pre-compiled for ubuntu 64bits. It is therefore straightforward to use : after [downloading](...) the latest release, just add the gem folder into matlab's path (this can be done by running the command `path(path,'/path_to_the_gem_folder')`), and it is ready to use.
+The library comes pre-compiled for ubuntu 64bits. It is therefore straightforward to use : after [downloading](https://gitlab.com/jdbancal/gem/tags/v0.1.0) the latest release, just add the gem folder into matlab's path (this can be done by running the command `path(path,'/path_to_the_gem_folder')`), and it is ready to use.
 
 If you are using a different platform (such as 32 bits, mac os or windows), or in case you use an older version of linux/matlab than the one on which the provided binaries were compiled, you need to compile it. Below are instructions on how to do so.
 
@@ -48,7 +48,7 @@ If you are using a different platform (such as 32 bits, mac os or windows), or i
 
 Steps to compile the GEM library under *ubuntu* :
 
-1. Download the [latest library release]() in the folder of your choice
+1. Download the [latest library release](https://gitlab.com/jdbancal/gem/tags/v0.1.0) in the folder of your choice
 2. Download the latest version of Eigen on [eigen.tuxfamily.org](eigen.tuxfamily.org) and place it into gem's src folder.
 3. Download the latest version of Spectra on [http://yixuan.cos.name/spectra/download.html](http://yixuan.cos.name/spectra/download.html) and place it into gem's src folder.
 4. Install the gmp and mpfrc++ libraries with the command
