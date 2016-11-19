@@ -44,7 +44,6 @@ function result = mtimes(this, varargin)
             result = gem('encapsulate', newObjectIdentifier);
         end
     else
-        % A priori we should not arrive here... but just in case
         if isequal(class(varargin{1}), 'gem')
             newObjectIdentifier = sgem_mex('mtimes_sf', objectIdentifier(this), objectIdentifier(varargin{1}));
             result = gem('encapsulate', newObjectIdentifier);

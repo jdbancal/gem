@@ -3468,6 +3468,38 @@ IndexType GmpEigenMatrix::rank() const
    return result;
 }
 
+/* Linear system solving c = a\b*/
+GmpEigenMatrix GmpEigenMatrix::mldivide(const GmpEigenMatrix& b) const
+{
+    GmpEigenMatrix result;
+
+    if ((isComplex) || (b.isComplex)) {
+        result = complexIsometry().mldivide(b.complexIsometry()).complexIsometryInverse();
+    } else {
+        result.isComplex = false;
+        result.matrixR = matrixR.colPivHouseholderQr().solve(b.matrixR);
+        result.matrixI.resize(0,0);
+    }
+
+    return result;
+}
+
+/* Linear system solving c = a\b*/
+GmpEigenMatrix& GmpEigenMatrix::mldivide_new(const GmpEigenMatrix& b) const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix));
+
+    if ((isComplex) || (b.isComplex)) {
+        result = complexIsometry().mldivide(b.complexIsometry()).complexIsometryInverse();
+    } else {
+        result.isComplex = false;
+        result.matrixR = matrixR.colPivHouseholderQr().solve(b.matrixR);
+        result.matrixI.resize(0,0);
+    }
+
+    return result;
+}
+
 /* Matrix inverse b = inv(a) */
 GmpEigenMatrix GmpEigenMatrix::inv() const
 {

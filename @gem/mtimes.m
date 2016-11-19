@@ -48,7 +48,6 @@ function result = mtimes(this, varargin)
         if isequal(class(varargin{1}), 'gem')
             newObjectIdentifier = sgem_mex('mtimes_sf', objectIdentifier(this), objectIdentifier(varargin{1}));
             result = gem('encapsulate', newObjectIdentifier);
-            result = sgem(result);
         else
             newObjectIdentifier = sgem_mex('mtimes', objectIdentifier(this), objectIdentifier(varargin{1}));
             result = sgem('encapsulate', newObjectIdentifier);

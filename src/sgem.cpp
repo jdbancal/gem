@@ -4645,6 +4645,112 @@ IndexType SparseGmpEigenMatrix::rank() const
     return result;
 }
 
+/* Linear system solving c = a\b, with dense b*/
+GmpEigenMatrix SparseGmpEigenMatrix::mldivide_sf(const GmpEigenMatrix& b) const
+{
+    GmpEigenMatrix result;
+
+    if ((isComplex) || (b.isComplex)) {
+        result = complexIsometry().mldivide_sf(b.complexIsometry()).complexIsometryInverse();
+    } else {
+        SparseQR< SparseMatrix<mpreal, ColMajor>, COLAMDOrdering<int> > solver(matrixR);
+
+        result.isComplex = false;
+        result.matrixR = solver.solve(b.matrixR);
+        result.matrixI.resize(0,0);
+    }
+
+    return result;
+}
+
+/* Linear system solving c = a\b, with dense b*/
+GmpEigenMatrix& SparseGmpEigenMatrix::mldivide_sf_new(const GmpEigenMatrix& b) const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix));
+
+    if ((isComplex) || (b.isComplex)) {
+        result = complexIsometry().mldivide_sf(b.complexIsometry()).complexIsometryInverse();
+    } else {
+        SparseQR< SparseMatrix<mpreal, ColMajor>, COLAMDOrdering<int> > solver(matrixR);
+
+        result.isComplex = false;
+        result.matrixR = solver.solve(b.matrixR);
+        result.matrixI.resize(0,0);
+    }
+
+    return result;
+}
+
+/* Linear system solving c = a\b, with sparse b*/
+SparseGmpEigenMatrix SparseGmpEigenMatrix::mldivide(const SparseGmpEigenMatrix& b) const
+{
+    SparseGmpEigenMatrix result;
+
+    if ((isComplex) || (b.isComplex)) {
+        result = complexIsometry().mldivide(b.complexIsometry()).complexIsometryInverse();
+    } else {
+        SparseQR< SparseMatrix<mpreal, ColMajor>, COLAMDOrdering<int> > solver;
+
+        solver.analyzePattern(matrixR);
+        solver.factorize(matrixR);
+
+        result.isComplex = false;
+        result.matrixI.resize(0,0);
+
+        // We solve for each column iteratively
+        result.matrixR.resize(b.matrixR.rows(), b.matrixR.cols());
+        result.matrixR.reserve(b.matrixR.nonZeros()*2);
+        for (IndexType i(0); i < b.matrixR.cols(); ++i) {
+            Matrix<mpreal, Dynamic, 1> colb(b.matrixR.col(i));
+            SparseMatrix<mpreal> solb(solver.solve(colb).sparseView(mpreal(0),mpreal(1)));
+
+            SparseMatrix<mpreal>::InnerIterator itR(solb,0);
+            while (itR) {
+                result.matrixR.insert(itR.row(), i) = itR.value();
+                ++itR;
+            }
+        }
+        result.matrixR.makeCompressed();
+    }
+
+    return result;
+}
+
+/* Linear system solving c = a\b, with sparse b*/
+SparseGmpEigenMatrix& SparseGmpEigenMatrix::mldivide_new(const SparseGmpEigenMatrix& b) const
+{
+    SparseGmpEigenMatrix& result(*(new SparseGmpEigenMatrix));
+
+    if ((isComplex) || (b.isComplex)) {
+        result = complexIsometry().mldivide(b.complexIsometry()).complexIsometryInverse();
+    } else {
+        SparseQR< SparseMatrix<mpreal, ColMajor>, COLAMDOrdering<int> > solver;
+
+        solver.analyzePattern(matrixR);
+        solver.factorize(matrixR);
+
+        result.isComplex = false;
+        result.matrixI.resize(0,0);
+
+        // We solve for each column iteratively
+        result.matrixR.resize(b.matrixR.rows(), b.matrixR.cols());
+        result.matrixR.reserve(b.matrixR.nonZeros()*2);
+        for (IndexType i(0); i < b.matrixR.cols(); ++i) {
+            Matrix<mpreal, Dynamic, 1> colb(b.matrixR.col(i));
+            SparseMatrix<mpreal> solb(solver.solve(colb).sparseView(mpreal(0),mpreal(1)));
+
+            SparseMatrix<mpreal>::InnerIterator itR(solb,0);
+            while (itR) {
+                result.matrixR.insert(itR.row(), i) = itR.value();
+                ++itR;
+            }
+        }
+        result.matrixR.makeCompressed();
+    }
+
+    return result;
+}
+
 /* Matrix inverse b = inv(a) */
 SparseGmpEigenMatrix SparseGmpEigenMatrix::inv() const
 {

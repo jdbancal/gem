@@ -36,21 +36,6 @@ function [U S V] = svds(this, varargin)
         error('gem::svds cannot compute less than 1 singular value');
     end
     
-    if nbSingularvalues > size(this,1) - 2 + ishermitian(this)
-        % This time, matlab's svds function doesn't complain if the
-        % dimension is smaller than the number of requested singular
-        % values, so we also don't...
-
-        % We use svd to compute all singular values
-        warning('Too many singular values for svds, using svd instead.');
-        if nargout >= 2
-            [U S D] = svd(this,'econ');
-        else
-            U = svd(this);
-        end
-        return;
-    end
-    
     % We check if there is a second parameter
     if (length(varargin) > 1) && (~ischar(varargin{2}))
         error('The third argument of gem::svds must be a text');
@@ -69,6 +54,56 @@ function [U S V] = svds(this, varargin)
             otherwise
                 error('Third argument of gem::svds not recognized');
         end
+    end
+    
+    if nbSingularvalues > size(this,1) - 2 + ishermitian(this)
+        % This time, matlab's svds function doesn't complain if the
+        % dimension is smaller than the number of requested singular
+        % values, so we also don't...
+
+        % We cannot extract more than this number of singular values
+        if nbSingularvalues > size(this,1)
+            nbSingularvalues = size(this,1);
+        end
+        
+        % We use svd to compute all singular values
+%        warning('Too many singular values for svds, using svd instead.');
+        if nargout >= 2
+            [U S D] = svd(this,'econ');
+            if isequal(type, 'sm')
+                subU.type='()';
+                subU.subs={[1:size(U,1)] [size(U,2):-1:size(U,2)-nbSingularvalues+1]};
+                U = subsref(U, subU);
+                subS.type='()';
+                subS.subs={[size(S,1):-1:size(S,1)-nbSingularvalues+1] [size(S,2):-1:size(S,2)-nbSingularvalues+1]};
+                S = subsref(S, subS);
+                subV.type='()';
+                subV.subs={[1:size(V,1)] [size(V,2):-1:size(V,2)-nbSingularvalues+1]};
+                V = subsref(V, subV);
+            elseif nbSingularvalues < size(S,1)
+                subU.type='()';
+                subU.subs={[1:size(U,1)] [1:nbSingularvalues]};
+                U = subsref(U, subU);
+                subS.type='()';
+                subS.subs={[1:nbSingularvalues] [1:nbSingularvalues]};
+                S = subsref(S, subS);
+                subV.type='()';
+                subV.subs={[1:size(V,1)] [1:nbSingularvalues]};
+                V = subsref(V, subV);
+            end
+        else
+            U = svd(this);
+            if isequal(type, 'sm')
+                subU.type='()';
+                subU.subs={[size(U,1):-1:size(U,1)-nbSingularvalues+1] [size(U,2):-1:size(U,2)-nbSingularvalues+1]};
+                U = subsref(U, subU);
+            elseif nbSingularvalues < size(U,1)
+                subU.type='()';
+                subU.subs={[1:nbSingularvalues] [1:nbSingularvalues]};
+                U = subsref(U, subU);
+            end
+        end
+        return;
     end
     
     % We perform the computation

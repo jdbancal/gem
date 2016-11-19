@@ -45,7 +45,7 @@ function [V D] = eigs(this, varargin)
     if nbEigenvalues > size(this,1) - 2 + ishermitian(this)
         if nbEigenvalues <= size(this,1)
             % We use eig to compute all eigenvalues
-            warning('Too many eigenvalues for eigs, using eig instead.');
+%            warning('Too many eigenvalues for eigs, using eig instead.');
             if nargout == 2
                 [V D] = eig(this);
             else

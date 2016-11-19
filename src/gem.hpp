@@ -319,6 +319,8 @@ public:
        --------------------------------------- */
 
     IndexType rank() const;
+    GmpEigenMatrix mldivide(const GmpEigenMatrix& b) const;
+    GmpEigenMatrix& mldivide_new(const GmpEigenMatrix& b) const;
     GmpEigenMatrix inv() const;
     GmpEigenMatrix& inv_new() const;
     GmpEigenMatrix eig(GmpEigenMatrix& V) const;

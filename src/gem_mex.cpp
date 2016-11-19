@@ -909,6 +909,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+    /* Call the class method "mldivide" */
+    if (!strcmp("mldivide", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 3))
+            mexErrMsgTxt("mldivide: Unexpected arguments.");
+
+        // Get the second argument
+        GmpEigenMatrix& b = recoverObjFromMatlabId<GmpEigenMatrix>(prhs[2]);
+
+        // Compute the matric inverse
+        GmpEigenMatrix& result(GmpEigenMatrix_instance.mldivide_new(b));
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+
+        return;
+    }
+
+
     /* Call the class method "inv" */
     if (!strcmp("inv", cmd)) {
         // Check parameters

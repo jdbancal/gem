@@ -792,6 +792,44 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+    /* Call the class method "mldivide_sf" */
+    if (!strcmp("mldivide_sf", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 3))
+            mexErrMsgTxt("mldivide_sf: Unexpected arguments.");
+
+        // Get the second argument
+        GmpEigenMatrix& b = recoverObjFromMatlabId<GmpEigenMatrix>(prhs[2]);
+
+        // Solve the linear system
+        GmpEigenMatrix& result(SparseGmpEigenMatrix_instance.mldivide_sf_new(b));
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+
+        return;
+    }
+
+
+    /* Call the class method "mldivide" */
+    if (!strcmp("mldivide", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 3))
+            mexErrMsgTxt("mldivide: Unexpected arguments.");
+
+        // Get the second argument
+        SparseGmpEigenMatrix& b = recoverObjFromMatlabId<SparseGmpEigenMatrix>(prhs[2]);
+
+        // Solve the linear system
+        SparseGmpEigenMatrix& result(SparseGmpEigenMatrix_instance.mldivide_new(b));
+
+        // We return the reference to these objects to matlab
+        plhs[0] = createMatlabIdFromObj<SparseGmpEigenMatrix>(result);
+
+        return;
+    }
+
+
     /* Call the class method "inv" */
     if (!strcmp("inv", cmd)) {
         // Check parameters

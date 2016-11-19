@@ -279,6 +279,10 @@ public:
        --------------------------------------- */
 
     IndexType rank() const;
+    GmpEigenMatrix mldivide_sf(const GmpEigenMatrix& b) const;
+    GmpEigenMatrix& mldivide_sf_new(const GmpEigenMatrix& b) const;
+    SparseGmpEigenMatrix mldivide(const SparseGmpEigenMatrix& b) const;
+    SparseGmpEigenMatrix& mldivide_new(const SparseGmpEigenMatrix& b) const;
     SparseGmpEigenMatrix inv() const;
     SparseGmpEigenMatrix& inv_new() const;
     GmpEigenMatrix eigs(const long int& nbEigenvalues, GmpEigenMatrix& V, const long int& type, const GmpEigenMatrix& sigma) const;

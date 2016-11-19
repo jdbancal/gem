@@ -35,12 +35,7 @@ function [U S V] = svds(this, varargin)
     if nbSingularvalues < 1
         error('sgem::svds cannot compute less than 1 singular value');
     end
-    
-    if nbSingularvalues > size(this,1) - 2 + ishermitian(this)
-        % We use svd to compute all singular values
-        error('Too many singular values for sgem::svds.');
-    end
-    
+        
     % We check if there is a second parameter
     if (length(varargin) > 1) && (~ischar(varargin{2}))
         error('The third argument of sgem::svds must be a text');
@@ -58,6 +53,60 @@ function [U S V] = svds(this, varargin)
                 type = 'sm';
             otherwise
                 error('Third argument of sgem::svds not recognized');
+        end
+    end
+    
+    if nbSingularvalues > size(this,1) - 2 + ishermitian(this)
+        % We cannot extract more than this number of singular values
+        if nbSingularvalues > size(this,1)
+            nbSingularvalues = size(this,1);
+        end
+        
+        % We use svd on full matrices to compute all singular values if the
+        % size is small
+        if size(this,1) <= 2
+%            warning('Too many singular values for svds, using svd on the full matrix instead.');
+            this = full(this);
+            if nargout >= 2
+                [U S D] = svd(this,'econ');
+                if isequal(type, 'sm')
+                    subU.type='()';
+                    subU.subs={[1:size(U,1)] [size(U,2):-1:size(U,2)-nbSingularvalues+1]};
+                    U = subsref(U, subU);
+                    subS.type='()';
+                    subS.subs={[size(S,1):-1:size(S,1)-nbSingularvalues+1] [size(S,2):-1:size(S,2)-nbSingularvalues+1]};
+                    S = subsref(S, subS);
+                    subV.type='()';
+                    subV.subs={[1:size(V,1)] [size(V,2):-1:size(V,2)-nbSingularvalues+1]};
+                    V = subsref(V, subV);
+                elseif nbSingularvalues < size(S,1)
+                    subU.type='()';
+                    subU.subs={[1:size(U,1)] [1:nbSingularvalues]};
+                    U = subsref(U, subU);
+                    subS.type='()';
+                    subS.subs={[1:nbSingularvalues] [1:nbSingularvalues]};
+                    S = subsref(S, subS);
+                    subV.type='()';
+                    subV.subs={[1:size(V,1)] [1:nbSingularvalues]};
+                    V = subsref(V, subV);
+                end
+            else
+                U = svd(this);
+                if isequal(type, 'sm')
+                    subU.type='()';
+                    subU.subs={[size(U,1):-1:size(U,1)-nbSingularvalues+1] [size(U,2):-1:size(U,2)-nbSingularvalues+1]};
+                    U = subsref(U, subU);
+                elseif nbSingularvalues < size(U,1)
+                    subU.type='()';
+                    subU.subs={[1:nbSingularvalues] [1:nbSingularvalues]};
+                    U = subsref(U, subU);
+                end
+            end
+
+            
+            return;
+        else
+            error('Too many singular values for sgem::svds.');
         end
     end
     
