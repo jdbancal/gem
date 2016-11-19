@@ -33,7 +33,7 @@ Once a high precision matrix has been created, it can be manipulated by applying
  - `sgem(speye(3))` creates a high precision sparse representation of the 3x3 identity matrix
  - `a=1./gem([1:7]); save('filename','a'); load('filename');` saves and loads a gem object
 
-Check out [Getting started with gem](doc/GettingStarted.md) for more usage examples.
+Check out [Getting started with gem](doc/gettingStarted.md) for more usage examples.
 
 
 Installation

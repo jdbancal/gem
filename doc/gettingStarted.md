@@ -1,4 +1,4 @@
-Getting Started with the GEM Library
+Getting started with the GEM Library
 ====================================
 
 Here is a short introduction to the usage of GEM library in matlab. This introduction assumes that the gem folder is in matlab's path and that it is working (this can be checked by typing e.g. `gem('pi')` into matlab; if this command yields an error, check that the gem library is compiled for your system and that its folder is in matlab's path).
@@ -6,8 +6,12 @@ Here is a short introduction to the usage of GEM library in matlab. This introdu
 ## Precision
 
 The GEM library can work with high precision numbers. This precision of a number is defined by the number of digits that are used to describe numbers (in basis 10). By default, the library takes into account 50 digits. This means that it can distinguish between numbers that differ at the 50th decimal place:
- - `(pi/10) - (pi/10 - 1e-17)` yields 0 but
-   `(gem('pi')/10) - (gem('pi')/10 - 1e-50)` is ~ 1e-50
+ - `(pi/10) - (pi/10 - 1e-17)` yields
+
+        0
+    but `(gem('pi')/10) - (gem('pi')/10 - 1e-50)` is
+
+        ~1e-50
 
 The precision at which the GEM library works can be adjusted throught the function `gemWorkingPrecision`. Alternatively, it can be passed as an parameter when a gem object is created:
  - `gem(3.141592654,3)` yields just 
