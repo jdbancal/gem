@@ -49,7 +49,7 @@ If you are using a different platform (such as 32 bits, mac os or windows), or i
 Steps to compile the GEM library under *ubuntu* :
 
 1. Download the [latest library release](https://gitlab.com/jdbancal/gem/tags/v0.1.0) in the folder of your choice
-2. Download the latest version of Eigen on [eigen.tuxfamily.org](eigen.tuxfamily.org) and place it into gem's src folder.
+2. Download the Eigen version *3.2* on [eigen.tuxfamily.org](eigen.tuxfamily.org) and place it into gem's src folder.
 3. Download the latest version of Spectra on [http://yixuan.cos.name/spectra/download.html](http://yixuan.cos.name/spectra/download.html) and place it into gem's src folder.
 4. Install the gmp and mpfrc++ libraries with the command
 `sudo apt-get install libmpfrc++-dev libgmp-dev`

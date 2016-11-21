@@ -1,4 +1,4 @@
-src/eigen
+src/eigen*
 *.o
 *.mex*
 .syncthing*
@@ -6,5 +6,5 @@ src/eigen
 src/gmp-*
 src/mpfr-*
 src/mpfrc++-*
-src/spectra
+src/spectra*
 /src/staticLibraries/
