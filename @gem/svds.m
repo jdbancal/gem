@@ -72,13 +72,13 @@ function [U S V] = svds(this, varargin)
             [U S D] = svd(this,'econ');
             if isequal(type, 'sm')
                 subU.type='()';
-                subU.subs={[1:size(U,1)] [size(U,2):-1:size(U,2)-nbSingularvalues+1]};
+                subU.subs={[1:size(U,1)] [size(U,2)-nbSingularvalues+1:size(U,2)]};
                 U = subsref(U, subU);
                 subS.type='()';
-                subS.subs={[size(S,1):-1:size(S,1)-nbSingularvalues+1] [size(S,2):-1:size(S,2)-nbSingularvalues+1]};
+                subS.subs={[size(S,1)-nbSingularvalues+1:size(S,1)] [size(S,2)-nbSingularvalues+1:size(S,2)]};
                 S = subsref(S, subS);
                 subV.type='()';
-                subV.subs={[1:size(V,1)] [size(V,2):-1:size(V,2)-nbSingularvalues+1]};
+                subV.subs={[1:size(V,1)] [size(V,2)-nbSingularvalues+1:size(V,2)]};
                 V = subsref(V, subV);
             elseif nbSingularvalues < size(S,1)
                 subU.type='()';
@@ -95,11 +95,11 @@ function [U S V] = svds(this, varargin)
             U = svd(this);
             if isequal(type, 'sm')
                 subU.type='()';
-                subU.subs={[size(U,1):-1:size(U,1)-nbSingularvalues+1] [size(U,2):-1:size(U,2)-nbSingularvalues+1]};
+                subU.subs={[size(U,1)-nbSingularvalues+1:size(U,1)] [1]};
                 U = subsref(U, subU);
             elseif nbSingularvalues < size(U,1)
                 subU.type='()';
-                subU.subs={[1:nbSingularvalues] [1:nbSingularvalues]};
+                subU.subs={[1:nbSingularvalues] [1]};
                 U = subsref(U, subU);
             end
         end

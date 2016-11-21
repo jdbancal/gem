@@ -42,20 +42,6 @@ function [V D] = eigs(this, varargin)
         error('gem::eigs cannot compute less than 1 eigenvalue');
     end
     
-    if nbEigenvalues > size(this,1) - 2 + ishermitian(this)
-        if nbEigenvalues <= size(this,1)
-            % We use eig to compute all eigenvalues
-%            warning('Too many eigenvalues for eigs, using eig instead.');
-            if nargout == 2
-                [V D] = eig(this);
-            else
-                V = eig(this);
-            end
-            return;
-        end
-        error('Too many eigenvalues asked for in gem::eigs');
-    end
-    
     % We check if there is a second parameter
     type = 1;
     sigma = 0;
@@ -94,6 +80,45 @@ function [V D] = eigs(this, varargin)
         error('Too many arguments in gem::eigs');
     end
 
+    if nbEigenvalues > size(this,1) - 2 + ishermitian(this)
+        if nbEigenvalues > size(this,1)
+            error('Too many eigenvalues asked for in gem::eigs');
+        end
+                
+        % We use eig to compute all eigenvalues
+%        warning('Too many eigenvalues for eigs, using eig instead.');
+        if nargout == 2
+            [V D] = eig(this);
+            if isequal(type, 2)
+                subV.type='()';
+                subV.subs={[1:size(V,1)] [size(V,2)-nbEigenvalues+1:size(V,2)]};
+                V = subsref(V, subV);
+                subD.type='()';
+                subD.subs={[size(D,1)-nbEigenvalues+1:size(D,1)] [size(D,2)-nbEigenvalues+1:size(D,2)]};
+                D = subsref(D, subD);
+            elseif nbEigenvalues < size(D,1)
+                subV.type='()';
+                subV.subs={[1:size(V,1)] [1:nbEigenvalues]};
+                V = subsref(V, subV);
+                subD.type='()';
+                subD.subs={[1:nbEigenvalues] [1:nbEigenvalues]};
+                D = subsref(D, subD);
+            end
+        else
+            V = eig(this);
+            if isequal(type, 2)
+                subV.type='()';
+                subV.subs={[size(V,1)-nbEigenvalues+1:size(V,1)] [1]};
+                V = subsref(V, subV);
+            elseif nbEigenvalues < size(V,1)
+                subV.type='()';
+                subV.subs={[1:nbEigenvalues] [1]};
+                V = subsref(V, subV);
+            end
+        end
+        return;
+    end
+    
     % We check how many outputs are
     if nargout <= 2
         % The matrix must be square
