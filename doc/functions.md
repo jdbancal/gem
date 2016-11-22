@@ -1,14 +1,14 @@
 Included functions
 ==================
 
-Here is a list of the functions currently implemented in the GEM library. The first table shows functions which can be called without reference to a gem/sgem object (to create a gem instance for instance, or to adjust some library parameters).
+Here is a list of the functions currently implemented in the GEM library. The first table shows functions which can be called without reference to a gem/sgem object (to create a high precision matrix for instance, or to adjust some library parameters).
 
 
 | function | full support | sparse support | remarks |
 |----------|---|---|---|
 | gem | ✔ | ✔ | gem object constructor |
 | sgem | ✔ | ✔ | sparse gem object constructor |
-| gemify | ✔ | ✔ | converts a matrix to gem or sgem object, preserving is sparsity |
+| gemify | ✔ | ✔ | converts a matrix to gem or sgem object, preserving its sparsity |
 | gemRand | ✔ | ✗ | generates high precision random numbers |
 | gemRng | ✔ | ✗ | gemRand random seed |
 | gemWorkingPrecision | ✔ | ✔ | sets the working precision of the library |
@@ -74,7 +74,7 @@ The following function can be applied to gem/sgem objects directly.
 | isreal | ✔ | ✔ |  |
 | issparse | ✔ | ✔ |  |
 | issymmetric | ✔ | ✔ |  |
-| kron | ✔ | ✔ | supports more than 2 inputs, as in kron({A,B,C}) |
+| kron | ✔ | ✔ | supports more than 2 inputs, as in kron(A,B,C) or kron({A,B,C}) |
 | ldivide | ✔ | ✔ |  |
 | le | ✔ | ✔ |  |
 | length | ✔ | ✔ |  |
@@ -88,7 +88,7 @@ The following function can be applied to gem/sgem objects directly.
 | min | ✔ | ✔ |  |
 | minus | ✔ | ✔ |  |
 | mldivide | ✔ | ✔ |  |
-| mpower | ✔ | ✔ | supports two scalars or matrices with +/-1 exponent |
+| mpower | ✔ | ✔ | supports two scalars, or matrices with +/-1 exponent |
 | mrdivide | ✔ | ✔ |  |
 | mtimes | ✔ | ✔ |  |
 | ne | ✔ | ✔ |  |

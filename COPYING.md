@@ -1,6 +1,6 @@
 The source code of the Gmp Eigen Matrix Library (GEM Library, including C++ files and matlab files) is released under the Mozilla Public License 2 (MPL2) license. This license is included in [this file](COPYING_MPL2.md).
 
-Due to some dependencies being released under the GPL library (see below), binaries are released under the GNU's Not Unix General Public License v3 (GPL3). A copy of this license can be found [here](COPYING_GPL3.md). Note that the MPL2 and GPL3 license are [compatible](https://www.gnu.org/licenses/license-list.html) licences.
+Due to some dependencies being released under the GPL library (see below), binaries are released under the GNU's Not Unix General Public License v3 (GPL3). A copy of this license can be found [here](COPYING_GPL3.md). Note that the MPL2 and GPL3 license are [compatible](https://www.gnu.org/licenses/license-list.html).
 
 Here is a summary of licenses on which this work relies:
 

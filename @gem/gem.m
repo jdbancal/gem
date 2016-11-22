@@ -11,28 +11,24 @@
 % or by using the global function gemWorkingPrecision. The default value
 % is 50 digits.
 
-% When specified as strings, the precision is always set to be at least
+% For numbers specified as strings, the precision is always set to be at least
 % large enough to translate all significant digits in the provided string.
 
-% The precision of displayed number can be adjusted by changing the
-% displayPrecision argument. The width is the total number of characters used
-% to display a number (including minus signs, dot and possibly exponent).
+% The precision of displayed number can be adjusted through the
+% gemDisplayPrecision function.
 
-% Note that currently, the result of some operation may contain more digits
-% than can be truly garanteed... (this is the standard behavior of mpfrc++)
+% Note that the result of some operation may contain more digits than can
+% be truly garanteed... (this is the standard behavior of mpfrc++)
 % Note also that even though a number may have a large precision, if it
 % finishes with a string of zeros, these won't be printed (again this is
 % the standard behavior of mpfrc++)
 
-% WARNING : At the moment, gem is a handle-type object. This garantees that
-%   matlab manages its memory cleanly (calling the destructor whenever
-%   needed). However, this means that "y=x" performes a soft copy :
-%   modifying x afterwards _also_ modifies y. Therefore, any procedure that
-%   modifies a gem object should always work on a copy! (or at least
-%   produce the result in a new object)
-
-% TODO : add the precision setting upon construction, and pad input with
-% zero digits if needed... (it only happens automatically for integers...)
+% Note: A gem object is a handle-type object. This garantees that
+% matlab manages its memory cleanly (calling the destructor whenever
+% needed). This also means that "y=x" performes a soft copy of the object:
+% modifying x afterwards _also_ modifies y. For this reason, any procedure
+% that modifies a gem object should always work on a copy! (or at least
+% produce the result in a new object)
 
 % Usage : Best usage is to always start by setting the working precision to
 %   whatever precision we want the library to work. This default precision
