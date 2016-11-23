@@ -2,6 +2,7 @@
 - Updated documentation
 - Fixed issues when computing few eigenvalues of a small matrix
 - Compiled with latest Spectra code
+- Added changelog file
 
 ## [0.1.0] - 2016-11-19
 - First release
