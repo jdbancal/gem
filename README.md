@@ -20,6 +20,7 @@ Usage examples
 --------------
 Here are a few simple examples of GEM library usage.
 
+ - `toStrings(gem('pi',100))` prints the 100 first decimals of pi 
  - `gem(2)`, `gem(1.23)`, `gem([1 2 3])` create 50-digits precision representations of the numbers 2 and 1.23, and of the vector [1 2 3]. When translating a number from double form, exactly 15 digits are taken into account.
  - `gem('1.23456789123456789+2i')` creates a 50-digits representation of the number provided in text form (all digits within the working precision are taken into account for numbers specified in char format)
  - `gemWorkingPrecision(100)` changes the working precision to 100 digits
