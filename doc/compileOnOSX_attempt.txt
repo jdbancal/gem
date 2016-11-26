@@ -1,0 +1,14 @@
+Here's how far we could go in compiling the library on OSX (compilation works, but so far not linking) :
+ (- Installed Xcode; may not be needed)
+ - Installed homebrew as explained in … ( /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" )
+ - typed `brew install gcc —without-multilib`
+ - in /usr/local/bin, added reference to gcc and g++ with `ln -s gcc-6 gcc` and `ln -s g++-6 g++`
+- launch matlab from the terminal, so that /usr/local/bin is the first folder looked for when running unix(‘which g++’) in matlab
+- type `make` from the gem folder
+
+
+This compiles all the .o files, but the linking process fails.
+
+
+Additional hints :
+- Follow the instructions in the following link to be able to run `mex -setup` : http://www.mathworks.com/matlabcentral/answers/246507-why-can-t-mex-find-a-supported-compiler-in-matlab-r2015b-after-i-upgraded-to-xcode-7-0#comment_392485
