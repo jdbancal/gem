@@ -3,7 +3,7 @@ How to contribute
 
 Here is a detailed overview of the steps to be followed by anyone who would like to contribute to the GEM library.
 
-Improvements to the code should be performed on a fork of the gitlab repository (see [here](https://docs.gitlab.com/ce/workflow/forking_workflow.html) for information on git related collaborative programming). In case you are wondering what kind of features could be still worth implementing in the library, a few ideas are listed at the [bottom](#Desired Features) of this file.
+Improvements to the code should be performed on a fork of the github repository (see [here](https://docs.gitlab.com/ce/workflow/forking_workflow.html) for information on git related collaborative programming). In case you are wondering what kind of features could be still worth implementing in the library, a few ideas are listed at the [bottom](#Desired Features) of this file.
 
 Assuming you want to implement a particular function and already forked a version of the source code to work on, here is how you can proceed:
  - First of all, identify some general feature of the function you are considering:
@@ -17,7 +17,7 @@ Assuming you want to implement a particular function and already forked a versio
  - It should now be straightforward to implement your function for sparse matrices as well by copying and modifying the files/functions in the `@sgem` folder, `src/sgem_mex.cpp` file, `src/sgem.hpp` file, `src/sgem.cpp` file. If your function never preserves sparsity, no modification of the src folder is required at this stage, though: you only need to perform modification of the matlab code in the `@sgem` folder.
  - Compile and check your code.
  - Make sure that your code has a minimal amount of help information and that it contains a few helpful comments that explain what is happening.
- - When all is fine, send a pull request on gitlab to add your new feature to the library!
+ - When all is fine, send a pull request on github to add your new feature to the library!
 
 
 Design considerations
@@ -51,6 +51,6 @@ Here is a partial list of features/functions that would be nice to add to the li
  - Implement the matrix exponential function `expm`
  - Parallelize the for loops appearing in simple functions such as `sin`.
  - `triu`, `tril`
- - For more ways to contribute, check if there is anything more [here](http://gitlab.com/jdbancal/gem/issues)
+ - For more ways to contribute, check if there is anything more [here](http://github.com/jdbancal/gem/issues)
 
 

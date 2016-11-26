@@ -39,7 +39,7 @@ Check out [getting started with the GEM library](doc/gettingStarted.md) for more
 Installation
 ------------
 
-The library comes pre-compiled for ubuntu 64bits. It is therefore straightforward to use : after [downloading](https://gitlab.com/jdbancal/gem/tags/v0.1.1) the latest release, just add the gem folder into matlab's path (this can be done by running the command `path(path,'/path_to_the_gem_folder')`), and it is ready to use.
+The library comes pre-compiled for ubuntu 64bits. It is therefore straightforward to use : after [downloading](https://github.com/jdbancal/gem/releases) the latest release, just add the gem folder into matlab's path (this can be done by running the command `path(path,'/path_to_the_gem_folder')`), and it is ready to use.
 
 If you are using a different platform (such as 32 bits, mac os or windows), or in case you use an older version of linux/matlab than the one on which the provided binaries were compiled, you need to compile it. Below are instructions on how to do so.
 
@@ -48,7 +48,7 @@ If you are using a different platform (such as 32 bits, mac os or windows), or i
 
 Steps to compile the GEM library under *ubuntu* :
 
-1. Download the [latest library release](https://gitlab.com/jdbancal/gem/tags/v0.1.1) in the folder of your choice
+1. Download the [latest library release](https://github.com/jdbancal/gem/releases) in the folder of your choice
 2. Download the Eigen source code **version 3.2** (version 3.3 is *not yet supported*) on [eigen.tuxfamily.org](eigen.tuxfamily.org) and place it into gem's src folder.
 3. Download the latest version of Spectra on [http://yixuan.cos.name/spectra/download.html](http://yixuan.cos.name/spectra/download.html) and place it into gem's src folder.
 4. Install the gmp and mpfrc++ libraries with the command
@@ -57,11 +57,11 @@ Steps to compile the GEM library under *ubuntu* :
 6. Type `make`. This will launch the compilation of the library. If everything goes fine, the program will conclude with 'Compilation successful'. Otherwise, a message should inform you about what is missing.
 7. Add the gem folder to your matlab path. You can now perform your favorite computation in high precision !-)
 
-Compilation on *other platforms* : unfortunately, I don't have other operating systems on which to run tests. Since the compilation commands are relatively simple (not much configuration involved), it should be rather straightforward to compile the GEM library on MacOSX or Windows. The best way to start is to make sure that a running version of [gcc](https://gcc.gnu.org/) is installed on your machine. Once this is done, you can try running the `make` program from within matlab and follow the instructions. If you manage to complete such compilation, please make sure to update this file on [gitlab](https://gitlab.com/jdbancal/gem) to describe your experience. Other people will thank you!
+Compilation on *other platforms* : unfortunately, I don't have other operating systems on which to run tests. Since the compilation commands are relatively simple (not much configuration involved), it should be rather straightforward to compile the GEM library on MacOSX or Windows. The best way to start is to make sure that a running version of [gcc](https://gcc.gnu.org/) is installed on your machine. Once this is done, you can try running the `make` program from within matlab and follow the instructions. If you manage to complete such compilation, please make sure to update this file on [github](https://github.com/jdbancal/gem) to describe your experience. Other people will thank you!
 
 
 License
 -------
 
-The GEM library is free and open source. It can be used for both open-source and proprietary application. Therefore, it is also free for academic use. Anyone can [contribute](doc/howToContribute.md) on the [gitlab page](https://gitlab.com/jdbancal/gem). The source code is distributed under a MPL2 license. See [COPYING.md](COPYING.md) for more details.
+The GEM library is free and open source. It can be used for both open-source and proprietary application. Therefore, it is also free for academic use. Anyone can [contribute](doc/howToContribute.md) on the [github page](https://github.com/jdbancal/gem). The source code is distributed under a MPL2 license. See [COPYING.md](COPYING.md) for more details.
 
