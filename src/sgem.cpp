@@ -2779,11 +2779,19 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rdivide(const SparseGmpEigenMatrix& b
     // We only support nxm matrix divided by 1x1 matrix (which we see as a scalar)
     if (b.isComplex) {
         if (isComplex) {
-            result.matrixR = (matrixR*b.matrixR.coeff(0,0) + matrixI*b.matrixI.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
-            result.matrixI = (-matrixR*b.matrixI.coeff(0,0) + matrixI*b.matrixR.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            //result.matrixR = (matrixR*b.matrixR.coeff(0,0) + matrixI*b.matrixI.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2)); // Not supported anymore on Eigen 3.3
+            //result.matrixI = (-matrixR*b.matrixI.coeff(0,0) + matrixI*b.matrixR.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixR = (matrixR*b.matrixR.coeff(0,0) + matrixI*b.matrixI.coeff(0,0));
+            result.matrixR = result.matrixR/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixI = (-matrixR*b.matrixI.coeff(0,0) + matrixI*b.matrixR.coeff(0,0));
+            result.matrixI = result.matrixI/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
         } else {
-            result.matrixR = matrixR*b.matrixR.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
-            result.matrixI = -matrixR*b.matrixI.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            //result.matrixR = matrixR*b.matrixR.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2)); // Not supported anymore on Eigen 3.3
+            //result.matrixI = -matrixR*b.matrixI.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixR = matrixR*b.matrixR.coeff(0,0);
+            result.matrixR = result.matrixR/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixI = -matrixR*b.matrixI.coeff(0,0);
+            result.matrixI = result.matrixI/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
         }
     } else if (isComplex) {
         result.matrixR = matrixR/b.matrixR.coeff(0,0);
@@ -2812,11 +2820,19 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rdivide_new(const SparseGmpEigenMatr
     // We only support nxm matrix divided by 1x1 matrix (which we see as a scalar)
     if (b.isComplex) {
         if (isComplex) {
-            result.matrixR = (matrixR*b.matrixR.coeff(0,0) + matrixI*b.matrixI.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
-            result.matrixI = (-matrixR*b.matrixI.coeff(0,0) + matrixI*b.matrixR.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            //result.matrixR = (matrixR*b.matrixR.coeff(0,0) + matrixI*b.matrixI.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2)); // Not supported anymore on Eigen 3.3
+            //result.matrixI = (-matrixR*b.matrixI.coeff(0,0) + matrixI*b.matrixR.coeff(0,0))/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixR = (matrixR*b.matrixR.coeff(0,0) + matrixI*b.matrixI.coeff(0,0));
+            result.matrixR = result.matrixR/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixI = (-matrixR*b.matrixI.coeff(0,0) + matrixI*b.matrixR.coeff(0,0));
+            result.matrixI = result.matrixI/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
         } else {
-            result.matrixR = matrixR*b.matrixR.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
-            result.matrixI = -matrixR*b.matrixI.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            //result.matrixR = matrixR*b.matrixR.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2)); // Not supported anymore on Eigen 3.3
+            //result.matrixI = -matrixR*b.matrixI.coeff(0,0)/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixR = matrixR*b.matrixR.coeff(0,0);
+            result.matrixR = result.matrixR/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
+            result.matrixI = -matrixR*b.matrixI.coeff(0,0);
+            result.matrixI = result.matrixI/(pow(b.matrixR.coeff(0,0),2) + pow(b.matrixI.coeff(0,0),2));
         }
     } else if (isComplex) {
         result.matrixR = matrixR/b.matrixR.coeff(0,0);
@@ -3735,9 +3751,11 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::kron(const SparseGmpEigenMatrix& b) c
     if (b.isComplex) {
         if (isComplex) {
             result.matrixR = kroneckerProduct(matrixR, b.matrixR);
-            result.matrixR -= kroneckerProduct(matrixI, b.matrixI);
+            //result.matrixR -= kroneckerProduct(matrixI, b.matrixI); // Doesn't wotk on Eigen 3.3 anymore
+            result.matrixR = result.matrixR - kroneckerProduct(matrixI, b.matrixI);
             result.matrixI = kroneckerProduct(matrixR, b.matrixI);
-            result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            //result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            result.matrixI = result.matrixI + kroneckerProduct(matrixI, b.matrixR);
             result.matrixR.prune(0,0);
             result.matrixI.prune(0,0);
             result.matrixR.makeCompressed();
@@ -3768,9 +3786,11 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::kron_new(const SparseGmpEigenMatrix&
     if (b.isComplex) {
         if (isComplex) {
             result.matrixR = kroneckerProduct(matrixR, b.matrixR);
-            result.matrixR -= kroneckerProduct(matrixI, b.matrixI);
+            //result.matrixR -= kroneckerProduct(matrixI, b.matrixI); // Doesn't wotk on Eigen 3.3 anymore
+            result.matrixR = result.matrixR - kroneckerProduct(matrixI, b.matrixI);
             result.matrixI = kroneckerProduct(matrixR, b.matrixI);
-            result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            //result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            result.matrixI = result.matrixI + kroneckerProduct(matrixI, b.matrixR);
             result.matrixR.prune(0,0);
             result.matrixI.prune(0,0);
             result.matrixR.makeCompressed();
@@ -3801,9 +3821,11 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::kron_sf(const GmpEigenMatrix& b) cons
     if (b.isComplex) {
         if (isComplex) {
             result.matrixR = kroneckerProduct(matrixR, b.matrixR);
-            result.matrixR -= kroneckerProduct(matrixI, b.matrixI);
+            //result.matrixR -= kroneckerProduct(matrixI, b.matrixI); // Doesn't wotk on Eigen 3.3 anymore
+            result.matrixR = result.matrixR - kroneckerProduct(matrixI, b.matrixI);
             result.matrixI = kroneckerProduct(matrixR, b.matrixI);
-            result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            //result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            result.matrixI = result.matrixI + kroneckerProduct(matrixI, b.matrixR);
             result.matrixR.prune(0,0);
             result.matrixI.prune(0,0);
             result.matrixR.makeCompressed();
@@ -3844,9 +3866,11 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::kron_sf_new(const GmpEigenMatrix& b)
     if (b.isComplex) {
         if (isComplex) {
             result.matrixR = kroneckerProduct(matrixR, b.matrixR);
-            result.matrixR -= kroneckerProduct(matrixI, b.matrixI);
+            //result.matrixR -= kroneckerProduct(matrixI, b.matrixI); // Doesn't wotk on Eigen 3.3 anymore
+            result.matrixR = result.matrixR - kroneckerProduct(matrixI, b.matrixI);
             result.matrixI = kroneckerProduct(matrixR, b.matrixI);
-            result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            //result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            result.matrixI = result.matrixI + kroneckerProduct(matrixI, b.matrixR);
             result.matrixR.prune(0,0);
             result.matrixI.prune(0,0);
             result.matrixR.makeCompressed();

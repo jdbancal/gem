@@ -2827,9 +2827,11 @@ SparseGmpEigenMatrix GmpEigenMatrix::kron_fs(const SparseGmpEigenMatrix& b) cons
     if (b.isComplex) {
         if (isComplex) {
             result.matrixR = kroneckerProduct(matrixR, b.matrixR);
-            result.matrixR -= kroneckerProduct(matrixI, b.matrixI);
+            //result.matrixR -= kroneckerProduct(matrixI, b.matrixI); // This is not supported anymore on Eigen 3.3...
+            result.matrixR = result.matrixR - kroneckerProduct(matrixI, b.matrixI);
             result.matrixI = kroneckerProduct(matrixR, b.matrixI);
-            result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            //result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            result.matrixI = result.matrixI + kroneckerProduct(matrixI, b.matrixR);
             result.matrixR.prune(0,0);
             result.matrixI.prune(0,0);
             result.matrixR.makeCompressed();
@@ -2870,9 +2872,11 @@ SparseGmpEigenMatrix& GmpEigenMatrix::kron_fs_new(const SparseGmpEigenMatrix& b)
     if (b.isComplex) {
         if (isComplex) {
             result.matrixR = kroneckerProduct(matrixR, b.matrixR);
-            result.matrixR -= kroneckerProduct(matrixI, b.matrixI);
+            //result.matrixR -= kroneckerProduct(matrixI, b.matrixI); // This is not supported anymore on Eigen 3.3...
+            result.matrixR = result.matrixR - kroneckerProduct(matrixI, b.matrixI);
             result.matrixI = kroneckerProduct(matrixR, b.matrixI);
-            result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            //result.matrixI += kroneckerProduct(matrixI, b.matrixR);
+            result.matrixI = result.matrixI + kroneckerProduct(matrixI, b.matrixR);
             result.matrixR.prune(0,0);
             result.matrixI.prune(0,0);
             result.matrixR.makeCompressed();
@@ -4601,9 +4605,11 @@ Matrix <bool, Dynamic, Dynamic> GmpEigenMatrix::ne(const GmpEigenMatrix& b) cons
         result = (matrixR.array() != b.matrixR(0,0));
         if (b.isComplex) {
             if (isComplex) {
-                result = result.array() + (matrixI.array() != b.matrixI(0,0));
+                result = result.array() || (matrixI.array() != b.matrixI(0,0));
             } else {
-                result = result.array() + (!iszero(b.matrixI(0,0))); // This should always give a table of true --- '&&' operator is not supported by Eigen here
+                //result = result.array() || (!iszero(b.matrixI(0,0))); // This should always give a table of true --- it doesn't work anymore on Eigen 3.3
+                if (!iszero(b.matrixI(0,0)))
+                    result = result.array() || (!result.array());
             }
         } else if (isComplex) {
             for (IndexType j(0); j < result.cols(); ++j)
@@ -4614,20 +4620,22 @@ Matrix <bool, Dynamic, Dynamic> GmpEigenMatrix::ne(const GmpEigenMatrix& b) cons
         result = (matrixR(0,0) != b.matrixR.array());
         if (b.isComplex) {
             if (isComplex) {
-                result = result.array() + (matrixI(0,0) != b.matrixI.array());
+                result = result.array() || (matrixI(0,0) != b.matrixI.array());
             } else {
                 for (IndexType j(0); j < result.cols(); ++j)
                     for (IndexType i(0); i < result.rows(); ++i)
                         result(i,j) = result(i,j) || (!iszero(b.matrixI(i,j)));
             }
         } else if (isComplex) {
-            result = result.array() + (!iszero(matrixI(0,0))); // This should always give a table of true
+            //result = result.array() || (!iszero(matrixI(0,0))); // This should always give a table of true --- it doesn't work anymore on Eigen 3.3
+            if (!iszero(matrixI(0,0)))
+                result = result.array() || (!result.array());
         }
     } else {
         result = (matrixR.array() != b.matrixR.array());
         if (b.isComplex) {
             if (isComplex) {
-                result = result.array() + (matrixI.array() != b.matrixI.array());
+                result = result.array() || (matrixI.array() != b.matrixI.array());
             } else {
                 for (IndexType j(0); j < result.cols(); ++j)
                     for (IndexType i(0); i < result.rows(); ++i)
