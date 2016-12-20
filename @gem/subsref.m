@@ -46,9 +46,9 @@ switch varargin{1}(1).type
                 this.setDisplayPrecision(varargin{1}(2).subs{1});
                 return;
             case 'objectIdentifier'
-                % The sgem class is allowed to access this private
+                % The sgem class is allowed to access this private function
                 [ST I] = dbstack('-completenames');
-                if (length(ST) < 2) || isempty(strfind(ST(2).file,'/@sgem/'))
+                if (length(ST) < 2) || (isempty(strfind(ST(2).file,'/@sgem/')) && isempty(strfind(ST(2).file,'\@sgem\')))
                     error('Only sgem.m is allowed to access this property.');
                 end
                 result = this.objectIdentifier;

@@ -123,7 +123,7 @@ classdef sgem < handle
                     % first we check that the caller is the current file
                     % (i.e. gem.m)
                     [ST I] = dbstack('-completenames');
-                    if (length(ST) < 2) || (isempty(strfind(ST(2).file,'/@gem/')) && isempty(strfind(ST(2).file,'/@sgem/')))
+                    if (length(ST) < 2) || (isempty(strfind(ST(2).file,'/@gem/')) && isempty(strfind(ST(2).file,'\@gem\')) && isempty(strfind(ST(2).file,'/@sgem/')) && isempty(strfind(ST(2).file,'\@sgem\')))
                         error('Only sgem.m is allowed to encapsulate an integer into a new sgem object.');
                     end
 

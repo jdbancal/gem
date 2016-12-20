@@ -1,3 +1,7 @@
+## [0.1.2] - 2016-12-20
+- Updated code to be compatible with latest Eigen, version 3.3
+- Windows compatibility
+
 ## [0.1.1] - 2016-11-23
 - Updated documentation
 - Fixed issues when computing few eigenvalues of a small matrix

@@ -64,6 +64,14 @@ classdef gem < handle
         %  - Create a C++ class instance for any of the mathematical
         %    constants above
         function this = gem(varargin)
+            % In the source file version of this library, we start by
+            % checking whether the c++ library was compiled. If not, we 
+            % suggest to download the binaries.
+            tmp = mfilename('fullpath');
+            if (exist([tmp(1:end-8), 'gem_mex.', mexext], 'file') ~= 3) && (~ismac)
+                warning('The library binaries were not found. You may wish to download them online at https://www.github.com/jdbancal/gem/releases .');
+            end
+            
             % The following variable is used in some instances to tell the
             % constructor to use the precision requested by the user rather
             % than the one it thinks is better for the considered number
@@ -208,7 +216,7 @@ classdef gem < handle
                     % first we check that the caller is the current file
                     % (i.e. gem.m)
                     [ST I] = dbstack('-completenames');
-                    if (length(ST) < 2) || (isempty(strfind(ST(2).file,'/@gem/')) && isempty(strfind(ST(2).file,'/@sgem/')) && isempty(strfind(ST(2).name,'gemRand')))
+                    if (length(ST) < 2) || (isempty(strfind(ST(2).file,'/@gem/')) && isempty(strfind(ST(2).file,'\@gem\')) && isempty(strfind(ST(2).file,'/@sgem/'))&& isempty(strfind(ST(2).file,'\@sgem\')) && isempty(strfind(ST(2).name,'gemRand')))
                         error('Only gem.m and sgem.m is allowed to encapsulate an integer into a new gem object.');
                     end
 
