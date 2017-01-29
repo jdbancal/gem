@@ -67,8 +67,10 @@ The following function can be applied to gem/sgem objects directly.
 | isequal | ✔ | ✔ |  |
 | isequaln | ✔ | ✔ |  |
 | isfinite | ✔ | ✔ |  |
+| isfloat | ✔ | ✔ |  |
 | ishermitian | ✔ | ✔ |  |
 | isinf | ✔ | ✔ |  |
+| isinteger | ✔ | ✔ |  |
 | isnan | ✔ | ✔ |  |
 | isnumeric | ✔ | ✔ |  |
 | isreal | ✔ | ✔ |  |
@@ -113,6 +115,7 @@ The following function can be applied to gem/sgem objects directly.
 | sin | ✔ | ✔ |  |
 | size | ✔ | ✔ |  |
 | sparse | ✔ | ✔ |  |
+| sprintf | ✔ | ✔ |  |
 | sqrt | ✔ | ✔ |  |
 | subsasgn | ✔ | ✔ |  |
 | subsref | ✔ | ✔ |  |
