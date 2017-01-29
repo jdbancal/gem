@@ -24,6 +24,8 @@ switch varargin{1}(1).type
                     % We are calling with several indices, as in a(:,1)
                     indices{i} = 1:s(i);
                 end
+            elseif isequal(varargin{1}.subs{i}, 0)
+                indices{i} = [];
             else
                 error('Unrecognized indexing in sgem::subsref')
             end
