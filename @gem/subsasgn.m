@@ -23,6 +23,8 @@ switch subs.type
                     % We are calling with several indices, as in a(:,1)
                     indices{i} = 1:s(i);
                 end
+            elseif isequal(subs.subs{i}, 0)
+                indices{i} = [];
             else
                 error('Unrecognized indexing in gem::subsref')
             end
@@ -40,6 +42,7 @@ if length(indices) == 1
         if numel(values) > 1
             error('In an assignment  A(I) = B in gem::subsasgn, the number of elements in B and I must be the same');
         end
+        result = this;
         return;
     end
     if (min(indices{1}) < 1) || ((max(indices{1}) > prod(s)) && (min(s) > 1))
