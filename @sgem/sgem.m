@@ -336,7 +336,7 @@ classdef sgem < handle
     % it needs to be a static method, and so we need to define it here...
     methods (Static)
         function result = loadobj(structure)
-            disp('loading...');
+            fprintf('loading...');
             % The result should be an instance of an sgem object with the data contained in the provided structure
             if structure.dataVersion > 1
                 error('The object was saved with a newer version of the library. Please upgrade the library to load it again.');
@@ -349,6 +349,7 @@ classdef sgem < handle
                 % this class
                 result = sgem('encapsulate', newObjectIdentifier);
             end
+            disp('done');
         end
     end
 
