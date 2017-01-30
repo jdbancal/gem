@@ -131,15 +131,45 @@ function [V D] = eigs(this, varargin)
             sigma = gem(sigma);
         end
 
-        % We check that we won't try to invert a singular matrix
-        if isequal(type,2)
-            if rank(this-sigma*eye(size(this))) < size(this,1)
-                if (nargout < 2) && (nbEigenvalues == 1)
-                    % We know what is the eigenvalue of smallest magnitude
-                    V = gem(0);
-                    return;
+        % The algorithm we use doen't handle eigenvalues equal to sigma. So
+        % this variable tells how many times it needs to be added
+        % mannually.
+        additionalSigmaMultiplicity = 0;
+        
+        % We make sure we won't try to find non-zero eigenvalues when there
+        % are no more (this is numerically unstable)
+        if isequal(type,1)
+            rankMatrix = rank(this);
+            if rankMatrix < nbEigenvalues
+                if nargout >= 2
+                    error('Eigenvectors are not computed for null eigenvalues.')
                 end
-                error('Sigma cannot be an eigenvalue of the considered matrix.');
+                if rankMatrix == 1
+                    warning('There is only one non-zero eigenvalues, computing this one only.');
+                else
+                    warning(['There are only ', num2str(rankMatrix), ' non-zero eigenvalues, computing these ones only.']);
+                end
+                additionalSigmaMultiplicity = nbEigenvalues-rankMatrix;
+                nbEigenvalues = rankMatrix;
+            end
+        end
+        
+        % We make sure we won't try to invert a singular matrix (this is
+        % numerically unstable as well)
+        if isequal(type,2)
+            rankShifted = rank(this-sigma*eye(size(this)));
+            if size(this,1) - rankShifted >= nbEigenvalues
+                % Then we know that all requested eigenvalues are equal to
+                % sigma, but we still haven't computed corresponding
+                % eigenvectors (these would be given by a function such as
+                % 'null')
+                V = sigma*ones(nbEigenvalues,1);
+                if nargout >= 2
+                    error('Eigenvectors are not computed when sigma is an eigenvalue.')
+                end
+                return;
+            elseif size(this,1) - rankShifted > 0
+                error('Sigma is an eigenvalue of the considered matrix. Consider perturbing it a little bit to allow the numerical method to run smoothly.')
             end
         end
         
@@ -150,11 +180,14 @@ function [V D] = eigs(this, varargin)
         D = gem('encapsulate', newObjectIdentifierD);
         
         % We normalize the eigenvectors (this should not be done if the
-        % option 'nobalance' is passed (once this option is implemented).
+        % option 'nobalance' is passed (once this option is implemented)).
         V = V*diag(1./sqrt(diag(V'*V)));
-
+        
         if nargout <= 1
             V = diag(D);
+            if additionalSigmaMultiplicity > 0
+                V = [V; sigma*ones(additionalSigmaMultiplicity,1)];
+            end
         end
         
     else
