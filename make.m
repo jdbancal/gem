@@ -35,7 +35,7 @@ end
 
 % Set the following variable to 0 in order to compile a library which does
 % not depend on shared gmp and mpfr libraries:
-useSharedGmpAndMpfr = 0;
+useSharedGmpAndMpfr = 1;
 
 if ~ismac
     warning('You are trying to compile the GEM library, but binaries may be available for your platform on https://www.github.com/jdbancal/gem/releases');
