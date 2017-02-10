@@ -5,7 +5,7 @@ function make(parallelization)
 % parallelization = 0 to disable openmp, parallelization = 1 otherwise.
 %
 % Note : the code relies on the eigen, spectra, gmp, mpfr and mpfrc++ libraries.
-% - The Eigen library (version 3.2 (!)) should be dowloaded from http://eigen.tuxfamily.org 
+% - The Eigen library should be dowloaded from http://eigen.tuxfamily.org 
 %   and placed in the gem/src folder.
 % - The Spectra library should be downloaded from 
 %   http://yixuan.cos.name/spectra/index.html and places in the gem/src 

@@ -9,7 +9,7 @@ The library implements two data types:
 
 and overloads [a number of matlab functions](doc/functions.md).
 
-The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for high precision arithmetic (through [MPFR](http://www.mpfr.org/) and [MPFR C++](http://www.holoborodko.com/pavel/mpfr/)), and on [Eigen](http://eigen.tuxfamily.org/) (version **3.2**) and [Spectra](http://yixuan.cos.name/spectra/) for matrix manipulations.
+The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for high precision arithmetic (through [MPFR](http://www.mpfr.org/) and [MPFR C++](http://www.holoborodko.com/pavel/mpfr/)), and on [Eigen](http://eigen.tuxfamily.org/) and [Spectra](http://yixuan.cos.name/spectra/) for matrix manipulations.
 
 At the moment, priority is given to functionality over performance: the code comes with no garantee of optimality. Nevertheless, appreciable improvement is already available compared to matlab's builtin types performance. With 100 digits of precision, for instance, a 100x100 matrix is transfered from _double to high precision_ 10x faster, from _high precision to double_ format 250x faster, and its _column-wise minimum_ is computed 25x faster. _Multiplication_ of two 100x100 dense matrices with 100-digits precision is 10 times faster with gem objects as compared to matlab 2016a's vpa type. For a matrix of size 1000x1000 these ratios become respectively 14x, 1500~20000x, 500x, 10x (the GEM library's multithreading capabilities were disactivated when performing these comparisons).
 
