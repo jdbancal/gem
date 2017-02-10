@@ -1,5 +1,6 @@
-## [0.1.3] - 2017-..-..
+## [0.1.3] - 2017-02-10
 - Added isinteger, isfloat, and basic implementation of sprintf
+- Added support for null extraction and assignments in subsref and subsasgn
 
 ## [0.1.2] - 2016-12-20
 - Updated code to be compatible with latest Eigen, version 3.3
