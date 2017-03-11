@@ -25,6 +25,7 @@ The following function can be applied to gem/sgem objects directly.
 | methods | full support | sparse support | remarks |
 |----------|---|---|---|
 | abs  | ✔  | ✔  |   |
+| any  | ✔  | ✔  |   |
 | acos | ✔ | ✔ |  |
 | acot | ✔ | ✔ |  |
 | acsc | ✔ | ✔ |  |

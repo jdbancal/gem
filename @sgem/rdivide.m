@@ -6,6 +6,13 @@ function result = rdivide(this, varargin)
         error('Wrong number of arguments in sgem::rdivide');
     end
 
+    % If the second type is more elaborated than just a number, we let the
+    % corresponding class take care of performing the operation
+    if ~isnumeric(varargin{1})
+        result = ldivide(varargin{1}, this);
+        return;
+    end
+    
     % This function preserves the sparsity only if A is sparse and B is a scalar.
     if issparse(this) && (numel(varargin{1}) == 1)
         % We check that both objects are of type sgem,

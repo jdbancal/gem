@@ -8,6 +8,13 @@ function result = mldivide(this, varargin)
         error('Wrong number of arguments in sgem::mldivide');
     end
     
+    % If the second type is more elaborated than just a number, we let the
+    % corresponding class take care of performing the operation
+    if ~isnumeric(varargin{1})
+        result = mrdivide(varargin{1}', this')';
+        return;
+    end
+    
     % We check that the denominator is a scalar
     if numel(this) == 1
         result = varargin{1}./this;

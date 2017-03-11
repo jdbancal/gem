@@ -6,6 +6,13 @@ function result = plus(this, varargin)
         error('Wrong number of arguments in gem::plus');
     end
 
+    % If the second type is more elaborated than just a number, we let the
+    % corresponding class take care of performing the operation
+    if ~isnumeric(varargin{1})
+        result = plus(varargin{1}, this);
+        return;
+    end
+    
     % We need to check that the operation is possible (the c++
     % library might give bad errors otherwise). So we request the
     % dimensions of each matrix
