@@ -10256,7 +10256,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowProd_new() const
 
 
 /* This function sorts out elements in a matrix */
-SparseGmpEigenMatrix SparseGmpEigenMatrix::sort(const int& dim, const int& type, vector < vector < IndexType > >& index, vector < IndexType >& positionZeros) const
+SparseGmpEigenMatrix SparseGmpEigenMatrix::sort(const int& dim, const int& type, vector < vector < IndexType > >& index, vector < IndexType >& nbNegatives) const
 {
     SparseGmpEigenMatrix result(*this);
 
