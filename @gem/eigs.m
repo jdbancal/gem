@@ -89,12 +89,19 @@ function [V D] = eigs(this, varargin)
 %        warning('Too many eigenvalues for eigs, using eig instead.');
         if nargout == 2
             [V D] = eig(this);
+            % We make sure the eigenvalues are ordered (not guaranteed by
+            % eig)
+            [D reorder] = sort(diag(D),1,'descend');
+            D = diag(D);
+            subV.type='()';
+            subV.subs={':' reorder};
+            V = subsref(V, subV);
             if isequal(type, 2)
                 subV.type='()';
-                subV.subs={[1:size(V,1)] [size(V,2)-nbEigenvalues+1:size(V,2)]};
+                subV.subs={[1:size(V,1)] [size(V,2):-1:size(V,2)-nbEigenvalues+1]};
                 V = subsref(V, subV);
                 subD.type='()';
-                subD.subs={[size(D,1)-nbEigenvalues+1:size(D,1)] [size(D,2)-nbEigenvalues+1:size(D,2)]};
+                subD.subs={[size(D,1):-1:size(D,1)-nbEigenvalues+1] [size(D,2):-1:size(D,2)-nbEigenvalues+1]};
                 D = subsref(D, subD);
             elseif nbEigenvalues < size(D,1)
                 subV.type='()';
@@ -106,9 +113,12 @@ function [V D] = eigs(this, varargin)
             end
         else
             V = eig(this);
+            % We make sure the eigenvalues are ordered (not guaranteed by
+            % eig)
+            V = sort(V,1,'descend');
             if isequal(type, 2)
                 subV.type='()';
-                subV.subs={[size(V,1)-nbEigenvalues+1:size(V,1)] [1]};
+                subV.subs={[size(V,1):-1:size(V,1)-nbEigenvalues+1] [1]};
                 V = subsref(V, subV);
             elseif nbEigenvalues < size(V,1)
                 subV.type='()';

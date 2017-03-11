@@ -48,6 +48,7 @@ The following function can be applied to gem/sgem objects directly.
 | diag | ✔ | ✔ |  |
 | disp | ✔ | ✔ |  |
 | display | ✔ | ✔ |  |
+| diff | ✔ | ✔ |  |
 | double | ✔ | ✔ |  |
 | eig | ✔ | ✗ |  |
 | eigs | ✔ | ✔ |  |
@@ -74,6 +75,7 @@ The following function can be applied to gem/sgem objects directly.
 | isnan | ✔ | ✔ |  |
 | isnumeric | ✔ | ✔ |  |
 | isreal | ✔ | ✔ |  |
+| issorted | ✔ | ✔ |  |
 | issparse | ✔ | ✔ |  |
 | issymmetric | ✔ | ✔ |  |
 | kron | ✔ | ✔ | supports more than 2 inputs, as in kron(A,B,C) or kron({A,B,C}) |
@@ -90,6 +92,7 @@ The following function can be applied to gem/sgem objects directly.
 | min | ✔ | ✔ |  |
 | minus | ✔ | ✔ |  |
 | mldivide | ✔ | ✔ |  |
+| mod | ✔ | ✔ |  |
 | mpower | ✔ | ✔ | supports two scalars, or matrices with +/-1 exponent |
 | mrdivide | ✔ | ✔ |  |
 | mtimes | ✔ | ✔ |  |
@@ -99,6 +102,7 @@ The following function can be applied to gem/sgem objects directly.
 | norm | ✔ | ✔ |  |
 | not | ✔ | ✔ |  |
 | numel | ✔ | ✔ |  |
+| num2str | ✔ | ✔ |  through matlab's implementation and sprintf |
 | or | ✔ | ✔ |  |
 | plot | ✔ | ✔ |  |
 | plus | ✔ | ✔ |  |
@@ -114,8 +118,11 @@ The following function can be applied to gem/sgem objects directly.
 | sec | ✔ | ✔ |  |
 | sin | ✔ | ✔ |  |
 | size | ✔ | ✔ |  |
+| sort | ✔ | ✔ |  |
+| sortrows | ✔ | ✔ |  through matlab's implementation |
+| sortrowsc | ✔ | ✗ |  |
 | sparse | ✔ | ✔ |  |
-| sprintf | ✔ | ✔ |  |
+| sprintf | ✔ | ✔ |  currently only supports a few digits of precision; use toStrings to extract the full precision in string format |
 | sqrt | ✔ | ✔ |  |
 | subsasgn | ✔ | ✔ |  |
 | subsref | ✔ | ✔ |  |
@@ -127,6 +134,7 @@ The following function can be applied to gem/sgem objects directly.
 | toStrings | ✔ | ✔ |  |
 | transpose | ✔ | ✔ |  |
 | uminus | ✔ | ✔ |  |
+| unique | ✔ | ✔ |  through matlab's implementation |
 | uplus | ✔ | ✔ |  |
 | vertcat | ✔ | ✔ |  |
 

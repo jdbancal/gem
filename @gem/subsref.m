@@ -16,6 +16,8 @@ switch varargin{1}(1).type
         for i = 1:length(varargin{1}.subs)
             if isnumeric(varargin{1}.subs{i})
                 indices{i} = varargin{1}.subs{i};
+            elseif islogical(varargin{1}.subs{i})
+                indices{i} = find(varargin{1}.subs{i});
             elseif isequal(varargin{1}.subs{i},':')
                 if length(varargin{1}.subs) == 1
                     % We are calling with a single index a(:)
@@ -100,6 +102,13 @@ if length(indices) == 1
     % ...  and create a new matlab object to keep this handle
     result = gem('encapsulate', newObjectIdentifier);
     
+    % For the special case "a(:)", the output is always vertical
+    special.type='()';
+    special.subs={':'};
+    if isequal(varargin,{special})
+        return
+    end
+    
     % If both this and the indices are 1-dimensional, then we keep the same
     % shape for the output as this (by default otherwise it takes the shape 
     % of the indices)
@@ -116,8 +125,4 @@ else
     result = gem('encapsulate', newObjectIdentifier);
 end
 
-
-
-
-%result = prod(size(this));
 end

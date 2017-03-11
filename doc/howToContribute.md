@@ -44,9 +44,7 @@ Desired Features
 
 Here is a partial list of features/functions that would be nice to add to the library.
 
- - `num2str` works fine on most gem 1x1 numbers, but fails for integers, so we would need something like `int2str`
- - Some sorting functions such as `sort`, `sortrow` and `unique`
- - When used with the option `lm` or `sm` and with k>=n-1-ishermitian(this), the function eigs now assumes that the eigenvalues returned by eig are ordered to extract the smallest or largest ones. This is often the case but not always -> fix by using a sorting algorithm here.
+ - improve the function `sprintf` to provide all digits
  - Implement the matrix `mpower` function for powers different from +/-1.
  - Implement the matrix exponential function `expm`
  - Parallelize the for loops appearing in simple functions such as `sin`.

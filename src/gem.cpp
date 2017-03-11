@@ -3653,7 +3653,7 @@ GmpEigenMatrix GmpEigenMatrix::eig(GmpEigenMatrix& V) const
 
             // Now we add the real eigenvalues and the corresponding eigenvectors
             // First, we sort them
-            sort(realEigenvaluesAndColumns.begin(),realEigenvaluesAndColumns.end());
+            std::sort(realEigenvaluesAndColumns.begin(),realEigenvaluesAndColumns.end());
             // Now we can extract the values and eigenvectors one by one
             i = 0;
             while (i < realEigenvaluesAndColumns.size()) {
@@ -3834,7 +3834,7 @@ GmpEigenMatrix& GmpEigenMatrix::eig_new(GmpEigenMatrix& V) const
 
             // Now we add the real eigenvalues and the corresponding eigenvectors
             // First, we sort them
-            sort(realEigenvaluesAndColumns.begin(),realEigenvaluesAndColumns.end());
+            std::sort(realEigenvaluesAndColumns.begin(),realEigenvaluesAndColumns.end());
             // Now we can extract the values and eigenvectors one by one
             i = 0;
             while (i < realEigenvaluesAndColumns.size()) {
@@ -5848,6 +5848,134 @@ GmpEigenMatrix& GmpEigenMatrix::rowProd_new() const
 
     return result;
 }
+
+
+
+// sorting elements along columns or rows
+GmpEigenMatrix GmpEigenMatrix::sort(const int& dim, const int& type, vector < vector < IndexType > >& index) const
+{
+    GmpEigenMatrix result(*this);
+
+    for (IndexType i(0); i < matrixR.rows(); ++i)
+        index.push_back(vector < IndexType > (matrixR.cols(), 0));
+
+    if (dim == 0) {
+        for (IndexType j(0); j < matrixR.cols(); ++j) {
+            vector < IndexType > indexMap(matrixR.rows(), 0);
+            for (IndexType i(0); i < indexMap.size(); ++i)
+                indexMap[i] = i;
+
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(matrixR.col(j), matrixI.col(j)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(matrixR.col(j)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            for (IndexType i(0); i < matrixR.rows(); ++i) {
+                result.matrixR(i,j) = matrixR(indexMap[i],j);
+                if (isComplex)
+                    result.matrixI(i,j) = matrixI(indexMap[i],j);
+                index[i][j] = indexMap[i];
+            }
+        }
+    } else {
+        for (IndexType i(0); i < matrixR.rows(); ++i) {
+            vector < IndexType > indexMap(matrixR.cols(), 0);
+            for (IndexType j(0); j < indexMap.size(); ++j)
+                indexMap[j] = j;
+
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(matrixR.row(i), matrixI.row(i)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(matrixR.row(i)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            for (IndexType j(0); j < matrixR.cols(); ++j) {
+                result.matrixR(i,j) = matrixR(i,indexMap[j]);
+                if (isComplex)
+                    result.matrixI(i,j) = matrixI(i,indexMap[j]);
+                index[i][j] = indexMap[j];
+            }
+        }
+    }
+
+    return result;
+}
+
+// sorting elements along columns or rows
+GmpEigenMatrix& GmpEigenMatrix::sort_new(const int& dim, const int& type, vector < vector < IndexType > >& index) const
+{
+    GmpEigenMatrix& result(*(new GmpEigenMatrix(*this)));
+
+    for (IndexType i(0); i < matrixR.rows(); ++i)
+        index.push_back(vector < IndexType > (matrixR.cols(), 0));
+
+    if (dim == 0) {
+        for (IndexType j(0); j < matrixR.cols(); ++j) {
+            vector < IndexType > indexMap(matrixR.rows(), 0);
+            for (IndexType i(0); i < indexMap.size(); ++i)
+                indexMap[i] = i;
+
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(matrixR.col(j), matrixI.col(j)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(matrixR.col(j)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            for (IndexType i(0); i < matrixR.rows(); ++i) {
+                result.matrixR(i,j) = matrixR(indexMap[i],j);
+                if (isComplex)
+                    result.matrixI(i,j) = matrixI(indexMap[i],j);
+                index[i][j] = indexMap[i];
+            }
+        }
+    } else {
+        for (IndexType i(0); i < matrixR.rows(); ++i) {
+            vector < IndexType > indexMap(matrixR.cols(), 0);
+            for (IndexType j(0); j < indexMap.size(); ++j)
+                indexMap[j] = j;
+
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(matrixR.row(i), matrixI.row(i)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(matrixR.row(i)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            for (IndexType j(0); j < matrixR.cols(); ++j) {
+                result.matrixR(i,j) = matrixR(i,indexMap[j]);
+                if (isComplex)
+                    result.matrixI(i,j) = matrixI(i,indexMap[j]);
+                index[i][j] = indexMap[j];
+            }
+        }
+    }
+
+    return result;
+}
+
+
+/* This function returns the recipe to sort the rows of a matrix */
+vector < IndexType > GmpEigenMatrix::sortrowsc(const std::vector < int > ascending) const
+{
+    vector < IndexType > indexMap(matrixR.rows(), 0);
+
+    for (IndexType i(0); i < indexMap.size(); ++i)
+        indexMap[i] = i;
+
+    std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesRows< Matrix< mpreal, Dynamic, Dynamic > >(matrixR, ascending));
+
+    return indexMap;
+}
+
+
 
 
 

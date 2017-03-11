@@ -429,6 +429,10 @@ public:
     GmpEigenMatrix rowProd() const;
     GmpEigenMatrix& rowProd_new() const;
 
+    // sorting functions
+    GmpEigenMatrix sort(const int& dim, const int& type, std::vector < std::vector < IndexType > >& index) const;
+    GmpEigenMatrix& sort_new(const int& dim, const int& type, std::vector < std::vector < IndexType > >& index) const;
+    std::vector < IndexType > sortrowsc(const std::vector < int > ascending) const;
 
     /* -------------------------------
        | Some mathematical constants |

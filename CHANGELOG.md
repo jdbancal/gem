@@ -1,3 +1,10 @@
+## [...] - ...
+- Added sorting functions: sort, sortrow, issorted
+- Added a small missing feature in eigs which required the sorting function
+- Added diff
+- Added support for logical indices in subsref and subsasgn
+- Added modulo
+
 ## [0.1.3] - 2017-02-10
 - Added isinteger, isfloat, and basic implementation of sprintf
 - Added support for null extraction and assignments in subsref and subsasgn

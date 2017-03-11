@@ -1205,6 +1205,50 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+    /* Sorts out the elements of a matrix */
+    if (!strcmp("sort", cmd)) {
+        // Check parameters
+        if ((nlhs != 2) || (nrhs != 4))
+            mexErrMsgTxt("sort: Unexpected arguments.");
+
+        // We extract the sorting dimension
+        int dim(mxGetScalar(prhs[2]));
+
+        // We extract the sorting type
+        int type(mxGetScalar(prhs[3]));
+
+        // We prepare a table to gather the indices
+        vector < vector < IndexType > > indices;
+
+        GmpEigenMatrix& result(GmpEigenMatrix_instance.sort_new(dim, type, indices));
+
+        // We prepare the reference to this object for matlab
+        plhs[0] = createMatlabIdFromObj<GmpEigenMatrix>(result);
+        plhs[1] = matrixToMatlabDoubles(indices);
+
+        return;
+    }
+
+
+    /* Sorts out the elements of a matrix by row */
+    if (!strcmp("sortrowsc", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 3))
+            mexErrMsgTxt("sortrowsc: Unexpected arguments.");
+
+        // We extract the sorting directions
+        vector < int > ascending(matlabDoublesToVector<int>(prhs[2]));
+
+        // We prepare a table to gather the indices
+        vector < IndexType > indices(GmpEigenMatrix_instance.sortrowsc(ascending));
+
+        // We prepare the table for matlab
+        plhs[0] = vectorToMatlabDoubles(indices);
+
+        return;
+    }
+
+
     // If we reached here, then there must be a third input parameter
     if (nrhs < 3)
 	   mexErrMsgTxt("Third input not found.");

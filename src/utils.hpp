@@ -299,6 +299,28 @@ template <typename T> inline mxArray* matrixToMatlabDoubles(const Eigen::SparseM
 }
 
 
+// This function sends a vector of vector of type T to matlab (after recasting
+// the types to doubles)
+template <typename T> inline mxArray* vectorVectorToMatlabDoublesCell(const std::vector< std::vector <T> >& mat)
+{
+    mxArray* field(mxCreateCellMatrix(mat.size(), 1));
+    mxArray* plhs;
+
+    for (mwIndex i = 0; i < mat.size(); ++i) {
+        plhs = mxCreateNumericMatrix(1, mat[i].size(), mxDOUBLE_CLASS, mxREAL);
+        double* pointer(mxGetPr(plhs));
+
+        for (mwIndex j = 0; j < mat[i].size(); ++j)
+            pointer[j] = (double)mat[i][j];
+
+        mxSetCell(field, i, plhs);
+    }
+
+    return field;
+}
+
+
+
 // This function creates a vector of given type from a matlab table of doubles
 // If works for column and line vectors equally, and if given a matrix, sees it
 // as one big vector.
@@ -370,6 +392,53 @@ template <typename T> inline Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> ma
 
     return mat;
 }
+
+
+// Here are some functions to ease sorting of matrix elements.
+// We follow the strategy used in libigl (also MPL2)
+// i.e. solution of http://bytes.com/topic/c/answers/132045-sort-get-index
+// Warning: this construct doesn't make a copy of the underlying matrix: so the
+// corresponding matrix should not be changed while this object is used.
+template<class T> struct compareThroughIndices {
+    compareThroughIndices(const T& arr) : array(&arr) {}
+    bool operator()(const size_t a, const size_t b) const
+        { return (*array)[a] < (*array)[b]; }
+    const T* array;
+};
+
+// Same for complex matrices
+// Note : For some reason, a different template parameter is needed for each
+// vector, although they are of the same type...
+template<class TR, class TI> struct compareThroughIndicesComplex {
+    compareThroughIndicesComplex(const TR& arrR, const TI& arrI) : arrayR(&arrR), arrayI(&arrI) {}
+    bool operator()(const size_t a, const size_t b) const
+        {
+            return (((mpfr::pow((*arrayR)[a],2) + mpfr::pow((*arrayI)[a],2)) < (mpfr::pow((*arrayR)[b],2) + mpfr::pow((*arrayI)[b],2))) ||
+                (((mpfr::pow((*arrayR)[a],2) + mpfr::pow((*arrayI)[a],2)) == (mpfr::pow((*arrayR)[b],2) + mpfr::pow((*arrayI)[b],2))) &&
+                    (atan2((*arrayI)[a], (*arrayR)[a]) < atan2((*arrayI)[b], (*arrayR)[b]))));
+        }
+    const TR* arrayR;
+    const TI* arrayI;
+};
+
+// Here is the function for comparing rows of a real matrix according to some rules
+template<class T> struct compareThroughIndicesRows {
+    compareThroughIndicesRows(const T& arr, const std::vector < int >& ascending) : array(&arr), mode(&ascending) {}
+    bool operator()(const size_t a, const size_t b) const
+        {
+            for (IndexType j(0); j < (*array).cols(); ++j)
+            {
+                if ((*array)(a,j) < (*array)(b,j))
+                    return ((*mode)[j] == 1);
+                else if ((*array)(a,j) > (*array)(b,j))
+                    return ((*mode)[j] == 0);
+            }
+            return true;
+        }
+    const T* array;
+    const std::vector<int>* mode;
+};
+
 
 
 #endif // __GmpEigenMatrix_Utils_HPP__

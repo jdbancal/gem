@@ -15,6 +15,8 @@ switch subs.type
         for i = 1:length(subs.subs)
             if isnumeric(subs.subs{i})
                 indices{i} = subs.subs{i};
+            elseif islogical(subs.subs{i})
+                indices{i} = find(subs.subs{i});
             elseif isequal(subs.subs{i},':')
                 if length(subs.subs) == 1
                     % We are calling with a single index a(:)

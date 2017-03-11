@@ -10255,6 +10255,371 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowProd_new() const
 }
 
 
+/* This function sorts out elements in a matrix */
+SparseGmpEigenMatrix SparseGmpEigenMatrix::sort(const int& dim, const int& type, vector < vector < IndexType > >& index, vector < IndexType >& positionZeros) const
+{
+    SparseGmpEigenMatrix result(*this);
+
+    // We prepare the matrices
+    result.matrixR.resize(matrixR.rows(),matrixR.cols());
+    result.matrixR.reserve(matrixR.nonZeros());
+    if (isComplex) {
+        result.isComplex = true;
+        result.matrixI.resize(matrixR.rows(), matrixR.cols());
+        result.matrixI.reserve(matrixI.nonZeros());
+    }
+
+    // We assume that index and nbNegatives are already empty
+    //index.clear();
+    //nbNegatives.clear();
+
+    if (dim == 0) {
+        for (IndexType k(0); k < matrixR.outerSize(); ++k) {
+            // First, we find the non-zero elements which are in this column
+            // as well as how many elements are smaller than zero
+            vector < IndexType > indexMap(0, 0);
+            nbNegatives.push_back(0);
+            if (isComplex) {
+                SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+                SparseMatrix<mpreal>::InnerIterator itI(matrixI,k);
+                while ((itR) || (itI)) {
+                    if ((itR) && (itI)) {
+                        if (itR.row() < itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                        } else if (itR.row() == itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                            ++itI;
+                        } else {
+                            indexMap.push_back(itI.row());
+                            ++itI;
+                        }
+                    } else if (itR) {
+                        indexMap.push_back(itR.row());
+                        ++itR;
+                    } else {
+                        indexMap.push_back(itI.row());
+                        ++itI;
+                    }
+                }
+            } else {
+                SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+                while (itR) {
+                    indexMap.push_back(itR.row());
+                    if (itR.value() < 0)
+                        ++nbNegatives[k];
+                    ++itR;
+                }
+            }
+
+            // Now we sort them
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(matrixR.col(k), matrixI.col(k)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(matrixR.col(k)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            index.push_back(indexMap);
+
+            IndexType startBlock, endBlock;
+            if (type == 0) {
+                startBlock = nbNegatives[k];
+                endBlock = indexMap.size() - nbNegatives[k];
+            } else {
+                startBlock = indexMap.size() - nbNegatives[k];
+                endBlock = nbNegatives[k];
+            }
+
+            // We construct the sorted column
+            for (IndexType i(0); i < indexMap.size(); ++i) {
+                IndexType x(i);
+                if (i >= startBlock)
+                    x = matrixR.innerSize()-indexMap.size()+i;
+
+                if (isComplex) {
+                    if (matrixR.coeff(indexMap[i],k) != 0)
+                        result.matrixR.insert(x,k) = matrixR.coeff(indexMap[i],k);
+                    if (matrixI.coeff(indexMap[i],k) != 0)
+                        result.matrixI.insert(x,k) = matrixI.coeff(indexMap[i],k);
+                } else {
+                    result.matrixR.insert(x,k) = matrixR.coeff(indexMap[i],k);
+                }
+            }
+        }
+    } else {
+        // We start by transposing the matrix
+        SparseGmpEigenMatrix transpo(transpose());
+
+        for (IndexType k(0); k < transpo.matrixR.outerSize(); ++k) {
+            // First, we find the non-zero elements which are in this column
+            // as well as how many elements are smaller than zero
+            vector < IndexType > indexMap(0, 0);
+            nbNegatives.push_back(0);
+            if (isComplex) {
+                SparseMatrix<mpreal>::InnerIterator itR(transpo.matrixR,k);
+                SparseMatrix<mpreal>::InnerIterator itI(transpo.matrixI,k);
+                while ((itR) || (itI)) {
+                    if ((itR) && (itI)) {
+                        if (itR.row() < itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                        } else if (itR.row() == itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                            ++itI;
+                        } else {
+                            indexMap.push_back(itI.row());
+                            ++itI;
+                        }
+                    } else if (itR) {
+                        indexMap.push_back(itR.row());
+                        ++itR;
+                    } else {
+                        indexMap.push_back(itI.row());
+                        ++itI;
+                    }
+                }
+            } else {
+                SparseMatrix<mpreal>::InnerIterator itR(transpo.matrixR,k);
+                while (itR) {
+                    indexMap.push_back(itR.row());
+                    if (itR.value() < 0)
+                        ++nbNegatives[k];
+                    ++itR;
+                }
+            }
+
+            // Now we sort them
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(transpo.matrixR.col(k), transpo.matrixI.col(k)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(transpo.matrixR.col(k)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            index.push_back(indexMap);
+
+            IndexType startBlock, endBlock;
+            if (type == 0) {
+                startBlock = nbNegatives[k];
+                endBlock = indexMap.size() - nbNegatives[k];
+            } else {
+                startBlock = indexMap.size() - nbNegatives[k];
+                endBlock = nbNegatives[k];
+            }
+
+            // We construct the sorted column
+            for (IndexType i(0); i < indexMap.size(); ++i) {
+                IndexType x(i);
+                if (i >= startBlock)
+                    x = matrixR.innerSize()-indexMap.size()+i;
+
+                if (isComplex) {
+                    if (transpo.matrixR.coeff(indexMap[i],k) != 0)
+                        result.matrixR.insert(k,x) = transpo.matrixR.coeff(indexMap[i],k);
+                    if (transpo.matrixI.coeff(indexMap[i],k) != 0)
+                        result.matrixI.insert(k,x) = transpo.matrixI.coeff(indexMap[i],k);
+                } else {
+                    result.matrixR.insert(k,x) = transpo.matrixR.coeff(indexMap[i],k);
+                }
+            }
+        }
+    }
+
+    result.matrixR.makeCompressed();
+    if (isComplex)
+        result.matrixI.makeCompressed();
+
+    return result;
+}
+
+/* This function sorts out elements in the columns of a matrix */
+SparseGmpEigenMatrix& SparseGmpEigenMatrix::sort_new(const int& dim, const int& type, vector < vector < IndexType > >& index, vector < IndexType >& nbNegatives) const
+{
+    SparseGmpEigenMatrix& result(*(new SparseGmpEigenMatrix));
+
+    // We prepare the matrices
+    result.matrixR.resize(matrixR.rows(),matrixR.cols());
+    result.matrixR.reserve(matrixR.nonZeros());
+    if (isComplex) {
+        result.isComplex = true;
+        result.matrixI.resize(matrixR.rows(), matrixR.cols());
+        result.matrixI.reserve(matrixI.nonZeros());
+    }
+
+    // We assume that index and nbNegatives are already empty
+    //index.clear();
+    //nbNegatives.clear();
+
+    if (dim == 0) {
+        for (IndexType k(0); k < matrixR.outerSize(); ++k) {
+            // First, we find the non-zero elements which are in this column
+            // as well as how many elements are smaller than zero
+            vector < IndexType > indexMap(0, 0);
+            nbNegatives.push_back(0);
+            if (isComplex) {
+                SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+                SparseMatrix<mpreal>::InnerIterator itI(matrixI,k);
+                while ((itR) || (itI)) {
+                    if ((itR) && (itI)) {
+                        if (itR.row() < itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                        } else if (itR.row() == itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                            ++itI;
+                        } else {
+                            indexMap.push_back(itI.row());
+                            ++itI;
+                        }
+                    } else if (itR) {
+                        indexMap.push_back(itR.row());
+                        ++itR;
+                    } else {
+                        indexMap.push_back(itI.row());
+                        ++itI;
+                    }
+                }
+            } else {
+                SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+                while (itR) {
+                    indexMap.push_back(itR.row());
+                    if (itR.value() < 0)
+                        ++nbNegatives[k];
+                    ++itR;
+                }
+            }
+
+            // Now we sort them
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(matrixR.col(k), matrixI.col(k)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(matrixR.col(k)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            index.push_back(indexMap);
+
+            IndexType startBlock, endBlock;
+            if (type == 0) {
+                startBlock = nbNegatives[k];
+                endBlock = indexMap.size() - nbNegatives[k];
+            } else {
+                startBlock = indexMap.size() - nbNegatives[k];
+                endBlock = nbNegatives[k];
+            }
+
+            // We construct the sorted column
+            for (IndexType i(0); i < indexMap.size(); ++i) {
+                IndexType x(i);
+                if (i >= startBlock)
+                    x = matrixR.innerSize()-indexMap.size()+i;
+
+                if (isComplex) {
+                    if (matrixR.coeff(indexMap[i],k) != 0)
+                        result.matrixR.insert(x,k) = matrixR.coeff(indexMap[i],k);
+                    if (matrixI.coeff(indexMap[i],k) != 0)
+                        result.matrixI.insert(x,k) = matrixI.coeff(indexMap[i],k);
+                } else {
+                    result.matrixR.insert(x,k) = matrixR.coeff(indexMap[i],k);
+                }
+            }
+        }
+    } else {
+        // We start by transposing the matrix
+        SparseGmpEigenMatrix transpo(transpose());
+
+        for (IndexType k(0); k < transpo.matrixR.outerSize(); ++k) {
+            // First, we find the non-zero elements which are in this column
+            // as well as how many elements are smaller than zero
+            vector < IndexType > indexMap(0, 0);
+            nbNegatives.push_back(0);
+            if (isComplex) {
+                SparseMatrix<mpreal>::InnerIterator itR(transpo.matrixR,k);
+                SparseMatrix<mpreal>::InnerIterator itI(transpo.matrixI,k);
+                while ((itR) || (itI)) {
+                    if ((itR) && (itI)) {
+                        if (itR.row() < itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                        } else if (itR.row() == itI.row()) {
+                            indexMap.push_back(itR.row());
+                            ++itR;
+                            ++itI;
+                        } else {
+                            indexMap.push_back(itI.row());
+                            ++itI;
+                        }
+                    } else if (itR) {
+                        indexMap.push_back(itR.row());
+                        ++itR;
+                    } else {
+                        indexMap.push_back(itI.row());
+                        ++itI;
+                    }
+                }
+            } else {
+                SparseMatrix<mpreal>::InnerIterator itR(transpo.matrixR,k);
+                while (itR) {
+                    indexMap.push_back(itR.row());
+                    if (itR.value() < 0)
+                        ++nbNegatives[k];
+                    ++itR;
+                }
+            }
+
+            // Now we sort them
+            if (isComplex)
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndicesComplex< Matrix< mpreal, Dynamic, 1 >, Matrix< mpreal, Dynamic, 1 > >(transpo.matrixR.col(k), transpo.matrixI.col(k)));
+            else
+                std::sort(indexMap.begin(), indexMap.end(), compareThroughIndices< Matrix< mpreal, Dynamic, 1 > >(transpo.matrixR.col(k)));
+
+            if (type == 1)
+                std::reverse(indexMap.begin(), indexMap.end());
+
+            index.push_back(indexMap);
+
+            IndexType startBlock, endBlock;
+            if (type == 0) {
+                startBlock = nbNegatives[k];
+                endBlock = indexMap.size() - nbNegatives[k];
+            } else {
+                startBlock = indexMap.size() - nbNegatives[k];
+                endBlock = nbNegatives[k];
+            }
+
+            // We construct the sorted column
+            for (IndexType i(0); i < indexMap.size(); ++i) {
+                IndexType x(i);
+                if (i >= startBlock)
+                    x = matrixR.innerSize()-indexMap.size()+i;
+
+                if (isComplex) {
+                    if (transpo.matrixR.coeff(indexMap[i],k) != 0)
+                        result.matrixR.insert(k,x) = transpo.matrixR.coeff(indexMap[i],k);
+                    if (transpo.matrixI.coeff(indexMap[i],k) != 0)
+                        result.matrixI.insert(k,x) = transpo.matrixI.coeff(indexMap[i],k);
+                } else {
+                    result.matrixR.insert(k,x) = transpo.matrixR.coeff(indexMap[i],k);
+                }
+            }
+        }
+    }
+
+    result.matrixR.makeCompressed();
+    if (isComplex)
+        result.matrixI.makeCompressed();
+
+    return result;
+}
+
+
 
 /* This function transforms complex matrices into twice as big real matrices */
 SparseGmpEigenMatrix SparseGmpEigenMatrix::complexIsometry() const

@@ -1073,6 +1073,35 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
 
 
+    /* Sorts out the elements of a matrix */
+    if (!strcmp("sort", cmd)) {
+        // Check parameters
+        if ((nlhs != 3) || (nrhs != 4))
+            mexErrMsgTxt("sort: Unexpected arguments.");
+
+        // We extract the sorting dimension
+        int dim(mxGetScalar(prhs[2]));
+
+        // We extract the sorting type
+        int type(mxGetScalar(prhs[3]));
+
+        // We prepare a table to gather the indices
+        vector < vector < IndexType > > indices;
+
+        // We prepare a list of positions for the zeros
+        vector < IndexType > nbNegatives;
+
+        SparseGmpEigenMatrix& result(SparseGmpEigenMatrix_instance.sort_new(dim, type, indices, nbNegatives));
+
+        // We prepare the reference to this object for matlab
+        plhs[0] = createMatlabIdFromObj<SparseGmpEigenMatrix>(result);
+        plhs[1] = vectorVectorToMatlabDoublesCell(indices);
+        plhs[2] = vectorToMatlabDoubles(nbNegatives);
+
+        return;
+    }
+
+
     // If we reached here, then there must be a third input parameter
     if (nrhs < 3)
        mexErrMsgTxt("Third input not found.");
