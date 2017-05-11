@@ -84,7 +84,7 @@ classdef sgem < handle
                     % gem object with default threshold
                     threshold = min(size(varargin{1}))*10^gem(-this.getWorkingPrecision);
                     this.objectIdentifier = sgem_mex('sparse', objectIdentifier(varargin{1}), objectIdentifier(threshold));
-                elseif isnumeric(varargin{1})
+                elseif isnumeric(varargin{1}) || islogical(varargin{1})
                     % Then we interpret this call as a call for the library to
                     % create an instance of this class from some numerical
                     % matlab data (e.g. a numerical number). We thus transfer
@@ -101,6 +101,9 @@ classdef sgem < handle
                         i = [];
                         j = [];
                         s = [];
+                    end
+                    if islogical(s)
+                        s = double(s);
                     end
                     [m n] = size(varargin{1});
                     if isequal(class(s),'gem') % in principle this case should not occur

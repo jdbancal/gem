@@ -102,6 +102,12 @@ classdef gem < handle
 %                        warning('Creating a dense gem object from a sparse matrix. Use ''sgem'' or ''gemify'' to create a sparse gem object.');
 %                    end
                     this.objectIdentifier = gem_mex('newFromMatlab', full(varargin{1}), this.getWorkingPrecision);
+                elseif islogical(varargin{1})
+                    % We also interpret this as a call for the library to
+                    % create an instance of this class from some numerical
+                    % matlab data. Only, the numerical data was provided in
+                    % numerical form.
+                    this.objectIdentifier = gem_mex('newFromMatlab', full(double(varargin{1})), this.getWorkingPrecision);
                 elseif ischar(varargin{1})
                     % We embed the string into a cell array so that the c++
                     % interface interprets it correctly.
