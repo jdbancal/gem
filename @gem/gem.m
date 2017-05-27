@@ -325,7 +325,7 @@ classdef gem < handle
                 if precision < 1
                     error('The precision need to be larger or equal to 1    ');
                 end
-                precision = newValue;
+                precision = double(newValue);
                 % We call the mex interface to make this the default
                 % working precision
                 gem_mex('setWorkingPrecision', precision);
@@ -341,7 +341,7 @@ classdef gem < handle
             end
             if nargin >= 1
                 if newValue >= 1
-                    precision = newValue;
+                    precision = double(newValue);
                 else
                     % This means plotting as many nonzero digits as
                     % available
