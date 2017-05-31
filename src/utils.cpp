@@ -68,7 +68,7 @@ string firstDigitsToString(const mpreal& x, const int& n, bool& oneMoreDigitFlag
 
     // We determine whether the rounding process created one more leading digit.
     // Here is the exponent we would have without rounding:
-    string initialExponent(iszero(x) ? "0" : ToString<double>(std::floor(std::log10(std::abs(x.toDouble())))));
+    string initialExponent(iszero(x) ? "0" : ToString<double>(mpfr::floor(mpfr::log10(mpfr::abs(x))).toDouble()));
     // Here is the exponent that we found
     size_t exponentSign = out.find_last_of("+");
     if (exponentSign == string::npos)
@@ -150,7 +150,7 @@ string mprealToString(const mpreal& x, int width, const int& exponentShift, int 
     // We are interested in the intersection between this range and the ones on
     // which the number has significant digits. Here are the exponents of the
     // first and last digits of our number
-    int numberPower1(iszero(x) ? 0 : std::floor(std::log10(std::abs(x.toDouble()))));
+    int numberPower1(iszero(x) ? 0 : mpfr::floor(mpfr::log10(mpfr::abs(x))));
     int numberPower2(numberPower1 - bits2digits(x.get_prec()) + 1);
 
     // WARNING : If the first digit is rounded up, it may create one more digit higher up (!)
@@ -269,7 +269,7 @@ string mprealToString2(const mpreal& x, const int& width, const bool& padOnTheRi
 //    cout << endl << x.toDouble() << endl;
 
     // First, we check what is the exponent of the number
-    int exponent(iszero(x) ? 0 : std::floor(std::log10(std::abs(x.toDouble()))));
+    int exponent(iszero(x) ? 0 : mpfr::floor(mpfr::log10(mpfr::abs(x))));
     int lengthExponent(ToString(exponent).length());
 
 //    cout << exponent << " " << lengthExponent << endl;
