@@ -321,13 +321,6 @@ void GmpEigenMatrix::display(const int& precision) const
     bool integerMatrix(isInt());
 //        cout << "integerMatrix = " << integerMatrix << endl;
     int largestExponent((int)((iszero(matrixR(0,0)) || isnan(matrixR(0,0)) || isinf(matrixR(0,0))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
-cout << "iszero(matrixR(0,0)) = " << iszero(matrixR(0,0)) << endl;
-cout << "isnan(matrixR(0,0)) = " << isnan(matrixR(0,0)) << endl;
-cout << "isinf(matrixR(0,0)) = " << isinf(matrixR(0,0)) << endl;
-cout << "INT_MIN = " << INT_MIN << endl;
-cout << "precision = " << precision << endl;
-int ttmp = (int)(mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision)))))));
-cout << "floor(log10(abs((matrixR(0,0)/(1-5*10^(-prec-1))))))" << ttmp << endl;
     for (mwIndex i = 0; i < matrixR.rows(); ++i) {
         for (mwIndex j = 0; j < matrixR.cols(); ++j) {
             largestExponent = max(largestExponent, (int)((iszero(matrixR(i,j)) || isnan(matrixR(i,j)) || isinf(matrixR(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
