@@ -11,7 +11,7 @@ function disp(this, arg2)
     
     % Some versions of matlab provide the name as a second argument
     if (nargin >= 2)
-        displayPrecision = arg3;
+        displayPrecision = double(arg3);
     end
     
     sgem_mex('display', this.objectIdentifier, displayPrecision);

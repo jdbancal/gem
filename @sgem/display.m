@@ -15,12 +15,12 @@ function display(this, arg2, arg3)
     if (nargin >= 2) && ischar(arg2)
         name = arg2;
         if nargin >= 3
-            displayPrecision = arg3;
+            displayPrecision = double(arg3);
         end
     else
         name = inputname(1);
         if (nargin >= 2)
-            displayPrecision = arg2;
+            displayPrecision = double(arg2);
         end
     end
     
