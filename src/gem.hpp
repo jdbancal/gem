@@ -116,7 +116,7 @@ public:
 
     /* This function returns a cell array with strings describing each matrix
        element */
-    mxArray* toStrings() const;
+    mxArray* toStrings(const int& precision) const;
 
     /* This function returns the number of significant digits of the real part in
        matlab format */

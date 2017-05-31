@@ -8,6 +8,7 @@
 - Added support for algebra with non-numeric objects
 - Improved display of super tiny numbers
 - Fixed precision setting for sparse matrices
+- Added support for partial precision in toStrings
 
 ## [0.1.3] - 2017-02-10
 - Added isinteger, isfloat, and basic implementation of sprintf

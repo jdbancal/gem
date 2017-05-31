@@ -547,7 +547,7 @@ mxArray* SparseGmpEigenMatrix::toDouble() const
 
    NOTE : Exceptionally, this function returns indices in matlab format
      (so that the matlab interface doesn't need to do it) */
-mxArray* SparseGmpEigenMatrix::toStrings() const
+mxArray* SparseGmpEigenMatrix::toStrings(const int& precision) const
 {
     // We start by filling dynamically allocated tables (we don't know exactly
     // how many elements we'll end up with)
@@ -563,7 +563,7 @@ mxArray* SparseGmpEigenMatrix::toStrings() const
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it) {
                 rows.push_back(it.row()+1);
                 cols.push_back(it.col()+1);
-                values.push_back(it.value().toString());
+                values.push_back(it.value().toString(precision));
             }
         }
     } else {
@@ -577,32 +577,32 @@ mxArray* SparseGmpEigenMatrix::toStrings() const
                     if (itR.row() < itI.row()) {
                         rows.push_back(itR.row()+1);
                         cols.push_back(itR.col()+1);
-                        values.push_back(itR.value().toString());
+                        values.push_back(itR.value().toString(precision));
                         ++itR;
                     } else if (itR.row() == itI.row()) {
                         rows.push_back(itR.row()+1);
                         cols.push_back(itR.col()+1);
-                        string chain(itI.value().toString()+"i");
+                        string chain(itI.value().toString(precision)+"i");
                         if (itI.value() > 0)
                             chain = "+" + chain;
-                        values.push_back(itR.value().toString() + chain);
+                        values.push_back(itR.value().toString(precision) + chain);
                         ++itR;
                         ++itI;
                     } else {
                         rows.push_back(itI.row()+1);
                         cols.push_back(itI.col()+1);
-                        values.push_back(itI.value().toString()+"i");
+                        values.push_back(itI.value().toString(precision)+"i");
                         ++itI;
                     }
                 } else if (itR) {
                     rows.push_back(itR.row()+1);
                     cols.push_back(itR.col()+1);
-                    values.push_back(itR.value().toString());
+                    values.push_back(itR.value().toString(precision));
                     ++itR;
                 } else {
                     rows.push_back(itI.row()+1);
                     cols.push_back(itI.col()+1);
-                    values.push_back(itI.value().toString()+"i");
+                    values.push_back(itI.value().toString(precision)+"i");
                     ++itI;
                 }
             }

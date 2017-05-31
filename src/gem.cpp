@@ -665,7 +665,7 @@ mxArray* GmpEigenMatrix::toDouble() const
 
 /* This function returns a cell array with strings describing each matrix
    element */
-mxArray* GmpEigenMatrix::toStrings() const
+mxArray* GmpEigenMatrix::toStrings(const int& precision) const
 {
     // Now, we add each field
     // We start with the real part
@@ -678,14 +678,14 @@ mxArray* GmpEigenMatrix::toStrings() const
     for (mwIndex j = 0; j < n; ++j) {
         // We first iterate on the columns
         for (mwIndex i = 0; i < m; ++i) {
-            string text(matrixR(i,j).toString());
+            string text(matrixR(i,j).toString(precision));
             if ((isComplex) && (matrixI(i,j) != 0))
             {
                 if (matrixR(i,j)==0)
                     text = "";
                 else if (sgn(matrixI(i,j)) >= 0)
                     text += "+";
-                text += matrixI(i,j).toString() + "i";
+                text += matrixI(i,j).toString(precision) + "i";
             }
             mxSetCell(cellArray, index, mxCreateString(text.c_str()));
             ++index;

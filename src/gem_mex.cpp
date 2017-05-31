@@ -324,10 +324,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /* Extract a cell array with strings describing each number */
     if (!strcmp("toStrings", cmd)) {
         // Check parameters
-        if ((nlhs != 1) || (nrhs != 2))
-            mexErrMsgTxt("double: Unexpected arguments.");
+        if ((nlhs != 1) || (nrhs != 3))
+            mexErrMsgTxt("toStrings: Unexpected arguments.");
 
-        plhs[0] = GmpEigenMatrix_instance.toStrings();
+        // We extract the required precision
+        int precision = mxGetScalar(prhs[2]);
+
+        // ... and call the function
+        plhs[0] = GmpEigenMatrix_instance.toStrings(precision);
         return;
     }
 
