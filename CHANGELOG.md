@@ -6,6 +6,8 @@
 - Added modulo
 - Added any
 - Added support for algebra with non-numeric objects
+- Improved display of super tiny numbers
+- Fixed precision setting for sparse matrices
 
 ## [0.1.3] - 2017-02-10
 - Added isinteger, isfloat, and basic implementation of sprintf
