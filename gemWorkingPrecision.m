@@ -38,7 +38,7 @@ function precision = gemWorkingPrecision(precision)
     else
         tmp.setWorkingPrecision(precision);
         % We also set the precision for the sparse objects
-%        stmp = gem(0);
-%        stmp.setWorkingPrecision(precision);
+        stmp = sgem(0);
+        stmp.setWorkingPrecision(precision);
     end
 end
