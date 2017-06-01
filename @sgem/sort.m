@@ -20,6 +20,8 @@ function [result I] = sort(this, dim, mode)
         else
             dim = 2;
         end
+    elseif ~isequal(class(dim), 'double')
+        dim = double(dim);
     end
     
     if ischar(dim)

@@ -10,8 +10,11 @@ function gemRng(seed)
     % We check the input
     if nargin == 0
         seed = randi(2^32,1,1,'uint32');
+    elseif ~isequal(class(seed),'double')
+        seed = double(seed);
     end
-    if (nargin > 1) || ~isnumeric(seed)
+
+    if (nargin > 1) || ~isnumeric(seed) || (numel(seed) ~= 1)
         error('Unexpected argument in gemRng')
     end
     

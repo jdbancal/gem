@@ -1,4 +1,4 @@
-% sGEM : an implementation of sparse GMP Eigen Matrices for MATLAB
+% sGEM : an implementation of sparse GMP Eigen Mantrices for MATLAB
 %
 % sgem is a MATLAB class wrapper to the sparse GmpEigenMatrix C++ class
 %
@@ -102,14 +102,11 @@ classdef sgem < handle
                         j = [];
                         s = [];
                     end
-                    if islogical(s)
-                        s = double(s);
-                    end
                     [m n] = size(varargin{1});
                     if isequal(class(s),'gem') % in principle this case should not occur
                         this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
                     else
-                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, double(s), m, n, this.getWorkingPrecision);
                     end
                 elseif ischar(varargin{1}) || iscell(varargin{1})
                     % We first create a dense gem object, then return its
