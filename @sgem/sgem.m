@@ -68,6 +68,10 @@ classdef sgem < handle
         %  - Create a C++ class instance for any of the mathematical
         %    constants above
         function this = sgem(varargin)
+            inferiorto('sdpvar');
+            superiorto('double');
+            superiorto('logical');
+
             if nargin == 0
                 % Without further argument we construct a new empty instance
                 this.objectIdentifier = sgem_mex('new');

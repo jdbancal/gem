@@ -43,7 +43,6 @@
 %   - gem('euler')   % Euler constant = 0.577...
 %   - gem('catalan') % The catalan number = 0.915965594...
 
-
 classdef gem < handle
     properties (SetAccess = private, Hidden = true)
         objectIdentifier; % The identifier of the underlying C++ class instance (i.e. the integer version of the pointer to the handle_class instance containing a pointer to the object of interest)
@@ -64,6 +63,10 @@ classdef gem < handle
         %  - Create a C++ class instance for any of the mathematical
         %    constants above
         function this = gem(varargin)
+            inferiorto('sdpvar');
+            superiorto('double');
+            superiorto('logical');
+
             % In the source file version of this library, we start by
             % checking whether the c++ library was compiled. If not, we 
             % suggest to download the binaries.
