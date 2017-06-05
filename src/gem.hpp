@@ -344,6 +344,8 @@ public:
     Eigen::Matrix <bool, Eigen::Dynamic, Eigen::Dynamic> operator>=(const GmpEigenMatrix& b) const;
     Eigen::Matrix <bool, Eigen::Dynamic, Eigen::Dynamic> eq(const GmpEigenMatrix& b) const;
     Eigen::Matrix <bool, Eigen::Dynamic, Eigen::Dynamic> ne(const GmpEigenMatrix& b) const;
+    Eigen::Matrix <bool, Eigen::Dynamic, Eigen::Dynamic> isnan() const;
+    Eigen::Matrix <bool, Eigen::Dynamic, Eigen::Dynamic> isinf() const;
     bool identicalValues(const GmpEigenMatrix& b) const;
     bool identicalValuesNaNok(const GmpEigenMatrix& b) const;
 

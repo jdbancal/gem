@@ -320,12 +320,12 @@ void GmpEigenMatrix::display(const int& precision) const
     //        are not well converted (they may not finish with zeros)
     bool integerMatrix(isInt());
 //        cout << "integerMatrix = " << integerMatrix << endl;
-    int largestExponent((int)((iszero(matrixR(0,0)) || isnan(matrixR(0,0)) || isinf(matrixR(0,0))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+    int largestExponent((int)((iszero(matrixR(0,0)) || mpfr::isnan(matrixR(0,0)) || mpfr::isinf(matrixR(0,0))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
     for (mwIndex i = 0; i < matrixR.rows(); ++i) {
         for (mwIndex j = 0; j < matrixR.cols(); ++j) {
-            largestExponent = max(largestExponent, (int)((iszero(matrixR(i,j)) || isnan(matrixR(i,j)) || isinf(matrixR(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+            largestExponent = max(largestExponent, (int)((iszero(matrixR(i,j)) || mpfr::isnan(matrixR(i,j)) || mpfr::isinf(matrixR(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
             if (isComplex)
-                largestExponent = max(largestExponent, (int)((iszero(matrixI(i,j)) || isnan(matrixI(i,j)) || isinf(matrixI(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixI(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+                largestExponent = max(largestExponent, (int)((iszero(matrixI(i,j)) || mpfr::isnan(matrixI(i,j)) || mpfr::isinf(matrixI(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixI(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
         }
     }
     // In case the matrix only contains zeros, NaNs and Infs, the global exponent is 0
@@ -416,9 +416,9 @@ void GmpEigenMatrix::display(const int& precision) const
             mexPrintf("  ");
             if (iszero(matrixR(i,j)))
                 mexPrintf("%s", (nSpaces(width)+"0").c_str());
-            else if (isnan(matrixR(i,j)))
+            else if (mpfr::isnan(matrixR(i,j)))
                 mexPrintf("%s", (nSpaces(width-2)+"NaN").c_str());
-            else if (isinf(matrixR(i,j))) {
+            else if (mpfr::isinf(matrixR(i,j))) {
                 if (sgn(matrixR(i,j)) < 0)
                     mexPrintf("%s", (nSpaces(width-3)+"-Inf").c_str());
                 else
@@ -433,9 +433,9 @@ void GmpEigenMatrix::display(const int& precision) const
             if (isComplex) {
                 if (iszero(matrixI(i,j)))
                     mexPrintf("%s", nSpaces(3+width+1).c_str());
-                else if (isnan(matrixI(i,j)))
+                else if (mpfr::isnan(matrixI(i,j)))
                     mexPrintf("%s", (" + "+nSpaces(width-3)+"NaNi").c_str());
-                else if (isinf(matrixI(i,j))) {
+                else if (mpfr::isinf(matrixI(i,j))) {
                     if (sgn(matrixI(i,j)) < 0)
                         mexPrintf("%s", (" - "+nSpaces(width-3)+"Infi").c_str());
                     else
@@ -492,9 +492,9 @@ void GmpEigenMatrix::displayIndividual(int width) const
         for (mwIndex i = 0; i < matrixR.rows(); ++i) {
             for (mwIndex j = 0; j < matrixR.cols(); ++j) {
                 if (iszero(matrixR(i,j))) {}
-                else if (isnan(matrixR(i,j)))
+                else if (mpfr::isnan(matrixR(i,j)))
                     width = max(width, 3);
-                else if (isinf(matrixR(i,j))) {
+                else if (mpfr::isinf(matrixR(i,j))) {
                     if (sgn(matrixR(i,j)) < 0)
                         width = max(width, 4);
                     else
@@ -503,9 +503,9 @@ void GmpEigenMatrix::displayIndividual(int width) const
                     width = max(width, (int) matrixR(i,j).toString().length());
                 if (isComplex) {
                     if (iszero(matrixI(i,j))) {}
-                    else if (isnan(matrixI(i,j)))
+                    else if (mpfr::isnan(matrixI(i,j)))
                         width = max(width, 3);
-                    else if (isinf(matrixI(i,j))) {
+                    else if (mpfr::isinf(matrixI(i,j))) {
                         if (sgn(matrixI(i,j)) < 0)
                             width = max(width, 3);
                         else
@@ -524,9 +524,9 @@ void GmpEigenMatrix::displayIndividual(int width) const
                 mexPrintf("  ");
                 if (iszero(matrixR(i,j)))
                     mexPrintf("%s", (nSpaces(width-1)+"0").c_str());
-                else if (isnan(matrixR(i,j)))
+                else if (mpfr::isnan(matrixR(i,j)))
                     mexPrintf("%s", (nSpaces(width-3)+"NaN").c_str());
-                else if (isinf(matrixR(i,j))) {
+                else if (mpfr::isinf(matrixR(i,j))) {
                     if (sgn(matrixR(i,j)) < 0)
                         mexPrintf("%s", (nSpaces(width-4)+"-Inf").c_str());
                     else
@@ -539,9 +539,9 @@ void GmpEigenMatrix::displayIndividual(int width) const
                 if (isComplex) {
                     if (iszero(matrixI(i,j)))
                         mexPrintf("%s", nSpaces(3+width+1).c_str());
-                    else if (isnan(matrixI(i,j)))
+                    else if (mpfr::isnan(matrixI(i,j)))
                         mexPrintf("%s", (" + "+nSpaces(width-3)+"NaNi").c_str());
-                    else if (isinf(matrixI(i,j))) {
+                    else if (mpfr::isinf(matrixI(i,j))) {
                         if (sgn(matrixI(i,j)) < 0)
                             mexPrintf("%s", (" - "+nSpaces(width-3)+"Infi").c_str());
                         else
@@ -582,9 +582,9 @@ void GmpEigenMatrix::displayIndividual(int width) const
             mexPrintf("  ");
             if (iszero(matrixR(i,j)))
                 mexPrintf("%s", (nSpaces(width)+"0").c_str());
-            else if (isnan(matrixR(i,j)))
+            else if (mpfr::isnan(matrixR(i,j)))
                 mexPrintf("%s", (nSpaces(width-2)+"NaN").c_str());
-            else if (isinf(matrixR(i,j))) {
+            else if (mpfr::isinf(matrixR(i,j))) {
                 if (sgn(matrixR(i,j)) < 0)
                     mexPrintf("%s", (nSpaces(width-3)+"-Inf").c_str());
                 else
@@ -594,9 +594,9 @@ void GmpEigenMatrix::displayIndividual(int width) const
             if (isComplex) {
                 if (iszero(matrixI(i,j)))
                     mexPrintf("%s", nSpaces(2+width+1).c_str());
-                else if (isnan(matrixI(i,j)))
+                else if (mpfr::isnan(matrixI(i,j)))
                     mexPrintf("%s", (" + "+nSpaces(width-4)+"NaNi").c_str());
-                else if (isinf(matrixI(i,j))) {
+                else if (mpfr::isinf(matrixI(i,j))) {
                     if (sgn(matrixI(i,j)) < 0)
                         mexPrintf("%s", (" - "+nSpaces(width-4)+"Infi").c_str());
                     else
@@ -2579,7 +2579,7 @@ GmpEigenMatrix GmpEigenMatrix::sqrt() const
                 // Im(sqrt(NaN)) = 0 (by convention)
                 // and
                 // Im(sqrt(Inf+c*1i)) = 0
-                if ((isnan(matrixR(i,j))) && (matrixI(i,j) == 0))
+                if ((mpfr::isnan(matrixR(i,j))) && (matrixI(i,j) == 0))
                     result.matrixI(i,j) = 0;
                 else if ((matrixR(i,j) == mpreal("Inf")) && (isfinite(matrixI(i,j))))
                     result.matrixI(i,j) = 0;
@@ -2620,7 +2620,7 @@ GmpEigenMatrix& GmpEigenMatrix::sqrt_new() const
                 // Im(sqrt(NaN)) = 0 (by convention)
                 // and
                 // Im(sqrt(Inf+c*1i)) = 0
-                if ((isnan(matrixR(i,j))) && (matrixI(i,j) == 0))
+                if ((mpfr::isnan(matrixR(i,j))) && (matrixI(i,j) == 0))
                     result.matrixI(i,j) = 0;
                 else if ((matrixR(i,j) == mpreal("Inf")) && (isfinite(matrixI(i,j))))
                     result.matrixI(i,j) = 0;
@@ -4651,6 +4651,36 @@ Matrix <bool, Dynamic, Dynamic> GmpEigenMatrix::ne(const GmpEigenMatrix& b) cons
     return result;
 }
 
+/* Test whether the elements are nan  b = isnan(a) */
+Matrix <bool, Dynamic, Dynamic> GmpEigenMatrix::isnan() const
+{
+    Matrix <bool, Dynamic, Dynamic> result(matrixR.rows(), matrixR.cols());
+
+    for (IndexType j(0); j < matrixR.cols(); ++j)
+        for (IndexType i(0); i < matrixR.rows(); ++i)
+            if (isComplex)
+                result(i,j) = mpfr::isnan(matrixR(i,j)) || mpfr::isnan(matrixI(i,j));
+            else
+                result(i,j) = mpfr::isnan(matrixR(i,j));
+
+    return result;
+}
+
+/* Test whether the elements are +/-inf  b = isinf(a) */
+Matrix <bool, Dynamic, Dynamic> GmpEigenMatrix::isinf() const
+{
+    Matrix <bool, Dynamic, Dynamic> result(matrixR.rows(), matrixR.cols());
+
+    for (IndexType j(0); j < matrixR.cols(); ++j)
+        for (IndexType i(0); i < matrixR.rows(); ++i)
+            if (isComplex)
+                result(i,j) = mpfr::isinf(matrixR(i,j)) || mpfr::isinf(matrixI(i,j));
+            else
+                result(i,j) = mpfr::isinf(matrixR(i,j));
+
+    return result;
+}
+
 /* Test whether the numerical values match
    this function is called by c = isequal(a, b)
    at this stage, we already know that both tables have the same size, that both
@@ -4680,9 +4710,9 @@ bool GmpEigenMatrix::identicalValuesNaNok(const GmpEigenMatrix& b) const
     for (IndexType j(0); j < matrixR.cols(); ++j)
         for (IndexType i(0); i < matrixR.rows(); ++i)
         {
-            bool result((matrixR(i,j) == b.matrixR(i,j)) || (isnan(matrixR(i,j)) && isnan(b.matrixR(i,j))));
+            bool result((matrixR(i,j) == b.matrixR(i,j)) || (mpfr::isnan(matrixR(i,j)) && mpfr::isnan(b.matrixR(i,j))));
             if ((isComplex) && (b.isComplex))
-                result = result && ((matrixI(i,j) == b.matrixI(i,j)) || (isnan(matrixI(i,j)) && isnan(b.matrixI(i,j))));
+                result = result && ((matrixI(i,j) == b.matrixI(i,j)) || (mpfr::isnan(matrixI(i,j)) && mpfr::isnan(b.matrixI(i,j))));
             if (!result)
                 return false;
         }
@@ -4756,7 +4786,7 @@ GmpEigenMatrix GmpEigenMatrix::colMin(vector<IndexType>& indices) const
             minValue.setInf(+1);
             minAngle.setInf(+1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) < minValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == minValue) && (atan2(matrixI(i,j), matrixR(i,j)) < minAngle))) {
                         indices[j] = i;
                         minValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -4780,7 +4810,7 @@ GmpEigenMatrix GmpEigenMatrix::colMin(vector<IndexType>& indices) const
             mpreal minValue;
             minValue.setInf(+1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
                     indices[j] = i;
                     minValue = matrixR(i,j);
                 }
@@ -4815,7 +4845,7 @@ GmpEigenMatrix& GmpEigenMatrix::colMin_new(vector<IndexType>& indices) const
             minValue.setInf(+1);
             minAngle.setInf(+1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) < minValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == minValue) && (atan2(matrixI(i,j), matrixR(i,j)) < minAngle))) {
                         indices[j] = i;
                         minValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -4839,7 +4869,7 @@ GmpEigenMatrix& GmpEigenMatrix::colMin_new(vector<IndexType>& indices) const
             mpreal minValue;
             minValue.setInf(+1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
                     indices[j] = i;
                     minValue = matrixR(i,j);
                 }
@@ -4874,7 +4904,7 @@ GmpEigenMatrix GmpEigenMatrix::rowMin(vector<IndexType>& indices) const
             minValue.setInf(+1);
             minAngle.setInf(+1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) < minValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == minValue) && (atan2(matrixI(i,j), matrixR(i,j)) < minAngle))) {
                         indices[i] = j;
                         minValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -4898,7 +4928,7 @@ GmpEigenMatrix GmpEigenMatrix::rowMin(vector<IndexType>& indices) const
             mpreal minValue;
             minValue.setInf(+1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
                     indices[i] = j;
                     minValue = matrixR(i,j);
                 }
@@ -4933,7 +4963,7 @@ GmpEigenMatrix& GmpEigenMatrix::rowMin_new(vector<IndexType>& indices) const
             minValue.setInf(+1);
             minAngle.setInf(+1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) < minValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == minValue) && (atan2(matrixI(i,j), matrixR(i,j)) < minAngle))) {
                         indices[i] = j;
                         minValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -4957,7 +4987,7 @@ GmpEigenMatrix& GmpEigenMatrix::rowMin_new(vector<IndexType>& indices) const
             mpreal minValue;
             minValue.setInf(+1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) < minValue)) {
                     indices[i] = j;
                     minValue = matrixR(i,j);
                 }
@@ -4982,10 +5012,10 @@ GmpEigenMatrix GmpEigenMatrix::ewMin(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(0,0)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(0,0)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) < bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(0,0)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) < bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5005,9 +5035,9 @@ GmpEigenMatrix GmpEigenMatrix::ewMin(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(0,0)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(0,0))) || (matrixR(i,j) <= b.matrixR(0,0))) {
+                    } else if ((mpfr::isnan(b.matrixR(0,0))) || (matrixR(i,j) <= b.matrixR(0,0))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(0,0);
@@ -5024,10 +5054,10 @@ GmpEigenMatrix GmpEigenMatrix::ewMin(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(0,0))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(0,0))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(0,0);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) <= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) <= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(0,0);
@@ -5047,9 +5077,9 @@ GmpEigenMatrix GmpEigenMatrix::ewMin(const GmpEigenMatrix& b) const
             result.matrixR.resize(b.matrixR.rows(),b.matrixR.cols());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(0,0))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(0,0))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(0,0) <= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(0,0) <= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(0,0);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);
@@ -5066,10 +5096,10 @@ GmpEigenMatrix GmpEigenMatrix::ewMin(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5089,9 +5119,9 @@ GmpEigenMatrix GmpEigenMatrix::ewMin(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(i,j) <= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(i,j) <= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);
@@ -5118,10 +5148,10 @@ GmpEigenMatrix& GmpEigenMatrix::ewMin_new(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(0,0)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(0,0)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) < bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(0,0)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) < bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5141,9 +5171,9 @@ GmpEigenMatrix& GmpEigenMatrix::ewMin_new(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(0,0)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(0,0))) || (matrixR(i,j) <= b.matrixR(0,0))) {
+                    } else if ((mpfr::isnan(b.matrixR(0,0))) || (matrixR(i,j) <= b.matrixR(0,0))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(0,0);
@@ -5160,10 +5190,10 @@ GmpEigenMatrix& GmpEigenMatrix::ewMin_new(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(0,0))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(0,0))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(0,0);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) <= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) <= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(0,0);
@@ -5183,9 +5213,9 @@ GmpEigenMatrix& GmpEigenMatrix::ewMin_new(const GmpEigenMatrix& b) const
             result.matrixR.resize(b.matrixR.rows(),b.matrixR.cols());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(0,0))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(0,0))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(0,0) <= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(0,0) <= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(0,0);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);
@@ -5202,10 +5232,10 @@ GmpEigenMatrix& GmpEigenMatrix::ewMin_new(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) < bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) <= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5225,9 +5255,9 @@ GmpEigenMatrix& GmpEigenMatrix::ewMin_new(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(i,j) <= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(i,j) <= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);
@@ -5264,7 +5294,7 @@ GmpEigenMatrix GmpEigenMatrix::colMax(vector<IndexType>& indices) const
             maxValue.setInf(-1);
             maxAngle.setInf(-1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) > maxValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == maxValue) && (atan2(matrixI(i,j), matrixR(i,j)) > maxAngle))) {
                         indices[j] = i;
                         maxValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -5288,7 +5318,7 @@ GmpEigenMatrix GmpEigenMatrix::colMax(vector<IndexType>& indices) const
             mpreal maxValue;
             maxValue.setInf(-1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
                     indices[j] = i;
                     maxValue = matrixR(i,j);
                 }
@@ -5323,7 +5353,7 @@ GmpEigenMatrix& GmpEigenMatrix::colMax_new(vector<IndexType>& indices) const
             maxValue.setInf(-1);
             maxAngle.setInf(-1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) > maxValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == maxValue) && (atan2(matrixI(i,j), matrixR(i,j)) > maxAngle))) {
                         indices[j] = i;
                         maxValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -5347,7 +5377,7 @@ GmpEigenMatrix& GmpEigenMatrix::colMax_new(vector<IndexType>& indices) const
             mpreal maxValue;
             maxValue.setInf(-1);
             for (IndexType i(0); i < matrixR.rows(); ++i) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
                     indices[j] = i;
                     maxValue = matrixR(i,j);
                 }
@@ -5382,7 +5412,7 @@ GmpEigenMatrix GmpEigenMatrix::rowMax(vector<IndexType>& indices) const
             maxValue.setInf(-1);
             maxAngle.setInf(-1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) > maxValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == maxValue) && (atan2(matrixI(i,j), matrixR(i,j)) > maxAngle))) {
                         indices[i] = j;
                         maxValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -5406,7 +5436,7 @@ GmpEigenMatrix GmpEigenMatrix::rowMax(vector<IndexType>& indices) const
             mpreal maxValue;
             maxValue.setInf(-1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
                     indices[i] = j;
                     maxValue = matrixR(i,j);
                 }
@@ -5441,7 +5471,7 @@ GmpEigenMatrix& GmpEigenMatrix::rowMax_new(vector<IndexType>& indices) const
             maxValue.setInf(-1);
             maxAngle.setInf(-1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (!isnan(matrixI(i,j)))) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (!mpfr::isnan(matrixI(i,j)))) {
                     if (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) > maxValue) || (((mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2)) == maxValue) && (atan2(matrixI(i,j), matrixR(i,j)) > maxAngle))) {
                         indices[i] = j;
                         maxValue = mpfr::pow(matrixR(i,j),2) + mpfr::pow(matrixI(i,j),2);
@@ -5465,7 +5495,7 @@ GmpEigenMatrix& GmpEigenMatrix::rowMax_new(vector<IndexType>& indices) const
             mpreal maxValue;
             maxValue.setInf(-1);
             for (IndexType j(0); j < matrixR.cols(); ++j) {
-                if ((!isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
+                if ((!mpfr::isnan(matrixR(i,j))) && (matrixR(i,j) > maxValue)) {
                     indices[i] = j;
                     maxValue = matrixR(i,j);
                 }
@@ -5490,10 +5520,10 @@ GmpEigenMatrix GmpEigenMatrix::ewMax(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(0,0)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(0,0)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) > bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(0,0)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) > bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5513,9 +5543,9 @@ GmpEigenMatrix GmpEigenMatrix::ewMax(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(0,0)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(0,0))) || (matrixR(i,j) >= b.matrixR(0,0))) {
+                    } else if ((mpfr::isnan(b.matrixR(0,0))) || (matrixR(i,j) >= b.matrixR(0,0))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(0,0);
@@ -5532,10 +5562,10 @@ GmpEigenMatrix GmpEigenMatrix::ewMax(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(0,0))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(0,0))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(0,0);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) >= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) >= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(0,0);
@@ -5555,9 +5585,9 @@ GmpEigenMatrix GmpEigenMatrix::ewMax(const GmpEigenMatrix& b) const
             result.matrixR.resize(b.matrixR.rows(),b.matrixR.cols());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(0,0))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(0,0))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(0,0) >= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(0,0) >= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(0,0);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);
@@ -5574,10 +5604,10 @@ GmpEigenMatrix GmpEigenMatrix::ewMax(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5597,9 +5627,9 @@ GmpEigenMatrix GmpEigenMatrix::ewMax(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(i,j) >= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(i,j) >= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);
@@ -5626,10 +5656,10 @@ GmpEigenMatrix& GmpEigenMatrix::ewMax_new(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(0,0)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(0,0)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) > bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(0,0)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(0,0))) || (aAbs.matrixR(i,j) > bAbs.matrixR(0,0)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(0,0)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5649,9 +5679,9 @@ GmpEigenMatrix& GmpEigenMatrix::ewMax_new(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(0,0)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(0,0)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(0,0))) || (matrixR(i,j) >= b.matrixR(0,0))) {
+                    } else if ((mpfr::isnan(b.matrixR(0,0))) || (matrixR(i,j) >= b.matrixR(0,0))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(0,0);
@@ -5668,10 +5698,10 @@ GmpEigenMatrix& GmpEigenMatrix::ewMax_new(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(0,0))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(0,0))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(0,0);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) >= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(0,0) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(0,0) == bAbs.matrixR(i,j)) && (aAngle.matrixR(0,0) >= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(0,0);
@@ -5691,9 +5721,9 @@ GmpEigenMatrix& GmpEigenMatrix::ewMax_new(const GmpEigenMatrix& b) const
             result.matrixR.resize(b.matrixR.rows(),b.matrixR.cols());
             for (IndexType i(0); i < b.matrixR.rows(); ++i) {
                 for (IndexType j(0); j < b.matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(0,0))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(0,0))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(0,0);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(0,0) >= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(0,0) >= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(0,0);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);
@@ -5710,10 +5740,10 @@ GmpEigenMatrix& GmpEigenMatrix::ewMax_new(const GmpEigenMatrix& b) const
             GmpEigenMatrix aAbs(abs()), aAngle(angle()), bAbs(b.abs()), bAngle(b.angle());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(aAbs.matrixR(i,j))) && (isnan(bAbs.matrixR(i,j)))) {
+                    if ((mpfr::isnan(aAbs.matrixR(i,j))) && (mpfr::isnan(bAbs.matrixR(i,j)))) {
                         result.matrixR(i,j) = aAbs.matrixR(i,j);
                         result.matrixI(i,j) = 0;
-                    } else if ((isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(i,j)))) {
+                    } else if ((mpfr::isnan(bAbs.matrixR(i,j))) || (aAbs.matrixR(i,j) > bAbs.matrixR(i,j)) || ((aAbs.matrixR(i,j) == bAbs.matrixR(i,j)) && (aAngle.matrixR(i,j) >= bAngle.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
                         if (isComplex)
                             result.matrixI(i,j) = matrixI(i,j);
@@ -5733,9 +5763,9 @@ GmpEigenMatrix& GmpEigenMatrix::ewMax_new(const GmpEigenMatrix& b) const
             result.matrixR.resize(matrixR.rows(),matrixR.cols());
             for (IndexType i(0); i < matrixR.rows(); ++i) {
                 for (IndexType j(0); j < matrixR.cols(); ++j) {
-                    if ((isnan(matrixR(i,j))) && (isnan(b.matrixR(i,j)))) {
+                    if ((mpfr::isnan(matrixR(i,j))) && (mpfr::isnan(b.matrixR(i,j)))) {
                         result.matrixR(i,j) = matrixR(i,j);
-                    } else if ((isnan(b.matrixR(i,j))) || (matrixR(i,j) >= b.matrixR(i,j))) {
+                    } else if ((mpfr::isnan(b.matrixR(i,j))) || (matrixR(i,j) >= b.matrixR(i,j))) {
                         result.matrixR(i,j) = matrixR(i,j);
                     } else {
                         result.matrixR(i,j) = b.matrixR(i,j);

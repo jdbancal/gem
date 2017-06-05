@@ -2965,7 +2965,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::angle() const
         result.matrixR.reserve(matrixR.nonZeros());
         for (IndexType k = 0; k < matrixR.outerSize(); ++k)
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it)
-                if ((it.value() < 0) || (isnan(it.value())))
+                if ((it.value() < 0) || (mpfr::isnan(it.value())))
                     result.matrixR.insert(it.row(), it.col()) = atan2(mpreal(0), it.value());
     } else {
         // For each column, we should merge the lists of lines with nonzero elements...
@@ -2977,7 +2977,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::angle() const
             while ((itR) || (itI)) {
                 if ((itR) && (itI)) {
                     if (itR.row() < itI.row()) {
-                        if ((itR.value() < 0) || (isnan(itR.value())))
+                        if ((itR.value() < 0) || (mpfr::isnan(itR.value())))
                             result.matrixR.insert(itR.row(), itR.col()) = atan2(mpreal(0), itR.value());
                         ++itR;
                     } else if (itR.row() == itI.row()) {
@@ -2989,7 +2989,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::angle() const
                         ++itI;
                     }
                 } else if (itR) {
-                    if ((itR.value() < 0) || (isnan(itR.value())))
+                    if ((itR.value() < 0) || (mpfr::isnan(itR.value())))
                         result.matrixR.insert(itR.row(), itR.col()) = atan2(mpreal(0), itR.value());
                     ++itR;
                 } else {
@@ -3016,7 +3016,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::angle_new() const
         result.matrixR.reserve(matrixR.nonZeros());
         for (IndexType k = 0; k < matrixR.outerSize(); ++k)
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it)
-                if ((it.value() < 0) || (isnan(it.value())))
+                if ((it.value() < 0) || (mpfr::isnan(it.value())))
                     result.matrixR.insert(it.row(), it.col()) = atan2(mpreal(0), it.value());
     } else {
         // For each column, we should merge the lists of lines with nonzero elements...
@@ -3028,7 +3028,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::angle_new() const
             while ((itR) || (itI)) {
                 if ((itR) && (itI)) {
                     if (itR.row() < itI.row()) {
-                        if ((itR.value() < 0) || (isnan(itR.value())))
+                        if ((itR.value() < 0) || (mpfr::isnan(itR.value())))
                             result.matrixR.insert(itR.row(), itR.col()) = atan2(mpreal(0), itR.value());
                         ++itR;
                     } else if (itR.row() == itI.row()) {
@@ -3040,7 +3040,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::angle_new() const
                         ++itI;
                     }
                 } else if (itR) {
-                    if ((itR.value() < 0) || (isnan(itR.value())))
+                    if ((itR.value() < 0) || (mpfr::isnan(itR.value())))
                         result.matrixR.insert(itR.row(), itR.col()) = atan2(mpreal(0), itR.value());
                     ++itR;
                 } else {
@@ -3511,7 +3511,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::sqrt() const
                 // Im(sqrt(NaN)) = 0 (by convention)
                 // and
                 // Im(sqrt(Inf+c*1i)) = 0
-                if ((isnan(matrixR.coeff(it.row(), it.col()))) && (matrixI.coeff(it.row(), it.col()) == 0))
+                if ((mpfr::isnan(matrixR.coeff(it.row(), it.col()))) && (matrixI.coeff(it.row(), it.col()) == 0))
                     ;
                 else if ((matrixR.coeff(it.row(), it.col()) == mpreal("Inf")) && (isfinite(matrixI.coeff(it.row(), it.col()))))
                     ;
@@ -3567,7 +3567,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::sqrt_new() const
                 // Im(sqrt(NaN)) = 0 (by convention)
                 // and
                 // Im(sqrt(Inf+c*1i)) = 0
-                if ((isnan(matrixR.coeff(it.row(), it.col()))) && (matrixI.coeff(it.row(), it.col()) == 0))
+                if ((mpfr::isnan(matrixR.coeff(it.row(), it.col()))) && (matrixI.coeff(it.row(), it.col()) == 0))
                     ;
                 else if ((matrixR.coeff(it.row(), it.col()) == mpreal("Inf")) && (isfinite(matrixI.coeff(it.row(), it.col()))))
                     ;
@@ -6402,6 +6402,125 @@ SparseMatrix <bool> SparseGmpEigenMatrix::ne(const SparseGmpEigenMatrix& b) cons
     return result;
 }
 
+/* Test whether the value is nan: b = isnan(a) */
+SparseMatrix <bool> SparseGmpEigenMatrix::isnan() const
+{
+    SparseMatrix <bool> result(matrixR.rows(), matrixR.cols());
+
+    // We will first copy the data to triplets
+    vector< Triplet<bool> > tripletList;
+
+    if (isComplex) {
+        tripletList.reserve(matrixR.nonZeros() + matrixI.nonZeros());
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+            SparseMatrix<mpreal>::InnerIterator itI(matrixI,k);
+
+            while ((itR) || (itI)) {
+                if ((itR) && (itI)) {
+                    if (itR.row() < itI.row()) {
+                        if (mpfr::isnan(itR.value()))
+                            tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                        ++itR;
+                    } else if (itR.row() == itI.row()) {
+                        if ((mpfr::isnan(itR.value())) || (mpfr::isnan(itI.value())))
+                            tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                        ++itR;
+                        ++itI;
+                    } else {
+                        if (mpfr::isnan(itI.value()))
+                            tripletList.push_back(Triplet<bool>(itI.row(), k, true));
+                        ++itI;
+                    }
+                } else if (itR) {
+                    if (mpfr::isnan(itR.value()))
+                        tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                    ++itR;
+                } else {
+                    if (mpfr::isnan(itI.value()))
+                        tripletList.push_back(Triplet<bool>(itI.row(), k, true));
+                    ++itI;
+                }
+            }                
+        }
+    } else {
+        tripletList.reserve(matrixR.nonZeros());
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+
+            while (itR) {
+                if (mpfr::isnan(itR.value()))
+                    tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                ++itR;
+            }
+        }
+    }
+
+    // Now we can assign the data to the sparse matrix
+    result.setFromTriplets(tripletList.begin(), tripletList.end());
+
+    return result;
+}
+/* Test whether the value is +inf or -inf: b = isinf(a) */
+SparseMatrix <bool> SparseGmpEigenMatrix::isinf() const
+{
+    SparseMatrix <bool> result(matrixR.rows(), matrixR.cols());
+
+    // We will first copy the data to triplets
+    vector< Triplet<bool> > tripletList;
+
+    if (isComplex) {
+        tripletList.reserve(matrixR.nonZeros() + matrixI.nonZeros());
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+            SparseMatrix<mpreal>::InnerIterator itI(matrixI,k);
+
+            while ((itR) || (itI)) {
+                if ((itR) && (itI)) {
+                    if (itR.row() < itI.row()) {
+                        if (mpfr::isinf(itR.value()))
+                            tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                        ++itR;
+                    } else if (itR.row() == itI.row()) {
+                        if ((mpfr::isinf(itR.value())) || (mpfr::isinf(itI.value())))
+                            tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                        ++itR;
+                        ++itI;
+                    } else {
+                        if (mpfr::isinf(itI.value()))
+                            tripletList.push_back(Triplet<bool>(itI.row(), k, true));
+                        ++itI;
+                    }
+                } else if (itR) {
+                    if (mpfr::isinf(itR.value()))
+                        tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                    ++itR;
+                } else {
+                    if (mpfr::isinf(itI.value()))
+                        tripletList.push_back(Triplet<bool>(itI.row(), k, true));
+                    ++itI;
+                }
+            }                
+        }
+    } else {
+        tripletList.reserve(matrixR.nonZeros());
+        for (IndexType k = 0; k < matrixR.outerSize(); ++k) {
+            SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
+
+            while (itR) {
+                if (mpfr::isinf(itR.value()))
+                    tripletList.push_back(Triplet<bool>(itR.row(), k, true));
+                ++itR;
+            }
+        }
+    }
+
+    // Now we can assign the data to the sparse matrix
+    result.setFromTriplets(tripletList.begin(), tripletList.end());
+
+    return result;
+}
+
 /* Test whether the numerical values match
    this function is called by c = isequal(a, b)
    at this stage, we already know that both tables have the same size, that both
@@ -6596,11 +6715,11 @@ bool SparseGmpEigenMatrix::identicalValuesNaNok(const SparseGmpEigenMatrix& b) c
                 } else if ((((itR) || (itI)) && ((itRb) || (itIb))) && (row == rowb)) {
                     if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
                         if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                            if (!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value()))))
+                            if (!((itR.value() == itRb.value()) || (mpfr::isnan(itR.value()) && mpfr::isnan(itRb.value()))))
                                 return false;
                             ++itRb;
                         } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                            if ((!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value())))) || (0 != itIb.value()))
+                            if ((!((itR.value() == itRb.value()) || (mpfr::isnan(itR.value()) && mpfr::isnan(itRb.value())))) || (0 != itIb.value()))
                                 return false;
                             ++itRb;
                             ++itIb;
@@ -6612,16 +6731,16 @@ bool SparseGmpEigenMatrix::identicalValuesNaNok(const SparseGmpEigenMatrix& b) c
                         ++itR;
                     } else if ((itR) && (itI) && (itR.row() == itI.row())) {
                         if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                            if ((!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value())))) || (itI.value() != 0))
+                            if ((!((itR.value() == itRb.value()) || (mpfr::isnan(itR.value()) && mpfr::isnan(itRb.value())))) || (itI.value() != 0))
                                 return false;
                             ++itRb;
                         } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                            if ((!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value())))) || (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value())))))
+                            if ((!((itR.value() == itRb.value()) || (mpfr::isnan(itR.value()) && mpfr::isnan(itRb.value())))) || (!((itI.value() == itIb.value()) || (mpfr::isnan(itI.value()) && mpfr::isnan(itIb.value())))))
                                 return false;
                             ++itRb;
                             ++itIb;
                         } else {
-                            if ((itR.value() != 0) || (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value())))))
+                            if ((itR.value() != 0) || (!((itI.value() == itIb.value()) || (mpfr::isnan(itI.value()) && mpfr::isnan(itIb.value())))))
                                 return false;
                             ++itIb;
                         }
@@ -6633,12 +6752,12 @@ bool SparseGmpEigenMatrix::identicalValuesNaNok(const SparseGmpEigenMatrix& b) c
                                 return false;
                             ++itRb;
                         } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                            if ((0 != itRb.value()) || (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value())))))
+                            if ((0 != itRb.value()) || (!((itI.value() == itIb.value()) || (mpfr::isnan(itI.value()) && mpfr::isnan(itIb.value())))))
                                 return false;
                             ++itRb;
                             ++itIb;
                         } else {
-                            if (!((itI.value() == itIb.value()) || (isnan(itI.value()) && isnan(itIb.value()))))
+                            if (!((itI.value() == itIb.value()) || (mpfr::isnan(itI.value()) && mpfr::isnan(itIb.value()))))
                                 return false;
                             ++itIb;
                         }
@@ -6673,7 +6792,7 @@ bool SparseGmpEigenMatrix::identicalValuesNaNok(const SparseGmpEigenMatrix& b) c
                         return false;
                     ++itR;
                 } else if (((itR) && (itRb)) && (itR.row() == itRb.row())) {
-                    if (!((itR.value() == itRb.value()) || (isnan(itR.value()) && isnan(itRb.value()))))
+                    if (!((itR.value() == itRb.value()) || (mpfr::isnan(itR.value()) && mpfr::isnan(itRb.value()))))
                         return false;
                     ++itR;
                     ++itRb;
@@ -6811,7 +6930,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMin(vector<IndexType>& indices) co
                     if (itR.row() < itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) < minValue) || ((pow(itR.value(),2) == minValue) && (atan2(0, itR.value()) < minAngle))) {
                                 indices[k] = itR.row();
                                 minValue = pow(itR.value(),2);
@@ -6822,7 +6941,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMin(vector<IndexType>& indices) co
                     } else if (itR.row() == itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) < minValue) || (((pow(itR.value(),2) + pow(itI.value(),2)) == minValue) && (atan2(itI.value(), itR.value()) < minAngle))) {
                                 indices[k] = itR.row();
                                 minValue = pow(itR.value(),2) + pow(itI.value(),2);
@@ -6834,7 +6953,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMin(vector<IndexType>& indices) co
                     } else {
                         if (firstZero == itI.row())
                             ++firstZero;
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) < minValue) || ((pow(itI.value(),2) == minValue) && (atan2(itI.value(), 0) < minAngle))) {
                                 indices[k] = itI.row();
                                 minValue = pow(itI.value(),2);
@@ -6846,7 +6965,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMin(vector<IndexType>& indices) co
                 } else if (itR) {
                     if (firstZero == itR.row())
                         ++firstZero;
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) < minValue) || ((pow(itR.value(),2) == minValue) && (atan2(0, itR.value()) < minAngle))) {
                             indices[k] = itR.row();
                             minValue = pow(itR.value(),2);
@@ -6857,7 +6976,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMin(vector<IndexType>& indices) co
                 } else {
                     if (firstZero == itI.row())
                         ++firstZero;
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) < minValue) || ((pow(itI.value(),2) == minValue) && (atan2(itI.value(), 0) < minAngle))) {
                             indices[k] = itI.row();
                             minValue = pow(itI.value(),2);
@@ -6897,7 +7016,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMin(vector<IndexType>& indices) co
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it) {
                 if (firstZero == it.row())
                     ++firstZero;
-                if ((!isnan(it.value())) && (it.value() < minValue)) {
+                if ((!mpfr::isnan(it.value())) && (it.value() < minValue)) {
                     indices[k] = it.row();
                     minValue = it.value();
                 }
@@ -6948,7 +7067,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMin_new(vector<IndexType>& indice
                     if (itR.row() < itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) < minValue) || ((pow(itR.value(),2) == minValue) && (atan2(0, itR.value()) < minAngle))) {
                                 indices[k] = itR.row();
                                 minValue = pow(itR.value(),2);
@@ -6959,7 +7078,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMin_new(vector<IndexType>& indice
                     } else if (itR.row() == itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) < minValue) || (((pow(itR.value(),2) + pow(itI.value(),2)) == minValue) && (atan2(itI.value(), itR.value()) < minAngle))) {
                                 indices[k] = itR.row();
                                 minValue = pow(itR.value(),2) + pow(itI.value(),2);
@@ -6971,7 +7090,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMin_new(vector<IndexType>& indice
                     } else {
                         if (firstZero == itI.row())
                             ++firstZero;
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) < minValue) || ((pow(itI.value(),2) == minValue) && (atan2(itI.value(), 0) < minAngle))) {
                                 indices[k] = itI.row();
                                 minValue = pow(itI.value(),2);
@@ -6983,7 +7102,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMin_new(vector<IndexType>& indice
                 } else if (itR) {
                     if (firstZero == itR.row())
                         ++firstZero;
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) < minValue) || ((pow(itR.value(),2) == minValue) && (atan2(0, itR.value()) < minAngle))) {
                             indices[k] = itR.row();
                             minValue = pow(itR.value(),2);
@@ -6994,7 +7113,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMin_new(vector<IndexType>& indice
                 } else {
                     if (firstZero == itI.row())
                         ++firstZero;
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) < minValue) || ((pow(itI.value(),2) == minValue) && (atan2(itI.value(), 0) < minAngle))) {
                             indices[k] = itI.row();
                             minValue = pow(itI.value(),2);
@@ -7034,7 +7153,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMin_new(vector<IndexType>& indice
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it) {
                 if (firstZero == it.row())
                     ++firstZero;
-                if ((!isnan(it.value())) && (it.value() < minValue)) {
+                if ((!mpfr::isnan(it.value())) && (it.value() < minValue)) {
                     indices[k] = it.row();
                     minValue = it.value();
                 }
@@ -7099,7 +7218,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMin(vector<IndexType>& indices) co
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) < minValue[itR.row()]) || ((pow(itR.value(),2) == minValue[itR.row()]) && (atan2(0, itR.value()) < minAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 minValue[itR.row()] = pow(itR.value(),2);
@@ -7115,7 +7234,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMin(vector<IndexType>& indices) co
                             }
                         }
                         previousNonZero = itR.row();
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) < minValue[itR.row()]) || (((pow(itR.value(),2) + pow(itI.value(),2)) == minValue[itR.row()]) && (atan2(itI.value(), itR.value()) < minAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 minValue[itR.row()] = pow(itR.value(),2) + pow(itI.value(),2);
@@ -7132,7 +7251,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMin(vector<IndexType>& indices) co
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) < minValue[itI.row()]) || ((pow(itI.value(),2) == minValue[itI.row()]) && (atan2(itI.value(), 0) < minAngle[itI.row()]))) {
                                 indices[itI.row()] = k;
                                 minValue[itI.row()] = pow(itI.value(),2);
@@ -7149,7 +7268,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMin(vector<IndexType>& indices) co
                         }
                     }
                     previousNonZero = itR.row();
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) < minValue[itR.row()]) || ((pow(itR.value(),2) == minValue[itR.row()]) && (atan2(0, itR.value()) < minAngle[itR.row()]))) {
                             indices[itR.row()] = k;
                             minValue[itR.row()] = pow(itR.value(),2);
@@ -7165,7 +7284,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMin(vector<IndexType>& indices) co
                         }
                     }
                     previousNonZero = itI.row();
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) < minValue[itI.row()]) || ((pow(itI.value(),2) == minValue[itI.row()]) && (atan2(itI.value(), 0) < minAngle[itI.row()]))) {
                             indices[itI.row()] = k;
                             minValue[itI.row()] = pow(itI.value(),2);
@@ -7228,7 +7347,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMin(vector<IndexType>& indices) co
                     }
                 }
                 previousNonZero = it.row();
-                if ((!isnan(it.value())) && (it.value() < minValue[it.row()])) {
+                if ((!mpfr::isnan(it.value())) && (it.value() < minValue[it.row()])) {
                     indices[it.row()] = k;
                     minValue[it.row()] = it.value();
                 }
@@ -7301,7 +7420,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMin_new(vector<IndexType>& indice
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) < minValue[itR.row()]) || ((pow(itR.value(),2) == minValue[itR.row()]) && (atan2(0, itR.value()) < minAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 minValue[itR.row()] = pow(itR.value(),2);
@@ -7317,7 +7436,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMin_new(vector<IndexType>& indice
                             }
                         }
                         previousNonZero = itR.row();
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) < minValue[itR.row()]) || (((pow(itR.value(),2) + pow(itI.value(),2)) == minValue[itR.row()]) && (atan2(itI.value(), itR.value()) < minAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 minValue[itR.row()] = pow(itR.value(),2) + pow(itI.value(),2);
@@ -7334,7 +7453,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMin_new(vector<IndexType>& indice
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) < minValue[itI.row()]) || ((pow(itI.value(),2) == minValue[itI.row()]) && (atan2(itI.value(), 0) < minAngle[itI.row()]))) {
                                 indices[itI.row()] = k;
                                 minValue[itI.row()] = pow(itI.value(),2);
@@ -7351,7 +7470,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMin_new(vector<IndexType>& indice
                         }
                     }
                     previousNonZero = itR.row();
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) < minValue[itR.row()]) || ((pow(itR.value(),2) == minValue[itR.row()]) && (atan2(0, itR.value()) < minAngle[itR.row()]))) {
                             indices[itR.row()] = k;
                             minValue[itR.row()] = pow(itR.value(),2);
@@ -7367,7 +7486,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMin_new(vector<IndexType>& indice
                         }
                     }
                     previousNonZero = itI.row();
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) < minValue[itI.row()]) || ((pow(itI.value(),2) == minValue[itI.row()]) && (atan2(itI.value(), 0) < minAngle[itI.row()]))) {
                             indices[itI.row()] = k;
                             minValue[itI.row()] = pow(itI.value(),2);
@@ -7430,7 +7549,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMin_new(vector<IndexType>& indice
                     }
                 }
                 previousNonZero = it.row();
-                if ((!isnan(it.value())) && (it.value() < minValue[it.row()])) {
+                if ((!mpfr::isnan(it.value())) && (it.value() < minValue[it.row()])) {
                     indices[it.row()] = k;
                     minValue[it.row()] = it.value();
                 }
@@ -7490,7 +7609,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                             row = itI.row();
 
                         if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                            if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                            if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -7498,7 +7617,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                             }
                             ++itR;
                         } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                            if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                            if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                             } else {
@@ -7508,7 +7627,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                             ++itR;
                             ++itI;
                         } else {
-                            if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                            if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                                 tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itI.row(), k, b.matrixR.coeff(0,0)));
@@ -7523,7 +7642,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                     SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
 
                     while (itR) {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         } else {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -7548,14 +7667,14 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                         row = itI.row();
 
                     if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         } else {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
                         }
                         ++itR;
                     } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                         } else {
@@ -7564,7 +7683,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                         ++itR;
                         ++itI;
                     } else {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(0, b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(0, b.matrixR.coeff(0,0)))))) {
                             tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                         } else {
                             tripletListR.push_back(Triplet<mpreal>(itI.row(), k, b.matrixR.coeff(0,0)));
@@ -7578,7 +7697,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                 SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
 
                 while (itR) {
-                    if ((isnan(b.matrixR.coeff(0,0))) || (itR.value() <= b.matrixR.coeff(0,0)))
+                    if ((mpfr::isnan(b.matrixR.coeff(0,0))) || (itR.value() <= b.matrixR.coeff(0,0)))
                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                     else
                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -7657,13 +7776,13 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                         } else if ((((itR) || (itI)) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
+                                    if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -7672,7 +7791,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -7681,7 +7800,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                                 ++itR;
                             } else if ((itR) && (itI) && (itR.row() == itI.row())) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -7689,7 +7808,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -7699,7 +7818,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), 0))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -7711,14 +7830,14 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                                 ++itI;
                             } else {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -7727,7 +7846,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), 0))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itIb.value()));
@@ -7781,13 +7900,13 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                             ++itR;
                         } else if (((itR) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
+                                if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                 ++itRb;
                             } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
+                                if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 } else {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -7796,7 +7915,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                                 ++itRb;
                                 ++itIb;
                             } else {
-                                if ((isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
+                                if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -7862,14 +7981,14 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                         }
                     } else if ((((itR) || (itI)) && (itRb)) && (row == rowb)) {
                         if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                            if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
+                            if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             else
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                             ++itRb;
                             ++itR;
                         } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                            if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                             } else {
@@ -7879,7 +7998,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                             ++itR;
                             ++itI;
                         } else {
-                            if ((isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
                                 tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -7905,7 +8024,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMin(const SparseGmpEigenMatrix& b) 
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         ++itR;
                     } else if ((itR) && (itRb) && (itR.row() == itRb.row())) {
-                        if ((isnan(itRb.value())) || (itR.value() <= itRb.value()))
+                        if ((mpfr::isnan(itRb.value())) || (itR.value() <= itRb.value()))
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         else
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -7964,7 +8083,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                             row = itI.row();
 
                         if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                            if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                            if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -7972,7 +8091,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                             }
                             ++itR;
                         } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                            if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                            if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                             } else {
@@ -7982,7 +8101,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                             ++itR;
                             ++itI;
                         } else {
-                            if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                            if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                                 tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itI.row(), k, b.matrixR.coeff(0,0)));
@@ -7997,7 +8116,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                     SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
 
                     while (itR) {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2) + pow(b.matrixI.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(b.matrixI.coeff(0,0), b.matrixR.coeff(0,0)))))) {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         } else {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -8022,14 +8141,14 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                         row = itI.row();
 
                     if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(0, itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         } else {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
                         }
                         ++itR;
                     } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, b.matrixR.coeff(0,0)))))) {
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                         } else {
@@ -8038,7 +8157,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                         ++itR;
                         ++itI;
                     } else {
-                        if ((isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(0, b.matrixR.coeff(0,0)))))) {
+                        if ((mpfr::isnan(pow(b.matrixR.coeff(0,0), 2))) || ((pow(itI.value(), 2) < pow(b.matrixR.coeff(0,0), 2)) || ((pow(itI.value(), 2) == pow(b.matrixR.coeff(0,0), 2)) && (atan2(itI.value(), 0) <= atan2(0, b.matrixR.coeff(0,0)))))) {
                             tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                         } else {
                             tripletListR.push_back(Triplet<mpreal>(itI.row(), k, b.matrixR.coeff(0,0)));
@@ -8052,7 +8171,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                 SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
 
                 while (itR) {
-                    if ((isnan(b.matrixR.coeff(0,0))) || (itR.value() <= b.matrixR.coeff(0,0)))
+                    if ((mpfr::isnan(b.matrixR.coeff(0,0))) || (itR.value() <= b.matrixR.coeff(0,0)))
                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                     else
                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -8131,13 +8250,13 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                         } else if ((((itR) || (itI)) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
+                                    if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -8146,7 +8265,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -8155,7 +8274,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                                 ++itR;
                             } else if ((itR) && (itI) && (itR.row() == itI.row())) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -8163,7 +8282,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -8173,7 +8292,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(itIb.value(), 0))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -8185,14 +8304,14 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                                 ++itI;
                             } else {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -8201,7 +8320,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itI.value(), 2) < pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(itIb.value(), 0))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itIb.value()));
@@ -8255,13 +8374,13 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                             ++itR;
                         } else if (((itR) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
+                                if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                 ++itRb;
                             } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
+                                if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) < pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), itRb.value()))))) {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 } else {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -8270,7 +8389,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                                 ++itRb;
                                 ++itIb;
                             } else {
-                                if ((isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
+                                if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) < pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) <= atan2(itIb.value(), 0)))))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -8336,14 +8455,14 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                         }
                     } else if ((((itR) || (itI)) && (itRb)) && (row == rowb)) {
                         if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                            if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
+                            if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) <= mpfr::abs(itRb.value())))
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             else
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                             ++itRb;
                             ++itR;
                         } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                            if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) <= atan2(0, itRb.value()))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                             } else {
@@ -8353,7 +8472,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                             ++itR;
                             ++itI;
                         } else {
-                            if ((isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) < pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) <= atan2(0, itRb.value()))))) {
                                 tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -8379,7 +8498,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMin_new(const SparseGmpEigenMatrix
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         ++itR;
                     } else if ((itR) && (itRb) && (itR.row() == itRb.row())) {
-                        if ((isnan(itRb.value())) || (itR.value() <= itRb.value()))
+                        if ((mpfr::isnan(itRb.value())) || (itR.value() <= itRb.value()))
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         else
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -8437,7 +8556,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMax(vector<IndexType>& indices) co
                     if (itR.row() < itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) > maxValue) || ((pow(itR.value(),2) == maxValue) && (atan2(0, itR.value()) > maxAngle))) {
                                 indices[k] = itR.row();
                                 maxValue = pow(itR.value(),2);
@@ -8448,7 +8567,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMax(vector<IndexType>& indices) co
                     } else if (itR.row() == itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) > maxValue) || (((pow(itR.value(),2) + pow(itI.value(),2)) == maxValue) && (atan2(itI.value(), itR.value()) > maxAngle))) {
                                 indices[k] = itR.row();
                                 maxValue = pow(itR.value(),2) + pow(itI.value(),2);
@@ -8460,7 +8579,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMax(vector<IndexType>& indices) co
                     } else {
                         if (firstZero == itI.row())
                             ++firstZero;
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) > maxValue) || ((pow(itI.value(),2) == maxValue) && (atan2(itI.value(), 0) > maxAngle))) {
                                 indices[k] = itI.row();
                                 maxValue = pow(itI.value(),2);
@@ -8472,7 +8591,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMax(vector<IndexType>& indices) co
                 } else if (itR) {
                     if (firstZero == itR.row())
                         ++firstZero;
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) > maxValue) || ((pow(itR.value(),2) == maxValue) && (atan2(0, itR.value()) > maxAngle))) {
                             indices[k] = itR.row();
                             maxValue = pow(itR.value(),2);
@@ -8483,7 +8602,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMax(vector<IndexType>& indices) co
                 } else {
                     if (firstZero == itI.row())
                         ++firstZero;
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) > maxValue) || ((pow(itI.value(),2) == maxValue) && (atan2(itI.value(), 0) > maxAngle))) {
                             indices[k] = itI.row();
                             maxValue = pow(itI.value(),2);
@@ -8523,7 +8642,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::colMax(vector<IndexType>& indices) co
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it) {
                 if (firstZero == it.row())
                     ++firstZero;
-                if ((!isnan(it.value())) && (it.value() > maxValue)) {
+                if ((!mpfr::isnan(it.value())) && (it.value() > maxValue)) {
                     indices[k] = it.row();
                     maxValue = it.value();
                 }
@@ -8574,7 +8693,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMax_new(vector<IndexType>& indice
                     if (itR.row() < itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) > maxValue) || ((pow(itR.value(),2) == maxValue) && (atan2(0, itR.value()) > maxAngle))) {
                                 indices[k] = itR.row();
                                 maxValue = pow(itR.value(),2);
@@ -8585,7 +8704,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMax_new(vector<IndexType>& indice
                     } else if (itR.row() == itI.row()) {
                         if (firstZero == itR.row())
                             ++firstZero;
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) > maxValue) || (((pow(itR.value(),2) + pow(itI.value(),2)) == maxValue) && (atan2(itI.value(), itR.value()) > maxAngle))) {
                                 indices[k] = itR.row();
                                 maxValue = pow(itR.value(),2) + pow(itI.value(),2);
@@ -8597,7 +8716,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMax_new(vector<IndexType>& indice
                     } else {
                         if (firstZero == itI.row())
                             ++firstZero;
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) > maxValue) || ((pow(itI.value(),2) == maxValue) && (atan2(itI.value(), 0) > maxAngle))) {
                                 indices[k] = itI.row();
                                 maxValue = pow(itI.value(),2);
@@ -8609,7 +8728,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMax_new(vector<IndexType>& indice
                 } else if (itR) {
                     if (firstZero == itR.row())
                         ++firstZero;
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) > maxValue) || ((pow(itR.value(),2) == maxValue) && (atan2(0, itR.value()) > maxAngle))) {
                             indices[k] = itR.row();
                             maxValue = pow(itR.value(),2);
@@ -8620,7 +8739,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMax_new(vector<IndexType>& indice
                 } else {
                     if (firstZero == itI.row())
                         ++firstZero;
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) > maxValue) || ((pow(itI.value(),2) == maxValue) && (atan2(itI.value(), 0) > maxAngle))) {
                             indices[k] = itI.row();
                             maxValue = pow(itI.value(),2);
@@ -8660,7 +8779,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::colMax_new(vector<IndexType>& indice
             for (SparseMatrix<mpreal>::InnerIterator it(matrixR,k); it; ++it) {
                 if (firstZero == it.row())
                     ++firstZero;
-                if ((!isnan(it.value())) && (it.value() > maxValue)) {
+                if ((!mpfr::isnan(it.value())) && (it.value() > maxValue)) {
                     indices[k] = it.row();
                     maxValue = it.value();
                 }
@@ -8725,7 +8844,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMax(vector<IndexType>& indices) co
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) > maxValue[itR.row()]) || ((pow(itR.value(),2) == maxValue[itR.row()]) && (atan2(0, itR.value()) > maxAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 maxValue[itR.row()] = pow(itR.value(),2);
@@ -8741,7 +8860,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMax(vector<IndexType>& indices) co
                             }
                         }
                         previousNonZero = itR.row();
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) > maxValue[itR.row()]) || (((pow(itR.value(),2) + pow(itI.value(),2)) == maxValue[itR.row()]) && (atan2(itI.value(), itR.value()) > maxAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 maxValue[itR.row()] = pow(itR.value(),2) + pow(itI.value(),2);
@@ -8758,7 +8877,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMax(vector<IndexType>& indices) co
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) > maxValue[itI.row()]) || ((pow(itI.value(),2) == maxValue[itI.row()]) && (atan2(itI.value(), 0) > maxAngle[itI.row()]))) {
                                 indices[itI.row()] = k;
                                 maxValue[itI.row()] = pow(itI.value(),2);
@@ -8775,7 +8894,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMax(vector<IndexType>& indices) co
                         }
                     }
                     previousNonZero = itR.row();
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) > maxValue[itR.row()]) || ((pow(itR.value(),2) == maxValue[itR.row()]) && (atan2(0, itR.value()) > maxAngle[itR.row()]))) {
                             indices[itR.row()] = k;
                             maxValue[itR.row()] = pow(itR.value(),2);
@@ -8791,7 +8910,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMax(vector<IndexType>& indices) co
                         }
                     }
                     previousNonZero = itI.row();
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) > maxValue[itI.row()]) || ((pow(itI.value(),2) == maxValue[itI.row()]) && (atan2(itI.value(), 0) > maxAngle[itI.row()]))) {
                             indices[itI.row()] = k;
                             maxValue[itI.row()] = pow(itI.value(),2);
@@ -8854,7 +8973,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::rowMax(vector<IndexType>& indices) co
                     }
                 }
                 previousNonZero = it.row();
-                if ((!isnan(it.value())) && (it.value() > maxValue[it.row()])) {
+                if ((!mpfr::isnan(it.value())) && (it.value() > maxValue[it.row()])) {
                     indices[it.row()] = k;
                     maxValue[it.row()] = it.value();
                 }
@@ -8927,7 +9046,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMax_new(vector<IndexType>& indice
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itR.value())) {
+                        if (!mpfr::isnan(itR.value())) {
                             if ((pow(itR.value(),2) > maxValue[itR.row()]) || ((pow(itR.value(),2) == maxValue[itR.row()]) && (atan2(0, itR.value()) > maxAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 maxValue[itR.row()] = pow(itR.value(),2);
@@ -8943,7 +9062,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMax_new(vector<IndexType>& indice
                             }
                         }
                         previousNonZero = itR.row();
-                        if ((!isnan(itR.value())) && (!isnan(itI.value()))) {
+                        if ((!mpfr::isnan(itR.value())) && (!mpfr::isnan(itI.value()))) {
                             if (((pow(itR.value(),2) + pow(itI.value(),2)) > maxValue[itR.row()]) || (((pow(itR.value(),2) + pow(itI.value(),2)) == maxValue[itR.row()]) && (atan2(itI.value(), itR.value()) > maxAngle[itR.row()]))) {
                                 indices[itR.row()] = k;
                                 maxValue[itR.row()] = pow(itR.value(),2) + pow(itI.value(),2);
@@ -8960,7 +9079,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMax_new(vector<IndexType>& indice
                             }
                         }
                         previousNonZero = itR.row();
-                        if (!isnan(itI.value())) {
+                        if (!mpfr::isnan(itI.value())) {
                             if ((pow(itI.value(),2) > maxValue[itI.row()]) || ((pow(itI.value(),2) == maxValue[itI.row()]) && (atan2(itI.value(), 0) > maxAngle[itI.row()]))) {
                                 indices[itI.row()] = k;
                                 maxValue[itI.row()] = pow(itI.value(),2);
@@ -8977,7 +9096,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMax_new(vector<IndexType>& indice
                         }
                     }
                     previousNonZero = itR.row();
-                    if (!isnan(itR.value())) {
+                    if (!mpfr::isnan(itR.value())) {
                         if ((pow(itR.value(),2) > maxValue[itR.row()]) || ((pow(itR.value(),2) == maxValue[itR.row()]) && (atan2(0, itR.value()) > maxAngle[itR.row()]))) {
                             indices[itR.row()] = k;
                             maxValue[itR.row()] = pow(itR.value(),2);
@@ -8993,7 +9112,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMax_new(vector<IndexType>& indice
                         }
                     }
                     previousNonZero = itI.row();
-                    if (!isnan(itI.value())) {
+                    if (!mpfr::isnan(itI.value())) {
                         if ((pow(itI.value(),2) > maxValue[itI.row()]) || ((pow(itI.value(),2) == maxValue[itI.row()]) && (atan2(itI.value(), 0) > maxAngle[itI.row()]))) {
                             indices[itI.row()] = k;
                             maxValue[itI.row()] = pow(itI.value(),2);
@@ -9056,7 +9175,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::rowMax_new(vector<IndexType>& indice
                     }
                 }
                 previousNonZero = it.row();
-                if ((!isnan(it.value())) && (it.value() > maxValue[it.row()])) {
+                if ((!mpfr::isnan(it.value())) && (it.value() > maxValue[it.row()])) {
                     indices[it.row()] = k;
                     maxValue[it.row()] = it.value();
                 }
@@ -9105,7 +9224,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
             SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
 
             while (itR) {
-                if ((isnan(b.matrixR.coeff(0,0))) || (itR.value() >= b.matrixR.coeff(0,0)))
+                if ((mpfr::isnan(b.matrixR.coeff(0,0))) || (itR.value() >= b.matrixR.coeff(0,0)))
                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                 else
                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -9179,13 +9298,13 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                         } else if ((((itR) || (itI)) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
+                                    if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -9194,7 +9313,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -9203,7 +9322,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                                 ++itR;
                             } else if ((itR) && (itI) && (itR.row() == itI.row())) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -9211,7 +9330,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -9221,7 +9340,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), 0))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -9233,14 +9352,14 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                                 ++itI;
                             } else {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -9249,7 +9368,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), 0))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itIb.value()));
@@ -9303,13 +9422,13 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                             ++itR;
                         } else if (((itR) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
+                                if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                 ++itRb;
                             } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
+                                if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 } else {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -9318,7 +9437,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                                 ++itRb;
                                 ++itIb;
                             } else {
-                                if ((isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
+                                if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -9384,14 +9503,14 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                         }
                     } else if ((((itR) || (itI)) && (itRb)) && (row == rowb)) {
                         if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                            if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
+                            if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             else
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                             ++itRb;
                             ++itR;
                         } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                            if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                             } else {
@@ -9401,7 +9520,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                             ++itR;
                             ++itI;
                         } else {
-                            if ((isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
                                 tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -9427,7 +9546,7 @@ SparseGmpEigenMatrix SparseGmpEigenMatrix::ewMax(const SparseGmpEigenMatrix& b) 
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         ++itR;
                     } else if ((itR) && (itRb) && (itR.row() == itRb.row())) {
-                        if ((isnan(itRb.value())) || (itR.value() >= itRb.value()))
+                        if ((mpfr::isnan(itRb.value())) || (itR.value() >= itRb.value()))
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         else
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -9475,7 +9594,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
             SparseMatrix<mpreal>::InnerIterator itR(matrixR,k);
 
             while (itR) {
-                if ((isnan(b.matrixR.coeff(0,0))) || (itR.value() >= b.matrixR.coeff(0,0)))
+                if ((mpfr::isnan(b.matrixR.coeff(0,0))) || (itR.value() >= b.matrixR.coeff(0,0)))
                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                 else
                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, b.matrixR.coeff(0,0)));
@@ -9549,13 +9668,13 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                         } else if ((((itR) || (itI)) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
+                                    if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -9564,7 +9683,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                     else
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -9573,7 +9692,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                                 ++itR;
                             } else if ((itR) && (itI) && (itR.row() == itI.row())) {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -9581,7 +9700,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -9591,7 +9710,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(itIb.value(), 0))))) {
                                         tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                         tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                                     } else {
@@ -9603,14 +9722,14 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                                 ++itI;
                             } else {
                                 if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                    if ((isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
+                                    if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
                                     }
                                     ++itRb;
                                 } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                    if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), itRb.value()))))) {
+                                    if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itI.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), itRb.value()))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -9619,7 +9738,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                                     ++itRb;
                                     ++itIb;
                                 } else {
-                                    if ((isnan(itIb.value())) || ((pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), 0))))) {
+                                    if ((mpfr::isnan(itIb.value())) || ((pow(itI.value(), 2) > pow(itIb.value(), 2)) || ((pow(itI.value(), 2) == pow(itIb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(itIb.value(), 0))))) {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                                     } else {
                                         tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itIb.value()));
@@ -9673,13 +9792,13 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                             ++itR;
                         } else if (((itR) && ((itRb) || (itIb))) && (row == rowb)) {
                             if ((!itIb) || ((itRb) && (itRb.row() < itIb.row()))) {
-                                if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
+                                if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                                 ++itRb;
                             } else if ((itRb) && (itIb) && (itRb.row() == itIb.row())) {
-                                if ((isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
+                                if ((mpfr::isnan(pow(itRb.value(), 2) + pow(itIb.value(), 2))) || ((pow(itR.value(), 2) > pow(itRb.value(), 2) + pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itRb.value(), 2) + pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), itRb.value()))))) {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 } else {
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
@@ -9688,7 +9807,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                                 ++itRb;
                                 ++itIb;
                             } else {
-                                if ((isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
+                                if ((mpfr::isnan(itIb.value())) || ((pow(itR.value(), 2) > pow(itIb.value(), 2)) || ((pow(itR.value(), 2) == pow(itIb.value(), 2)) && (atan2(0, itR.value()) >= atan2(itIb.value(), 0)))))
                                     tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 else
                                     tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itIb.value()));
@@ -9754,14 +9873,14 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                         }
                     } else if ((((itR) || (itI)) && (itRb)) && (row == rowb)) {
                         if ((!itI) || ((itR) && (itR.row() < itI.row()))) {
-                            if ((isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
+                            if ((mpfr::isnan(itRb.value())) || (mpfr::abs(itR.value()) >= mpfr::abs(itRb.value())))
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                             else
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));
                             ++itRb;
                             ++itR;
                         } else if ((itR) && (itI) && (itR.row() == itI.row())) {
-                            if ((isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itR.value(), 2) + pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itR.value(), 2) + pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), itR.value()) >= atan2(0, itRb.value()))))) {
                                 tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                                 tripletListI.push_back(Triplet<mpreal>(itR.row(), k, itI.value()));
                             } else {
@@ -9771,7 +9890,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                             ++itR;
                             ++itI;
                         } else {
-                            if ((isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
+                            if ((mpfr::isnan(itRb.value())) || ((pow(itI.value(), 2) > pow(itRb.value(), 2)) || ((pow(itI.value(), 2) == pow(itRb.value(), 2)) && (atan2(itI.value(), 0) >= atan2(0, itRb.value()))))) {
                                 tripletListI.push_back(Triplet<mpreal>(itI.row(), k, itI.value()));
                             } else {
                                 tripletListR.push_back(Triplet<mpreal>(itI.row(), k, itRb.value()));
@@ -9797,7 +9916,7 @@ SparseGmpEigenMatrix& SparseGmpEigenMatrix::ewMax_new(const SparseGmpEigenMatrix
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         ++itR;
                     } else if ((itR) && (itRb) && (itR.row() == itRb.row())) {
-                        if ((isnan(itRb.value())) || (itR.value() >= itRb.value()))
+                        if ((mpfr::isnan(itRb.value())) || (itR.value() >= itRb.value()))
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itR.value()));
                         else
                             tripletListR.push_back(Triplet<mpreal>(itR.row(), k, itRb.value()));

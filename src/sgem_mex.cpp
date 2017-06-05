@@ -878,6 +878,38 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 
 
+    /* Call the class method "isnan" */
+    if (!strcmp("isnan", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 2))
+            mexErrMsgTxt("isnan: Unexpected arguments.");
+
+        // Compute the element-wise comparison
+        SparseMatrix<bool> result(SparseGmpEigenMatrix_instance.isnan());
+
+        // We return the reference to this object to matlab
+        plhs[0] = matrixToMatlabDoubles(result);
+
+        return;
+    }
+
+
+    /* Call the class method "isinf" */
+    if (!strcmp("isinf", cmd)) {
+        // Check parameters
+        if ((nlhs != 1) || (nrhs != 2))
+            mexErrMsgTxt("isinf: Unexpected arguments.");
+
+        // Compute the element-wise comparison
+        SparseMatrix<bool> result(SparseGmpEigenMatrix_instance.isinf());
+
+        // We return the reference to this object to matlab
+        plhs[0] = matrixToMatlabDoubles(result);
+
+        return;
+    }
+
+
     /* Call the class method "issymmetric" */
     if (!strcmp("issymmetric", cmd)) {
         // Check parameters

@@ -301,6 +301,8 @@ public:
     Eigen::SparseMatrix <bool> operator>=(const SparseGmpEigenMatrix& b) const;
     Eigen::SparseMatrix <bool> eq(const SparseGmpEigenMatrix& b) const;
     Eigen::SparseMatrix <bool> ne(const SparseGmpEigenMatrix& b) const;
+    Eigen::SparseMatrix <bool> isnan() const;
+    Eigen::SparseMatrix <bool> isinf() const;
     bool identicalValues(const SparseGmpEigenMatrix& b) const;
     bool identicalValuesNaNok(const SparseGmpEigenMatrix& b) const;
 
