@@ -901,7 +901,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             mexErrMsgTxt("rank: Unexpected arguments.");
 
         // We allocate space for the result
-        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT8_CLASS, mxREAL);
+        plhs[0] = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
 
         // We check where the output data should be places
         int* output = (int*)mxGetData(plhs[0]);
