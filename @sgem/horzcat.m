@@ -44,11 +44,29 @@ function result = horzcat(this, varargin)
     end
 
     %% Now we can concatenate the two objects
-    if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
-        newObjectIdentifier = gem_mex('horzcat', objectIdentifier(this), objectIdentifier(varargin{1}));
-        result = gem('encapsulate', newObjectIdentifier);
-    else
-        newObjectIdentifier = sgem_mex('horzcat', objectIdentifier(this), objectIdentifier(varargin{1}));
-        result = sgem('encapsulate', newObjectIdentifier);
+    % It seems to be quicker to perform the concatenation by this way
+
+    % Then both matrices should be sparse already
+    if ~isequal(class(this), 'sgem')
+        this = sparse(this);
     end
+    if ~isequal(class(varargin{1}), 'sgem')
+        varargin{1} = sparse(varargin{1});
+    end
+
+    % We resize both matrices
+    this = this*sgem(1:s1(2), 1:s1(2), 1, s1(2), s1(2)+s2(2));
+    varargin{1} = varargin{1}*sgem(1:s2(2), s1(2)+[1:s2(2)], 1, s2(2), s1(2)+s2(2));
+
+    result = this + varargin{1};
+    return;
+    
+%     % Otherwise we just use a direct method
+%     if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
+%         newObjectIdentifier = gem_mex('horzcat', objectIdentifier(this), objectIdentifier(varargin{1}));
+%         result = gem('encapsulate', newObjectIdentifier);
+%     else
+%         newObjectIdentifier = sgem_mex('horzcat', objectIdentifier(this), objectIdentifier(varargin{1}));
+%         result = sgem('encapsulate', newObjectIdentifier);
+%     end
 end

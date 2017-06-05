@@ -44,6 +44,26 @@ function result = vertcat(this, varargin)
     end
 
     %% Now we can concatenate the two objects
+    % If the second matrix is large, it is quicker to perform the
+    % concatenation differently
+    if (s2(1) > 10)
+        % Then both matrices should be sparse already
+        if ~isequal(class(this), 'sgem')
+            this = sparse(this);
+        end
+        if ~isequal(class(varargin{1}), 'sgem')
+            varargin{1} = sparse(varargin{1});
+        end
+        
+        % We resize both matrices
+        this = sgem(1:s1(1), 1:s1(1), 1, s1(1)+s2(1), s1(1))*this;
+        varargin{1} = sgem(s1(1)+[1:s2(1)], 1:s2(1), 1, s1(1)+s2(1), s2(1))*varargin{1};
+        
+        result = this + varargin{1};
+        return;
+    end
+    
+    % Otherwise we just use a direct method
     if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
         newObjectIdentifier = gem_mex('vertcat', objectIdentifier(this), objectIdentifier(varargin{1}));
         result = gem('encapsulate', newObjectIdentifier);

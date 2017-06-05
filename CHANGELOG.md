@@ -15,7 +15,7 @@
 - Improved performance of binary check function
 - Improved parameter support in sum function
 - Improved sparse constructor
-- Improved performance of subsref function
+- Improved performance of subsref, vertcat and horzcat function
 - Fixed limit on rank and nnz
 
 ## [0.1.3] - 2017-02-10
