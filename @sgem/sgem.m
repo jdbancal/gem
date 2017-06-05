@@ -195,7 +195,7 @@ classdef sgem < handle
                 end
             elseif nargin == 3
                 if isnumeric(varargin{1}) && isnumeric(varargin{2}) && isnumeric(varargin{3}) ...
-                    && numel(varargin{1}) == numel(varargin{2}) && numel(varargin{1}) == numel(varargin{3})
+                    && numel(varargin{1}) == numel(varargin{2}) && ((numel(varargin{1}) == numel(varargin{3})) || (numel(varargin{3}) == 1)) ...
                     % Then we interpret this call as a call for the library to
                     % create an instance of this class from some numerical
                     % matlab data with given row and column indices. We thus transfer
@@ -205,6 +205,9 @@ classdef sgem < handle
                     i = double(varargin{1}); % We make sure i and j are double arrays
                     j = double(varargin{2});
                     s = full(varargin{3}); % We make sure s is not sparse
+                    if numel(i) ~= numel(s)
+                        s = ones(1,numel(i))*s;
+                    end
                     if size(i,1) < size(i,2) % We make sure all vectors are in column form
                         i = i.';
                     end
@@ -274,7 +277,7 @@ classdef sgem < handle
                 end
             elseif nargin == 5
                 if isnumeric(varargin{1}) && isnumeric(varargin{2}) && isnumeric(varargin{3}) ...
-                    && numel(varargin{1}) == numel(varargin{2}) && numel(varargin{1}) == numel(varargin{3}) ...
+                    && numel(varargin{1}) == numel(varargin{2}) && ((numel(varargin{1}) == numel(varargin{3})) || (numel(varargin{3}) == 1)) ...
                     && isnumeric(varargin{4}) && isnumeric(varargin{5}) ...
                     && isequal(size(varargin{4}), [1 1]) && isequal(size(varargin{5}), [1 1])
                     % Then we interpret this call as a call for the library to
@@ -286,6 +289,9 @@ classdef sgem < handle
                     i = double(varargin{1}); % We make sure i and j are double arrays
                     j = double(varargin{2});
                     s = full(varargin{3}); % We make sure s is not sparse
+                    if numel(i) ~= numel(s)
+                        s = ones(1,numel(i))*s;
+                    end
                     if size(i,1) < size(i,2) % We make sure all vectors are in column form
                         i = i.';
                     end
