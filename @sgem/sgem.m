@@ -68,9 +68,18 @@ classdef sgem < handle
         %  - Create a C++ class instance for any of the mathematical
         %    constants above
         function this = sgem(varargin)
-            inferiorto('sdpvar');
+            superiorto('single');
             superiorto('double');
+            superiorto('int8');
+            superiorto('int16');
+            superiorto('int32');
+            superiorto('int64');
+            superiorto('uint8');
+            superiorto('uint16');
+            superiorto('uint32');
+            superiorto('uint64');
             superiorto('logical');
+            inferiorto('sdpvar');
 
             if nargin == 0
                 % Without further argument we construct a new empty instance
@@ -109,8 +118,18 @@ classdef sgem < handle
                     [m n] = size(varargin{1});
                     if isequal(class(s),'gem') % in principle this case should not occur
                         this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                    elseif isa(varargin{1}, 'uint8') || isa(varargin{1}, 'uint16') || isa(varargin{1}, 'uint32') || isa(varargin{1}, 'uint64') ...
+                        || isa(varargin{1}, 'int8') || isa(varargin{1}, 'int16') || isa(varargin{1}, 'int32') || isa(varargin{1}, 'int64')
+                        % For integers, we set the values manually to make
+                        % sure we don't loose any precision
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, zeros(size(s)), m, n, this.getWorkingPrecision);
+                        s_values = gem(s);
+                        this(:) = s_values;
                     else
-                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, double(s), m, n, this.getWorkingPrecision);
+                        if ~isa(s, 'double')
+                            s = double(s);
+                        end
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
                     end
                 elseif ischar(varargin{1}) || iscell(varargin{1})
                     % We first create a dense gem object, then return its
@@ -175,7 +194,7 @@ classdef sgem < handle
                     error('Wrong instruction upon creation of a new sgem object.');
                 end
             elseif nargin == 3
-                if isnumeric(varargin{1}) && isnumeric(varargin{2}) && isnumeric(varargin{1}) ...
+                if isnumeric(varargin{1}) && isnumeric(varargin{2}) && isnumeric(varargin{3}) ...
                     && numel(varargin{1}) == numel(varargin{2}) && numel(varargin{1}) == numel(varargin{3})
                     % Then we interpret this call as a call for the library to
                     % create an instance of this class from some numerical
@@ -209,9 +228,19 @@ classdef sgem < handle
                     end
                     m = max(i);
                     n = max(j);
-                    if isequal(class(s),'gem')
+                    if isequal(class(s),'gem') % in principle this case should not occur
                         this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                    elseif isa(varargin{1}, 'uint8') || isa(varargin{1}, 'uint16') || isa(varargin{1}, 'uint32') || isa(varargin{1}, 'uint64') ...
+                        || isa(varargin{1}, 'int8') || isa(varargin{1}, 'int16') || isa(varargin{1}, 'int32') || isa(varargin{1}, 'int64')
+                        % For integers, we set the values manually to make
+                        % sure we don't loose any precision
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, zeros(size(s)), m, n, this.getWorkingPrecision);
+                        s_values = gem(s);
+                        this(:) = s_values;
                     else
+                        if ~isa(s, 'double')
+                            s = double(s);
+                        end
                         this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
                     end
                 else
@@ -244,7 +273,7 @@ classdef sgem < handle
                     error('Wrong instruction upon creation of a new sgem object.');
                 end
             elseif nargin == 5
-                if isnumeric(varargin{1}) && isnumeric(varargin{2}) && isnumeric(varargin{1}) ...
+                if isnumeric(varargin{1}) && isnumeric(varargin{2}) && isnumeric(varargin{3}) ...
                     && numel(varargin{1}) == numel(varargin{2}) && numel(varargin{1}) == numel(varargin{3}) ...
                     && isnumeric(varargin{4}) && isnumeric(varargin{5}) ...
                     && isequal(size(varargin{4}), [1 1]) && isequal(size(varargin{5}), [1 1])
@@ -286,7 +315,7 @@ classdef sgem < handle
                     if isequal(class(s),'gem')
                         this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
                     else
-                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s, m, n, this.getWorkingPrecision);
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, double(s), m, n, this.getWorkingPrecision);
                     end
                 else
                     error('Wrong instruction upon creation of a new sgem object.');

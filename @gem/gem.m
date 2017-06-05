@@ -63,9 +63,18 @@ classdef gem < handle
         %  - Create a C++ class instance for any of the mathematical
         %    constants above
         function this = gem(varargin)
-            inferiorto('sdpvar');
+            superiorto('single');
             superiorto('double');
+            superiorto('int8');
+            superiorto('int16');
+            superiorto('int32');
+            superiorto('int64');
+            superiorto('uint8');
+            superiorto('uint16');
+            superiorto('uint32');
+            superiorto('uint64');
             superiorto('logical');
+            inferiorto('sdpvar');
 
             % In the source file version of this library, we start by
             % checking whether the c++ library was compiled. If not, we 
@@ -94,7 +103,7 @@ classdef gem < handle
                     % The we create a dense version of the provided sparse
                     % sgem object
                     this.objectIdentifier = gem_mex('full', objectIdentifier(varargin{1}));
-                elseif isnumeric(varargin{1})
+                elseif isnumeric(varargin{1}) || islogical(varargin{1})
                     % Then we interpret this call as a call for the library to
                     % create an instance of this class from some numerical
                     % matlab data (e.g. a numerical number). We thus transfer
@@ -104,13 +113,21 @@ classdef gem < handle
 %                    if issparse(varargin{1})
 %                        warning('Creating a dense gem object from a sparse matrix. Use ''sgem'' or ''gemify'' to create a sparse gem object.');
 %                    end
-                    this.objectIdentifier = gem_mex('newFromMatlab', full(varargin{1}), this.getWorkingPrecision);
-                elseif islogical(varargin{1})
-                    % We also interpret this as a call for the library to
-                    % create an instance of this class from some numerical
-                    % matlab data. Only, the numerical data was provided in
-                    % numerical form.
-                    this.objectIdentifier = gem_mex('newFromMatlab', full(double(varargin{1})), this.getWorkingPrecision);
+                    if isa(varargin{1}, 'uint8') || isa(varargin{1}, 'uint16') || isa(varargin{1}, 'uint32') || isa(varargin{1}, 'uint64') ...
+                        || isa(varargin{1}, 'int8') || isa(varargin{1}, 'int16') || isa(varargin{1}, 'int32') || isa(varargin{1}, 'int64')
+                        % For potentially large integers, translating into
+                        % strings guarantees that we don't forget any digit
+                        tmp = cell(size(varargin{1}));
+                        for i = 1:numel(varargin{1})
+                            tmp{i} = num2str(varargin{1}(i));
+                        end
+                        this = gem(tmp);
+                    else
+                        if ~isa(varargin{1}, 'double')
+                            varargin{1} = double(varargin{1});
+                        end
+                        this.objectIdentifier = gem_mex('newFromMatlab', full(varargin{1}), this.getWorkingPrecision);
+                    end
                 elseif ischar(varargin{1})
                     % We embed the string into a cell array so that the c++
                     % interface interprets it correctly.
