@@ -117,8 +117,38 @@ if length(indices) == 1
     end
 else
     % Then indices have been specified for both dimensions, as in a(1:2,:)
-    % so we call the subsref procedure. Since the function creates a
-    % new object with the result, we keep the corresponding handle...
+    % so we keep the matrix structure
+
+    nothingToDoLeft = (length(indices{1}) == s(1)) && isequal(indices{1}, 1:s(1));
+    nothingToDoRight = (length(indices{2}) == s(2)) && isequal(indices{2}, 1:s(2));
+
+    % A very simple case
+    if nothingToDoLeft && nothingToDoRight
+        result = this;
+        return;
+    end
+    
+    % It seems to be almost always faster to extract the elements by matrix
+    % multiplication:
+    if length(indices{1})*length(indices{2}) > 50000
+        if nothingToDoLeft
+            v2 = sgem(indices{2}, 1:numel(indices{2}), 1, s(2), numel(indices{2}));
+            result = this*v2;
+            return;
+        elseif nothingToDoRight
+            v1 = sgem(1:numel(indices{1}), indices{1}, 1, numel(indices{1}), s(1));
+            result = v1*this;
+            return;
+        else
+            v1 = sgem(1:numel(indices{1}), indices{1}, 1, numel(indices{1}), s(1));
+            v2 = sgem(indices{2}, 1:numel(indices{2}), 1, s(2), numel(indices{2}));
+            result = v1*this*v2;
+            return;
+        end
+    end
+        
+    % Otherwise, we call the subsref procedure. Since the function creates
+    % a new object with the result, we keep the corresponding handle...
     newObjectIdentifier = sgem_mex('subsref', this.objectIdentifier, indices{1}-1, indices{2}-1);
 
     % ...  and create a new matlab object to keep this handle

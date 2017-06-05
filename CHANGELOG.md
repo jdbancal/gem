@@ -10,6 +10,13 @@
 - Fixed precision setting for sparse matrices
 - Added support for partial precision in toStrings
 - Set class hierarchy
+- Added support for integer types
+- Improved performance of isnan and isinf
+- Improved performance of binary check function
+- Improved parameter support in sum function
+- Improved sparse constructor
+- Improved performance of subsref function
+- Fixed limit on rank and nnz
 
 ## [0.1.3] - 2017-02-10
 - Added isinteger, isfloat, and basic implementation of sprintf
