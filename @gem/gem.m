@@ -76,13 +76,7 @@ classdef gem < handle
             superiorto('logical');
             inferiorto('sdpvar');
 
-            % In the source file version of this library, we start by
-            % checking whether the c++ library was compiled. If not, we 
-            % suggest to download the binaries.
-            tmp = mfilename('fullpath');
-            if (exist([tmp(1:end-8), 'gem_mex.', mexext], 'file') ~= 3) && (~ismac)
-                warning('The library binaries were not found. You may wish to download them online at https://www.github.com/jdbancal/gem/releases .');
-            end
+            checkForBinaries;
             
             % The following variable is used in some instances to tell the
             % constructor to use the precision requested by the user rather
@@ -529,4 +523,22 @@ function n = nbDigitsFromString(str)
 
     % And return the number of digits
     n = exponent-1 - length(spaces) - length(dots) - length(pluses) - length(minuses);
+end
+
+% This function checks whether the library binaries are in the path.
+function value = checkForBinaries()
+    persistent binariesOk;
+    if isempty(binariesOk) %|| (binariesOk ~= 1)
+        % In the source file version of this library, we start by
+        % checking whether the c++ library was compiled. If not, we 
+        % suggest to download the binaries.
+        tmp = mfilename('fullpath');
+        if (exist([tmp(1:end-8), 'gem_mex.', mexext], 'file') ~= 3) && (~ismac)
+            warning('The library binaries were not found. You may wish to download them online at https://www.github.com/jdbancal/gem/releases .');
+            binariesOk = 0;
+        else
+            binariesOk = 1;
+        end
+    end
+    value = binariesOk;
 end
