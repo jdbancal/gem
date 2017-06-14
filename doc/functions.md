@@ -25,6 +25,8 @@ The following function can be applied to gem/sgem objects directly.
 | methods | full support | sparse support | remarks |
 |----------|---|---|---|
 | abs  | ✔  | ✔  |   |
+| all  | ✔  | ✔  |   |
+| and  | ✔  | ✔  |   |
 | any  | ✔  | ✔  |   |
 | acos | ✔ | ✔ |  |
 | acot | ✔ | ✔ |  |
@@ -138,4 +140,5 @@ The following function can be applied to gem/sgem objects directly.
 | unique | ✔ | ✔ |  through matlab's implementation |
 | uplus | ✔ | ✔ |  |
 | vertcat | ✔ | ✔ |  |
+| xor | ✔ | ✔ |  |
 

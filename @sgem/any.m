@@ -9,7 +9,7 @@ if (nargin < 2) && (min(size(this)) > 1)
     % For matrices, we act by default on the columns
     dim = 1;
 elseif nargin < 2
-    result = logical(sum(sum((this ~= 0) - isnan(this))));
+    result = logical(sum((this ~= 0) - isnan(this)));
     return;
 end
 

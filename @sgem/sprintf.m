@@ -1,10 +1,11 @@
 % sprintf - redirects to matlab's sprintf function with double conversion
 function result = sprintf(varargin)
 
-    % We convert gem objects to double
+    % We convert sgem objects to dense objects, so that the gem method is
+    % called instead
     for i = 1:nargin
-        if isequal(class(varargin{i}), 'gem') || isequal(class(varargin{i}), 'sgem')
-            varargin{i} = double(varargin{i});
+        if isequal(class(varargin{i}), 'sgem')
+            varargin{i} = full(varargin{i});
         end
     end
 

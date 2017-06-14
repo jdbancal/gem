@@ -5,6 +5,8 @@
 - Added support for logical indices in subsref and subsasgn
 - Added modulo
 - Added any
+- Added all
+- Added xor
 - Added support for algebra with non-numeric objects
 - Improved display of super tiny numbers
 - Fixed precision setting for sparse matrices
@@ -17,6 +19,7 @@
 - Improved sparse constructor
 - Improved performance of subsref, vertcat and horzcat function
 - Fixed limit on rank and nnz
+- Improved sprintf
 
 ## [0.1.3] - 2017-02-10
 - Added isinteger, isfloat, and basic implementation of sprintf
