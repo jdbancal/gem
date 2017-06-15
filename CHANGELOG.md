@@ -1,4 +1,4 @@
-## [...] - ...
+## [1.0.0] - 2017-06-16
 - Added sorting functions: sort, sortrow, issorted
 - Added a small missing feature in eigs which required the sorting function
 - Added diff
