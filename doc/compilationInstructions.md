@@ -20,15 +20,14 @@ Steps to compile the GEM library on *ubuntu* :
 Steps to compile the GEM library on *windows* (64 bits) :
 ---------------------------------------------------------
 
-1. Install msys on your system
-2. Install the TDM-GCC compiler from [http://tdm-gcc.tdragon.net/download](http://tdm-gcc.tdragon.net/download) and configure it for matlab (see (here)[https://fr.mathworks.com/help/matlab/matlab_external/compiling-c-mex-files-with-mingw.html] for more details).
+1. Install msys on your system from [http://mingw.org/wiki/msys](http://mingw.org/wiki/msys)
+2. Launch the MinGW Installation Manager and install packages `mingw-developer-toolkit` and `msys-base` 
 3. Download GMP from [https://gmplib.org/#DOWNLOAD](https://gmplib.org/#DOWNLOAD) and place it into gem's src folder
 4. Download MPFR from [http://www.mpfr.org/mpfr-current/#download](http://www.mpfr.org/mpfr-current/#download) and place it into gem's src folder
-5. Download MPFR-C++ from [http://www.holoborodko.com/pavel/mpfr/
-](http://www.holoborodko.com/pavel/mpfr/
+5. Download MPFR-C++ from [http://www.holoborodko.com/pavel/mpfr/](http://www.holoborodko.com/pavel/mpfr/
 ) and place it into gem's src folder
 6. Create the folder src/staticLibraries
-7. From within msys, go into the src/gmp folder and run the following commands:
+7. From within msys (launch C:\MinGW\msys\1.0\msys.bat), go into the src/gmp folder and run the following commands:
     - `./configure --disable-shared --enable-static CFLAGS=-fPIC --prefix=`pwd`/../staticLibraries`
     - `make`
     - `make check`
@@ -38,8 +37,10 @@ Steps to compile the GEM library on *windows* (64 bits) :
     - `make`
     - `make check`
     - `make install`
-9. In the file `make.m`, set the variabe `useSharedGmpAndMpfr` to 0 (it takes value 1 by default)
-10. Follow the instructions above for the installation on ubuntu (except for point number 4)
+9. Install the TDM64-GCC compiler from [http://tdm-gcc.tdragon.net/download](http://tdm-gcc.tdragon.net/download), making sure you include the component `Components/gcc/openmp` in the TDM-GCC Setup. Configure it for matlab by typing `setenv('MW_MINGW64_LOC','C:\TDM-GCC-64')` and `mex -setup cpp` in matlab (see (here)[https://fr.mathworks.com/help/matlab/matlab_external/compiling-c-mex-files-with-mingw.html] for more details).
+10. In the file `make.m`, set the variabe `useSharedGmpAndMpfr` to 0 (it takes value 1 by default)
+11. Follow the instructions above for the installation on ubuntu (except for point number 4)
+12. Note: the compiled require the `libcomp` library, located in `C:\TDM-GCC-64\bin\libcomp-1.dll`.by default: copy this file into the `gem` folder
 
 
 Steps to compile the GEM library on *MacOs* and other platform :
