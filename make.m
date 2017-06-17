@@ -37,9 +37,7 @@ end
 % not depend on shared gmp and mpfr libraries:
 useSharedGmpAndMpfr = 1;
 
-if ~ismac
-    warning('You are trying to compile the GEM library, but binaries may be available for your platform on https://www.github.com/jdbancal/gem/releases');
-end
+warning('You are trying to compile the GEM library, but binaries may be available for your platform on https://www.github.com/jdbancal/gem/releases');
 
 %% We perform some checks
 % This file needs to be run from within its folder
@@ -79,8 +77,8 @@ if isempty(spectraFolder)
 end
 
 
-% We set the flags needed for parallelization (if requested)
-if parallelization == 1
+% We set the flags needed for parallelization (if requested and if possible)
+if (parallelization == 1) && ~ismac
     parallelizationFlag = '-pthread -fopenmp';
 else
     parallelizationFlag = '';
@@ -96,7 +94,7 @@ if useSharedGmpAndMpfr == 1
     if (ismac) || (~isunix)
         % If we pass here, we expect to be on a linux machine (it is not
         % strictly needed though)
-        warning('Trying to compile the GEM library with shared GMP and MPFR libraries, but it is not clear whether these libraries are available on the system.');
+        warning('Trying to compile the GEM library with shared GMP and MPFR libraries, but it is not clear whether these libraries are available on the system. You may want to try compiling without shared libraries first.');
     end
     
     flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -Isrc/', eigenFolder, ' -Isrc/', eigenFolder, '/unsupported -Isrc/', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG src/utils.cpp -o src/utils.o']);
@@ -169,9 +167,6 @@ else
     end
 
     % Now gmp and mpfr should be ready, we can compile gem
-    if ismac
-        warning('Trying to run compilation commands that were not tested on this platform.');
-    end
     if isunix
         flags(1) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -I', eigenFolder, ' -I', eigenFolder, '/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
         flags(2) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -I', eigenFolder, ' -I', eigenFolder, '/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
@@ -180,7 +175,7 @@ else
         flags(5) = unix(['g++ -c -D_GNU_SOURCE -DMATLAB_MEX_FILE  -I', eigenFolder, ' -I', eigenFolder, '/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
         flags(6) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/', lower(computer), '/mexFunction.map" gem_mex.o gem.o sgem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/', lower(computer), ' -L"', matlabroot, '/bin/', lower(computer), '" -lmx -lmex -lmat -lm -lstdc++ ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o ../gem_mex.', mexext]);
         flags(7) = unix(['g++ -Wl,--no-undefined  -shared -Wl,--version-script,"', matlabroot, '/extern/lib/', lower(computer), '/mexFunction.map" sgem_mex.o sgem.o gem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a  -Wl,-rpath-link,', matlabroot, '/bin/', lower(computer), ' -L"', matlabroot, '/bin/', lower(computer), '" -lmx -lmex -lmat -lm -lstdc++ ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -o ../sgem_mex.', mexext]);
-    else
+    elseif ispc
         flags(1) = unix(['g++ -c -m64 -DMATLAB_MEX_FILE  -I', eigenFolder, ' -I', eigenFolder, '/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG utils.cpp -o utils.o']);
         flags(2) = unix(['g++ -c -m64 -DMATLAB_MEX_FILE  -I', eigenFolder, ' -I', eigenFolder, '/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG gem.cpp -o gem.o']);
         flags(3) = unix(['g++ -c -m64 -DMATLAB_MEX_FILE  -I', eigenFolder, ' -I', eigenFolder, '/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG gem_mex.cpp -o gem_mex.o']);
@@ -188,6 +183,14 @@ else
         flags(5) = unix(['g++ -c -m64 -DMATLAB_MEX_FILE  -I', eigenFolder, ' -I', eigenFolder, '/unsupported -I', mpfrcppFolder, ' -IstaticLibraries/include -I', spectraFolder, '/include -I/usr/include  -I"', matlabroot, '/extern/include" -I"', matlabroot, '/simulink/include" -ansi -fexceptions -fPIC -fno-omit-frame-pointer -Wno-deprecated -std=c++11 ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
         flags(6) = unix(['g++ -m64 -s -Wl,--no-undefined  -shared gem_mex.o gem.o sgem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a -L"', matlabroot, '/bin/', lower(computer), '" -llibmx -llibmex -llibmat -lm -llibmwlapack -llibmwblas ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -L"', matlabroot, '\extern\lib\win64\mingw64" -o ../gem_mex.', mexext]);
         flags(7) = unix(['g++ -m64 -s -Wl,--no-undefined  -shared sgem_mex.o sgem.o gem.o utils.o  staticLibraries/lib/libmpfr.a staticLibraries/lib/libgmp.a -L"', matlabroot, '/bin/', lower(computer), '" -llibmx -llibmex -llibmat -lm -llibmwlapack -llibmwblas ', parallelizationFlag, ' ', optimizationFlag, ' -DEIGEN_NO_DEBUG -L"', matlabroot, '\extern\lib\win64\mingw64" -o ../sgem_mex.', mexext]);
+    elseif ismac
+flags(1) = unix(['/usr/bin/xcrun -sdk macosx10.12 clang++ -c -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Impfrc++-3 -IstaticLibraries/include -Ispectra/include -I/usr/include  -I"/Applications/MATLAB_R2016a.app/extern/include" -I"/Applications/MATLAB_R2016a.app/simulink/include" -fno-common -arch x86_64 -mmacosx-version-min=10.12 -fexceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -fobjc-arc -std=c++11 -stdlib=libc++ -O2 -fwrapv -DNDEBUG utils.cpp -o utils.o']);
+flags(2) = unix(['/usr/bin/xcrun -sdk macosx10.12 clang++ -c -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Impfrc++-3 -IstaticLibraries/include -Ispectra/include -I/usr/include  -I"/Applications/MATLAB_R2016a.app/extern/include" -I"/Applications/MATLAB_R2016a.app/simulink/include" -fno-common -arch x86_64 -mmacosx-version-min=10.12 -fexceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -fobjc-arc -std=c++11 -stdlib=libc++ -O2 -fwrapv -DNDEBUG gem.cpp -o gem.o']);
+flags(3) = unix(['/usr/bin/xcrun -sdk macosx10.12 clang++ -c -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Impfrc++-3 -IstaticLibraries/include -Ispectra/include -I/usr/include  -I"/Applications/MATLAB_R2016a.app/extern/include" -I"/Applications/MATLAB_R2016a.app/simulink/include" -fno-common -arch x86_64 -mmacosx-version-min=10.12 -fexceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -fobjc-arc -std=c++11 -stdlib=libc++ -O2 -fwrapv -DNDEBUG gem_mex.cpp -o gem_mex.o']);
+flags(4) = unix(['/usr/bin/xcrun -sdk macosx10.12 clang++ -c -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Impfrc++-3 -IstaticLibraries/include -Ispectra/include -I/usr/include  -I"/Applications/MATLAB_R2016a.app/extern/include" -I"/Applications/MATLAB_R2016a.app/simulink/include" -fno-common -arch x86_64 -mmacosx-version-min=10.12 -fexceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -fobjc-arc -std=c++11 -stdlib=libc++ -O2 -fwrapv -DNDEBUG sgem.cpp -o sgem.o']);
+flags(5) = unix(['/usr/bin/xcrun -sdk macosx10.12 clang++ -c -DMATLAB_MEX_FILE  -Ieigen -Ieigen/unsupported -Impfrc++-3 -IstaticLibraries/include -Ispectra/include -I/usr/include  -I"/Applications/MATLAB_R2016a.app/extern/include" -I"/Applications/MATLAB_R2016a.app/simulink/include" -fno-common -arch x86_64 -mmacosx-version-min=10.12 -fexceptions -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -fobjc-arc -std=c++11 -stdlib=libc++ -O2 -fwrapv -DNDEBUG sgem_mex.cpp -o sgem_mex.o']);
+flags(6) = unix(['/usr/bin/xcrun -sdk macosx10.12 clang++ -Wl,-twolevel_namespace -undefined error -arch x86_64 -mmacosx-version-min=10.12 -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -framework Cocoa -bundle  -Wl,-exported_symbols_list,"/Applications/MATLAB_R2016a.app/extern/lib/maci64/mexFunction.map" -stdlib=libc++ -O -Wl,-exported_symbols_list,"/Applications/MATLAB_R2016a.app/extern/lib/maci64/mexFunction.map" gem_mex.o gem.o sgem.o utils.o staticLibraries/lib/libmpfr.a  -lmpfr  -lgmp   -L"/Applications/MATLAB_R2016a.app/bin/maci64" -lmx -lmex -lmat -o ../gem_mex.mexmaci64']);
+flags(7) = unix(['/usr/bin/xcrun -sdk macosx10.12 clang++ -Wl,-twolevel_namespace -undefined error -arch x86_64 -mmacosx-version-min=10.12 -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk -framework Cocoa -bundle  -Wl,-exported_symbols_list,"/Applications/MATLAB_R2016a.app/extern/lib/maci64/mexFunction.map" -stdlib=libc++ -O -Wl,-exported_symbols_list,"/Applications/MATLAB_R2016a.app/extern/lib/maci64/mexFunction.map" sgem_mex.o gem.o sgem.o utils.o staticLibraries/lib/libmpfr.a  -lmpfr  -lgmp   -L"/Applications/MATLAB_R2016a.app/bin/maci64" -lmx -lmex -lmat -o ../sgem_mex.mexmaci64']);
     end
     cd ..
 end
@@ -201,7 +204,7 @@ end
 
 return;
 
-% The following line displays the default instructions for compiilation 
+% The following line displays the default instructions for compilation 
 % with default options (and no parallelization) :
 %mex -n -largeArrayDims -Isrc/eigen -Isrc/eigen/unsupported -Isrc/spectra/include -I/usr/include -lmpfr -lgmp src/gem_mex.cpp src/gem.cpp src/sgem.cpp src/utils.cpp
 
