@@ -43,9 +43,19 @@ Steps to compile the GEM library on *windows* (64 bits) :
 12. Note: the compiled require the `libcomp` library, located in `C:\TDM-GCC-64\bin\libcomp-1.dll`.by default: copy this file into the `gem` folder
 
 
-Steps to compile the GEM library on *MacOs* and other platform :
-----------------------------------------------------------------
+Steps to compile the GEM library on *MacOs* (tested on el capitain 10.11.6) :
+-----------------------------------------------------------------------------
 
-Compilation on *other platforms* : unfortunately, I don't have other operating systems on which to run tests. Since the compilation commands are relatively simple (not much configuration involved), it should be rather straightforward to compile the GEM library with something similar to the above commands. The best way to start is to make sure that a running version of [gcc](https://gcc.gnu.org/) is installed on your machine. Once this is done, you can try running the compilation commands one by one, and see what happens. If you succeed, tell us how you did it!
+Tentative roadmap:
+1. Install Xcode
+2. Install homebrew and most of the packages mentioned in https://www.topbug.net/blog/2013/04/14/install-and-use-gnu-command-line-tools-in-mac-os-x/
+3. Install gcc throught homebrew with `brew install gcc --without-muiltilib` (or maybe without the option...)
+4. Install maybe also `gmp` `mpfr` and `libmpc` with brew...
+4. In /usr/local/bin, add reference to gcc and g++ with `ln -s gcc-7 gcc` and `ln -s g++-7 g++`
+5. Launch matlab from the terminal, so that /usr/local/bin is the first folder looked for when running `unix(‘which g++’)` in matlab
+6. Type `make` from  within the gem folder and follow the instructions
+7. Add the gem folder to your matlab path.
 
+These additional links may help
+ - Instructions to be able to run `mex -setup` : http://www.mathworks.com/matlabcentral/answers/246507-why-can-t-mex-find-a-supported-compiler-in-matlab-r2015b-after-i-upgraded-to-xcode-7-0#comment_392485
 

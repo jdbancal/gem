@@ -20,6 +20,7 @@
 - Improved performance of subsref, vertcat and horzcat function
 - Fixed limit on rank and nnz
 - Improved sprintf
+- First compilation instructions for mac os
 
 ## [0.1.3] - 2017-02-10
 - Added isinteger, isfloat, and basic implementation of sprintf
