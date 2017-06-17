@@ -3244,7 +3244,7 @@ GmpEigenMatrix GmpEigenMatrix::asin() const
     // Now we could also compute the images of real numbers between -1 and 1 if we want
     for (IndexType j(0); j < result.matrixR.cols(); ++j)
         for (IndexType i(0); i < result.matrixR.rows(); ++i)
-            if (((!isComplex) || (isComplex) && (matrixI(i,j) == 0)) && (matrixR(i,j) >= -1) && (matrixR(i,j) <= 1) && (result.isComplex)) {
+            if (((!isComplex) || ((isComplex) && (matrixI(i,j) == 0))) && (matrixR(i,j) >= -1) && (matrixR(i,j) <= 1) && (result.isComplex)) {
 //                result.matrixR(i,j) = mpfr::asin(matrixR(i,j));
                 result.matrixI(i,j) = 0; // At least, we remove the imaginary parts which should be zero
             }
@@ -3268,7 +3268,7 @@ GmpEigenMatrix& GmpEigenMatrix::asin_new() const
     // Now we could also compute the images of real numbers between -1 and 1 if we want
     for (IndexType j(0); j < result.matrixR.cols(); ++j)
         for (IndexType i(0); i < result.matrixR.rows(); ++i)
-            if (((!isComplex) || (isComplex) && (matrixI(i,j) == 0)) && (matrixR(i,j) >= -1) && (matrixR(i,j) <= 1) && (result.isComplex)) {
+            if (((!isComplex) || ((isComplex) && (matrixI(i,j) == 0))) && (matrixR(i,j) >= -1) && (matrixR(i,j) <= 1) && (result.isComplex)) {
 //                result.matrixR(i,j) = mpfr::asin(matrixR(i,j));
                 result.matrixI(i,j) = 0;
             }
