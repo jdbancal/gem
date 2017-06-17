@@ -79,7 +79,9 @@ classdef sgem < handle
             superiorto('uint32');
             superiorto('uint64');
             superiorto('logical');
-            inferiorto('sdpvar');
+            if sdpvarInPath()
+                inferiorto('sdpvar');
+            end
 
             if nargin == 0
                 % Without further argument we construct a new empty instance
@@ -452,3 +454,16 @@ classdef sgem < handle
     end
 end
 
+% This function checks whether the sdpvar class are in the path.
+function value = sdpvarInPath()
+    persistent sdpvarExist;
+    if isempty(sdpvarExist)
+        % the first time, we check if the class exists
+        if exist('sdpvar','class')
+            sdpvarExist = true;
+        else
+            sdpvarExist = false;
+        end
+    end
+    value = sdpvarExist;
+end

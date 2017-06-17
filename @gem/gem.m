@@ -74,7 +74,9 @@ classdef gem < handle
             superiorto('uint32');
             superiorto('uint64');
             superiorto('logical');
-            inferiorto('sdpvar');
+            if sdpvarInPath() || true
+                inferiorto('sdpvar');
+            end
 
             checkForBinaries;
             
@@ -541,4 +543,18 @@ function value = checkForBinaries()
         end
     end
     value = binariesOk;
+end
+
+% This function checks whether the sdpvar class are in the path.
+function value = sdpvarInPath()
+    persistent sdpvarExist;
+    if isempty(sdpvarExist)
+        % the first time, we check if the class exists
+        if exist('sdpvar','class')
+            sdpvarExist = true;
+        else
+            sdpvarExist = false;
+        end
+    end
+    value = sdpvarExist;
 end
