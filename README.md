@@ -7,7 +7,7 @@ The library implements two data types:
  - **gem** for high precision dense matrices
  - **sgem** for high precision sparse matrices
 
-and overloads [a number of matlab functions](doc/functions.md).
+and overloads [a number of matlab functions](doc/functions.md). It can be downloaded [here](https://github.com/jdbancal/gem/releases).
 
 The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for high precision arithmetic (through [MPFR](http://www.mpfr.org/) and [MPFR C++](http://www.holoborodko.com/pavel/mpfr/)), and on [Eigen](http://eigen.tuxfamily.org/) and [Spectra](http://yixuan.cos.name/spectra/) for matrix manipulations.
 
@@ -28,7 +28,7 @@ Here are a few simple examples of GEM library usage.
 Once a high precision matrix is created, it can be manipulated by calling usual matlab functions.
 
  - `eig(gemRand(100,100))` : computes the eigenvalues of a random 100x100 matrix
- - `eigs(gemRand(100,100),1)` : computes the largest eigenvalues of a random 100x100 matrix
+ - `eigs(gemRand(100,100),1)` : computes the largest eigenvalue of a random 100x100 matrix
  - `sum(gem([1:100000]).^8)-5e39-2e24` gives 111111111177777777771111111111333333333330000 (use function `gemDisplayPrecision` to see all the digits)
  - `notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1)` gives 262537412640768743.9999999999992500725971981856889 (the number of digits displayed can also be specified on a case by case fashion as a parameter to the display fuction; a precision of -1 displays all available digits)
  - `sgem(speye(3))` creates a high precision sparse representation of the 3x3 identity matrix
@@ -40,9 +40,9 @@ Check out [getting started with the GEM library](doc/gettingStarted.md) for more
 Installation
 ------------
 
-The library comes pre-compiled for ubuntu and windows 64bits. It is therefore straightforward to use : after [downloading](https://github.com/jdbancal/gem/releases) the latest release, just add the gem folder into matlab's path (this can be done by running the command `path(path,'/path_to_the_gem_folder')`), and it is ready to use.
+The library comes pre-compiled for linux, macos and windows (64bits). It is therefore straightforward to use : after [downloading](https://github.com/jdbancal/gem/releases) the latest release, just add the gem folder into matlab's path (this can be done by running the command `path(path,'/path_to_the_gem_folder')`), and it is ready to use.
 
-If you are using a different platform (such as 32 bits or mac os), or in case you use an older version of linux/matlab than the one on which the provided binaries were compiled, you need to compile it. In this case, check out the [compilation instructions](doc/compilationInstructions.md).
+If you are using a different platform (such as 32 bits), or in case you use an older version of linux/matlab than the one on which the provided binaries were compiled, you may compile it. For this, please refer to the [compilation instructions](doc/compilationInstructions.md).
 
 
 License
