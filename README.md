@@ -33,6 +33,7 @@ Once a high precision matrix is created, it can be manipulated by calling usual 
  - `notAnInteger = exp(sqrt(gem(163))*gem('pi')); display(notAnInteger, -1)` gives 262537412640768743.9999999999992500725971981856889 (the number of digits displayed can also be specified on a case by case fashion as a parameter to the display fuction; a precision of -1 displays all available digits)
  - `sgem(speye(3))` creates a high precision sparse representation of the 3x3 identity matrix
  - `a=1./gem([1:7]); save('filename','a'); load('filename');` saves and loads a gem object
+ - Watch how how 50 digits of the golden ratio are being calculated by the continued fraction formula with `x= gem(1); for i=1:118 x=1/(1+x); disp(num2str(1+x,50)); end; disp(num2str((1+sqrt(gem(5)))/2, 50))`
 
 Check out [getting started with the GEM library](doc/gettingStarted.md) for more usage examples.
 
