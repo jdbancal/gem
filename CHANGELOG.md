@@ -1,3 +1,8 @@
+## [1.0.0] - 2018-01-08
+- Updated the usage of class precedence to the latest matlab standard
+- Added an example related to the golden ratio
+- Minor modification to Readme
+
 ## [1.0.0] - 2017-06-16
 - Added sorting functions: sort, sortrow, issorted
 - Added a small missing feature in eigs which required the sorting function
