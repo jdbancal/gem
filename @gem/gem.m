@@ -63,20 +63,6 @@ classdef gem < handle
         %  - Create a C++ class instance for any of the mathematical
         %    constants above
         function this = gem(varargin)
-            superiorto('single');
-            superiorto('double');
-            superiorto('int8');
-            superiorto('int16');
-            superiorto('int32');
-            superiorto('int64');
-            superiorto('uint8');
-            superiorto('uint16');
-            superiorto('uint32');
-            superiorto('uint64');
-            superiorto('logical');
-            if sdpvarInPath()
-                inferiorto('sdpvar');
-            end
 
             checkForBinaries;
             
@@ -545,16 +531,3 @@ function value = checkForBinaries()
     value = binariesOk;
 end
 
-% This function checks whether the sdpvar class are in the path.
-function value = sdpvarInPath()
-    persistent sdpvarExist;
-    if isempty(sdpvarExist)
-        % the first time, we check if the class exists
-        if exist('sdpvar','class')
-            sdpvarExist = true;
-        else
-            sdpvarExist = false;
-        end
-    end
-    value = sdpvarExist;
-end
