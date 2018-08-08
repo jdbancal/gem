@@ -1,10 +1,11 @@
-src/eigen*
 *.o
 *.mex*
 .syncthing*
 *~
-src/gmp-*
-src/mpfr-*
-src/mpfrc++-*
-src/spectra*
-/src/staticLibraries/
+src/*eigen*
+src/*gmp-*
+src/*mpfr-*
+src/*mpfrc++*
+src/*spectra*
+src/*boost_*
+src/staticLibraries/
