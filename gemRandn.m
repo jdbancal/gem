@@ -1,11 +1,11 @@
-% gemRand - high precision pseudorandom numbers distributed according to
+% gemRandn - high precision pseudorandom numbers distributed according to
 % the standard normal distribution
 %
 % Usage :
-%   gemRand         returns one pseudo-random number
-%   gemRand(N)      returns an NxN matrix of pseudo-random numbers
-%   gemRand(N,M)    returns an NxM matrix of pseudo-random numbers
-%   gemRand([N,M])  idem
+%   gemRandn         returns one pseudo-random number
+%   gemRandn(N)      returns an NxN matrix of pseudo-random numbers
+%   gemRandn(N,M)    returns an NxM matrix of pseudo-random numbers
+%   gemRandn([N,M])  idem
 %
 % Note : The values produced by this function depend on the seed (which can
 % be set by the function gemRng), as well as on the gem working precision.
