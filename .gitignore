@@ -1,5 +1,6 @@
 *.o
 *.mex*
+*.dll
 .syncthing*
 *~
 src/*eigen*
