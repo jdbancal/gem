@@ -1,13 +1,13 @@
 Gmp Eigen Matrix Library
 ========================
 
-The [GEM library](https://github.com/jdbancal/gem/releases) is a variable precision library for [matlab](http://www.mathworks.com/products/matlab/). It provides an open source solution for basic high precision computations in matlab.
+The [GEM library](https://github.com/jdbancal/gem/releases) is a variable precision library for [matlab](http://www.mathworks.com/products/matlab/) and [octave](https://www.gnu.org/software/octave/). It provides an open source solution for basic high precision computations in matlab.
 
 The library implements two data types:
  - **gem** for high precision dense matrices
  - **sgem** for high precision sparse matrices
 
-and overloads [a number of matlab functions](doc/functions.md). It can be downloaded [here](https://github.com/jdbancal/gem/releases).
+and overloads [a number of matlab/octave functions](doc/functions.md). It can be downloaded [here](https://github.com/jdbancal/gem/releases).
 
 The library is coded in C++ and matlab. It currently relies on [GMP](https://gmplib.org/) for high precision arithmetic (through [MPFR](http://www.mpfr.org/) and [MPFR C++](http://www.holoborodko.com/pavel/mpfr/)), and on [Eigen](http://eigen.tuxfamily.org/) and [Spectra](http://yixuan.cos.name/spectra/) for matrix manipulations.
 
@@ -43,7 +43,7 @@ Installation
 
 The library comes pre-compiled for linux, macos and windows (64bits). It is therefore straightforward to use : after [downloading](https://github.com/jdbancal/gem/releases) the latest release, just add the gem folder into matlab's path (this can be done by running the command `path(path,'/path_to_the_gem_folder')`), and it is ready to use.
 
-If you are using a different platform (such as 32 bits), or in case you use an older version of linux/matlab than the one on which the provided binaries were compiled, you may compile it. For this, please refer to the [compilation instructions](doc/compilationInstructions.md).
+If you are using a different platform (such as 32 bits), if you are using an older version of the operating system than the one on which the provided binaries were compiled, an older version of matlab or octave on something else than linux, you may use the provided script to compile it. For this, please refer to the [compilation instructions](doc/compilationInstructions.md).
 
 
 License

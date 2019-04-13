@@ -1,7 +1,7 @@
 How to compile the GEM library
 ==============================
 
-This document describes steps which lead to a successful compilation of the GEM library on various platforms.
+This document describes steps which lead to a successful compilation of the GEM library on various platforms. Here we assume that the target environment is *matlab*, but the same instructions also apply to *octave* (tested on linux).
 
 
 Steps to compile the GEM library on *ubuntu* :
