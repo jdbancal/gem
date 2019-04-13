@@ -48,9 +48,9 @@ function result = le(this, varargin)
     
     % Now we can compute the comparison matrix
     if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
-        result = logical(gem_mex('le', objectIdentifier(this), objectIdentifier(varargin{1})));
+        result = logical(gem_mex('le', this.objectIdentifier, varargin{1}.objectIdentifier));
     else
-        result = logical(sgem_mex('le', objectIdentifier(this), objectIdentifier(varargin{1})));
+        result = logical(sgem_mex('le', this.objectIdentifier, varargin{1}.objectIdentifier));
     end
     
     % For matlab, le when one object is sparse produces a sparse result

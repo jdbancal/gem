@@ -46,9 +46,9 @@ function result = eq(this, varargin)
     
     % Now we can compute the comparison matrix
     if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
-        result = logical(gem_mex('eq', objectIdentifier(this), objectIdentifier(varargin{1})));
+        result = logical(gem_mex('eq', this.objectIdentifier, varargin{1}.objectIdentifier));
     else
-        result = logical(sgem_mex('eq', objectIdentifier(this), objectIdentifier(varargin{1})));
+        result = logical(sgem_mex('eq', this.objectIdentifier, varargin{1}.objectIdentifier));
     end
     
     % For matlab, eq when one object is sparse produces a sparse result

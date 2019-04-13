@@ -122,13 +122,13 @@ function [Y I] = max(this, varargin)
         if ~issparse(this)
             % Now we call the element-wise minimum procedure. Since the function creates a
             % new object with the result, we keep the corresponding handle...
-            newObjectIdentifier = gem_mex('ewMax', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = gem_mex('ewMax', this.objectIdentifier, varargin{1}.objectIdentifier);
             % ...  and create a new matlab object to keep this handle
             Y = gem('encapsulate', newObjectIdentifier);
         else
             % Now we call the element-wise minimum procedure. Since the function creates a
             % new object with the result, we keep the corresponding handle...
-            newObjectIdentifier = sgem_mex('ewMax', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = sgem_mex('ewMax', this.objectIdentifier, varargin{1}.objectIdentifier);
             % ...  and create a new matlab object to keep this handle
             Y = sgem('encapsulate', newObjectIdentifier);
         end

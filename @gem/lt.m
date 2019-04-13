@@ -48,9 +48,9 @@ function result = lt(this, varargin)
     
     % Now we can compute the comparison matrix
     if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
-        result = logical(gem_mex('lt', objectIdentifier(this), objectIdentifier(varargin{1})));
+        result = logical(gem_mex('lt', this.objectIdentifier, varargin{1}.objectIdentifier));
     else
-        result = logical(sgem_mex('lt', objectIdentifier(this), objectIdentifier(varargin{1})));
+        result = logical(sgem_mex('lt', this.objectIdentifier, varargin{1}.objectIdentifier));
     end
     
     % For matlab, lt when one object is sparse produces a sparse result

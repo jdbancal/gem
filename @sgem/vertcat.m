@@ -65,10 +65,10 @@ function result = vertcat(this, varargin)
     
     % Otherwise we just use a direct method
     if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
-        newObjectIdentifier = gem_mex('vertcat', objectIdentifier(this), objectIdentifier(varargin{1}));
+        newObjectIdentifier = gem_mex('vertcat', this.objectIdentifier, varargin{1}.objectIdentifier);
         result = gem('encapsulate', newObjectIdentifier);
     else
-        newObjectIdentifier = sgem_mex('vertcat', objectIdentifier(this), objectIdentifier(varargin{1}));
+        newObjectIdentifier = sgem_mex('vertcat', this.objectIdentifier, varargin{1}.objectIdentifier);
         result = sgem('encapsulate', newObjectIdentifier);
     end
 end

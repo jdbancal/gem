@@ -44,19 +44,19 @@ function result = mtimes(this, varargin)
     % result in the adequate object.
     if isequal(class(this), 'gem')
         if isequal(class(varargin{1}), 'gem')
-            newObjectIdentifier = gem_mex('mtimes', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = gem_mex('mtimes', this.objectIdentifier, varargin{1}.objectIdentifier);
             result = gem('encapsulate', newObjectIdentifier);
         else
-            newObjectIdentifier = gem_mex('mtimes_fs', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = gem_mex('mtimes_fs', this.objectIdentifier, varargin{1}.objectIdentifier);
             result = gem('encapsulate', newObjectIdentifier);
         end
     else
         % A priori we should not arrive here... but just in case
         if isequal(class(varargin{1}), 'gem')
-            newObjectIdentifier = sgem_mex('mtimes_sf', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = sgem_mex('mtimes_sf', this.objectIdentifier, varargin{1}.objectIdentifier);
             result = gem('encapsulate', newObjectIdentifier);
         else
-            newObjectIdentifier = sgem_mex('mtimes', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = sgem_mex('mtimes', this.objectIdentifier, varargin{1}.objectIdentifier);
             result = sgem('encapsulate', newObjectIdentifier);
         end
     end

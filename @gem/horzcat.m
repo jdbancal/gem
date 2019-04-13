@@ -45,10 +45,10 @@ function result = horzcat(this, varargin)
 
     %% Now we can concatenate the two objects
     if isequal(class(this), 'gem') && isequal(class(varargin{1}), 'gem')
-        newObjectIdentifier = gem_mex('horzcat', objectIdentifier(this), objectIdentifier(varargin{1}));
+        newObjectIdentifier = gem_mex('horzcat', this.objectIdentifier, varargin{1}.objectIdentifier);
         result = gem('encapsulate', newObjectIdentifier);
     else
-        newObjectIdentifier = sgem_mex('horzcat', objectIdentifier(this), objectIdentifier(varargin{1}));
+        newObjectIdentifier = sgem_mex('horzcat', this.objectIdentifier, varargin{1}.objectIdentifier);
         result = sgem('encapsulate', newObjectIdentifier);
     end
 end

@@ -64,7 +64,7 @@ classdef gem < handle
         %    constants above
         function this = gem(varargin)
 
-            checkForBinaries;
+            this.checkForBinaries;
             
             % The following variable is used in some instances to tell the
             % constructor to use the precision requested by the user rather
@@ -84,7 +84,7 @@ classdef gem < handle
                 elseif isequal(class(varargin{1}), 'sgem')
                     % The we create a dense version of the provided sparse
                     % sgem object
-                    this.objectIdentifier = gem_mex('full', objectIdentifier(varargin{1}));
+                    this.objectIdentifier = gem_mex('full', varargin{1}.objectIdentifier);
                 elseif isnumeric(varargin{1}) || islogical(varargin{1})
                     % Then we interpret this call as a call for the library to
                     % create an instance of this class from some numerical
@@ -141,9 +141,9 @@ classdef gem < handle
                     % If we are here, the string is not a mathematical
                     % constant, so we check that the string only contains a
                     % real part
-                    if ~isRealString(varargin{1})
-                        [rPart iPart] = separateRIString(varargin{1});
-                        if ~isRealString(rPart) || ~isRealString(iPart) % To prevent an infinite loop
+                    if ~this.isRealString(varargin{1})
+                        [rPart iPart] = this.separateRIString(varargin{1});
+                        if ~this.isRealString(rPart) || ~this.isRealString(iPart) % To prevent an infinite loop
                             error('The complex string was not correctly separated.');
                         end
 
@@ -158,13 +158,13 @@ classdef gem < handle
                     end
 
                     % We check that the string is of an acceptable form
-                    if ~isValidString(varargin{1})
+                    if ~this.isValidString(varargin{1})
                         error('The format of this string is not supported');
                     end
 
                     % Now we set the precision and construct the c++ object
                     if isempty(forceDefaultPrecision) || (forceDefaultPrecision ~= 1)
-                        precision = max(this.getWorkingPrecision, nbDigitsFromString(varargin{1}));
+                        precision = max(this.getWorkingPrecision, this.nbDigitsFromString(varargin{1}));
                     else
                         % We force the precision to be the one requested by
                         % the user
@@ -174,9 +174,9 @@ classdef gem < handle
                 elseif iscell(varargin{1})
                     % First, we check that the cell only contains a real
                     % part
-                    if ~isRealCell(varargin{1})
-                        [rPart iPart] = separateRICell(varargin{1});
-                        if ~isRealCell(rPart) || ~isRealCell(iPart) % To prevent an infinite loop
+                    if ~this.isRealCell(varargin{1})
+                        [rPart iPart] = this.separateRICell(varargin{1});
+                        if ~this.isRealCell(rPart) || ~this.isRealCell(iPart) % To prevent an infinite loop
                             error('The complex string was not correctly separated.');
                         end
 
@@ -192,7 +192,7 @@ classdef gem < handle
 
                     % We check that the cell contains numbers in an
                     % acceptable form
-                    if ~isValidCell(varargin{1})
+                    if ~this.isValidCell(varargin{1})
                         error('The format of this cell is not supported');
                     end
 
@@ -203,7 +203,7 @@ classdef gem < handle
                         if isnumeric(varargin{1}{i})
                             precision = max(precision, 15);
                         elseif ischar(varargin{1}{i})
-                            precision = max(precision, nbDigitsFromString(varargin{1}{i}));
+                            precision = max(precision, this.nbDigitsFromString(varargin{1}{i}));
                         else
                             error('Only doubles and strings are supported in a cell array.');
                         end
@@ -277,7 +277,11 @@ classdef gem < handle
 
         % Destructor - Destroy the C++ class instance
         function delete(this)
-            gem_mex('delete', this.objectIdentifier);
+            % Latest versions of matlab might try to delete object which
+            % were not fully constructed yet...
+            if ~isempty(this.objectIdentifier)
+                gem_mex('delete', this.objectIdentifier);
+            end
         end    
     end
 
@@ -353,181 +357,187 @@ classdef gem < handle
             value = precision;
         end
     end
-end
+    
+    
+    %% The following methods are needed in the class, they are implemented as
+    % methods rather than functions, because octave doesn't support declaration 
+    % of functions into a class file
+    methods (Static, Access = private)
+        
+        % This function verifies that a string doesn't contain any imaginary part
+        function bool = isRealString(str)
+            bool = 1 - (sum(str == 'i') > 0);
+        end
 
-%% Here are some functions which are needed in the class
 
-
-% This function verifies that a string doesn't contain any imaginary part
-function bool = isRealString(str)
-    bool = 1 - (sum(str == 'i') > 0);
-end
-
-
-% This function verifies that a cell array doesn't contain any imaginary
-% part (but the cell array could contain either doubles, or strings)
-function bool = isRealCell(x)
-    for i = 1:numel(x)
-        if ischar(x{i})
-            if sum(x{i} == 'i') > 0
-                bool = 0;
-                return;
+        % This function verifies that a cell array doesn't contain any imaginary
+        % part (but the cell array could contain either doubles, or strings)
+        function bool = isRealCell(x)
+            for i = 1:numel(x)
+                if ischar(x{i})
+                    if sum(x{i} == 'i') > 0
+                        bool = 0;
+                        return;
+                    end
+                elseif isnumeric(x{i}) && (numel(x{i}) == 1)
+                    if ~isreal(x{i})
+                        bool = 0;
+                        return;
+                    end
+                else
+                    error('Cell arrays can only contain doubles or strings.');
+                end
             end
-        elseif isnumeric(x{i}) && (numel(x{i}) == 1)
-            if ~isreal(x{i})
-                bool = 0;
-                return;
-            end
-        else
-            error('Cell arrays can only contain doubles or strings.');
-        end
-    end
-    bool = 1;
-end
-
-
-% This function separates the real and imaginary parts in a string
-% Here, we expect the imaginary part to appear after the real part.
-function [rPart iPart] = separateRIString(str)
-    if isRealString(str)
-        rPart = str;
-        iPart = '';
-    else
-        % First, we remove spaces and force lower case
-        str = lower(str(find(str~=' ')));
-
-        % Now, let us identify the imaginary part...
-        % maybe it is written in scientific notation...
-        imagStart = regexp(str,'(+|-|)[0-9]+(\.|)[0-9]*e(+|-|)[0-9]+i');
-
-        if isempty(imagStart)
-            % If not, we check if the imaginary part is written as a simple
-            % number
-            imagStart = regexp(str,'(+|-|)[0-9]+(\.|)[0-9]*i');
-        end
-
-        if isempty(imagStart)
-            % There is no imaginary part
-            rPart = str;
-            iPart = '';
-        else
-            rPart = str(1:imagStart-1);
-            iPart = str(imagStart:end);
-            % We remove the 'i' from the imaginary part
-            iPart = iPart(find(iPart~='i'));
-        end
-    end
-end
-
-
-% This function separates the real and imaginary parts in a cell array
-function [rPart iPart] = separateRICell(x)
-    rPart = cell(size(x));
-    iPart = cell(size(x));
-    for i = 1:numel(x)
-        if ischar(x{i})
-            [rPart{i} iPart{i}] = separateRIString(x{i});
-        elseif isnumeric(x{i}) && (numel(x{i}) == 1)
-            rPart{i} = real(x{i});
-            iPart{i} = imag(x{i});
-        else
-            error('Cell arrays can only contain doubles or strings.');
-        end
-    end
-end
-
-
-% This function verifies that the string str defines a valid number
-% NOTE : We should also make sure that the spaces are located at the right
-%        place, but for the moment, we only check things up to the spaces.
-%        If mpfr doesn't like some spaces, we could also remove them here.
-function bool = isValidString(str)
-    % We only support the following characters : 0-9,+,-,e,E,.
-    if ~isempty(regexp(str,'[^ 0-9eE+-\.]'))
-        bool = 0;
-        return;
-    end
-
-    % We remove spaces, and lower the e
-    str = lower(str);
-    str = str(find(str~=' '));
-
-    % Now we check if the string contains a number in scientific notation
-    str2 = regexprep(str,'(+|-|)[0-9]+(\.|)[0-9]*e(+|-|)[0-9]+','');
-    if length(str2) ~= length(str)
-        if length(str2) == 0
-            % The string denotes a number in scientific notation
             bool = 1;
-            return;
-        else
-            % Something remains in the string after we removed the number
-            % in scientific notation. This is not an acceptable string
-            bool = 0;
-            return;
         end
-    end
-
-    % nothing was found, so we check if there is just a standard number
-    str3 = regexprep(str,'(+|-|)[0-9]+(\.|)[0-9]*','');
-    bool = (length(str3) == 0);
-end
 
 
-% This function verifies that a cell is in a suitable form to be passed to
-% the c++ library
-function bool = isValidCell(x)
-    for i = 1:numel(x)
-        if ischar(x{i})
-            if ~isValidString(x{i})
+        % This function separates the real and imaginary parts in a string
+        % Here, we expect the imaginary part to appear after the real part.
+        function [rPart iPart] = separateRIString(str)
+            if this.isRealString(str)
+                rPart = str;
+                iPart = '';
+            else
+                % First, we remove spaces and force lower case
+                str = lower(str(find(str~=' ')));
+
+                % Now, let us identify the imaginary part...
+                % maybe it is written in scientific notation...
+                imagStart = regexp(str,'(+|-|)[0-9]+(\.|)[0-9]*e(+|-|)[0-9]+i');
+
+                if isempty(imagStart)
+                    % If not, we check if the imaginary part is written as a simple
+                    % number
+                    imagStart = regexp(str,'(+|-|)[0-9]+(\.|)[0-9]*i');
+                end
+
+                if isempty(imagStart)
+                    % There is no imaginary part
+                    rPart = str;
+                    iPart = '';
+                else
+                    rPart = str(1:imagStart-1);
+                    iPart = str(imagStart:end);
+                    % We remove the 'i' from the imaginary part
+                    iPart = iPart(find(iPart~='i'));
+                end
+            end
+        end
+
+
+        % This function separates the real and imaginary parts in a cell array
+        function [rPart iPart] = separateRICell(x)
+            rPart = cell(size(x));
+            iPart = cell(size(x));
+            for i = 1:numel(x)
+                if ischar(x{i})
+                    [rPart{i} iPart{i}] = this.separateRIString(x{i});
+                elseif isnumeric(x{i}) && (numel(x{i}) == 1)
+                    rPart{i} = real(x{i});
+                    iPart{i} = imag(x{i});
+                else
+                    error('Cell arrays can only contain doubles or strings.');
+                end
+            end
+        end
+
+
+        % This function verifies that the string str defines a valid number
+        % NOTE : We should also make sure that the spaces are located at the right
+        %        place, but for the moment, we only check things up to the spaces.
+        %        If mpfr doesn't like some spaces, we could also remove them here.
+        function bool = isValidString(str)
+            % We only support the following characters : 0-9,+,-,e,E,.
+            if ~isempty(regexp(str,'[^ 0-9eE+-\.]'))
                 bool = 0;
                 return;
             end
-        elseif ~(isnumeric(x{i}) && (numel(x{i}) == 1))
-            error('Cell arrays can only contain doubles or strings.');
+
+            % We remove spaces, and lower the e
+            str = lower(str);
+            str = str(find(str~=' '));
+
+            % Now we check if the string contains a number in scientific notation
+            str2 = regexprep(str,'(+|-|)[0-9]+(\.|)[0-9]*e(+|-|)[0-9]+','');
+            if length(str2) ~= length(str)
+                if length(str2) == 0
+                    % The string denotes a number in scientific notation
+                    bool = 1;
+                    return;
+                else
+                    % Something remains in the string after we removed the number
+                    % in scientific notation. This is not an acceptable string
+                    bool = 0;
+                    return;
+                end
+            end
+
+            % nothing was found, so we check if there is just a standard number
+            str3 = regexprep(str,'(+|-|)[0-9]+(\.|)[0-9]*','');
+            bool = (length(str3) == 0);
         end
-    end
-    bool = 1;
-end
 
 
-% This function counts how many digits significant are present in the
-% number described in the provided string
-function n = nbDigitsFromString(str)
-
-    % We don't want to consider a possible exponent
-    exponent = find(lower(str) == 'e', 1);
-    if isempty(exponent)
-        exponent = length(str)+1;
-    end
-
-    % We count spaces
-    spaces = find(str(1:exponent-1) == ' ');
-    % dots
-    dots = find(str(1:exponent-1) == '.');
-    % pluses
-    pluses = find(str(1:exponent-1) == '+');
-    % minuses
-    minuses = find(str(1:exponent-1) == '-');
-
-    % And return the number of digits
-    n = exponent-1 - length(spaces) - length(dots) - length(pluses) - length(minuses);
-end
-
-% This function checks whether the library binaries are in the path.
-function value = checkForBinaries()
-    persistent binariesOk;
-    if isempty(binariesOk) %|| (binariesOk ~= 1)
-        % In the source file version of this library, we start by
-        % checking whether the c++ library was compiled. If not, we 
-        % suggest to download the binaries.
-        tmp = mfilename('fullpath');
-        if (exist([tmp(1:end-8), 'gem_mex.', mexext], 'file') ~= 3)
-            warning('The library binaries were not found. You may wish to download them online at https://www.github.com/jdbancal/gem/releases .');
-            binariesOk = 0;
-        else
-            binariesOk = 1;
+        % This function verifies that a cell is in a suitable form to be passed to
+        % the c++ library
+        function bool = isValidCell(x)
+            for i = 1:numel(x)
+                if ischar(x{i})
+                    if ~this.isValidString(x{i})
+                        bool = 0;
+                        return;
+                    end
+                elseif ~(isnumeric(x{i}) && (numel(x{i}) == 1))
+                    error('Cell arrays can only contain doubles or strings.');
+                end
+            end
+            bool = 1;
         end
+
+
+        % This function counts how many digits significant are present in the
+        % number described in the provided string
+        function n = nbDigitsFromString(str)
+
+            % We don't want to consider a possible exponent
+            exponent = find(lower(str) == 'e', 1);
+            if isempty(exponent)
+                exponent = length(str)+1;
+            end
+
+            % We count spaces
+            spaces = find(str(1:exponent-1) == ' ');
+            % dots
+            dots = find(str(1:exponent-1) == '.');
+            % pluses
+            pluses = find(str(1:exponent-1) == '+');
+            % minuses
+            minuses = find(str(1:exponent-1) == '-');
+
+            % And return the number of digits
+            n = exponent-1 - length(spaces) - length(dots) - length(pluses) - length(minuses);
+        end
+
+        % This function checks whether the library binaries are in the path.
+        function value = checkForBinaries()
+            persistent binariesOk;
+            if isempty(binariesOk) %|| (binariesOk ~= 1)
+                % In the source file version of this library, we start by
+                % checking whether the c++ library was compiled. If not, we 
+                % suggest to download the binaries.
+                tmp = mfilename('fullpath');
+                if (exist([tmp(1:end-8), 'gem_mex.', mexext], 'file') ~= 3)
+                    warning('The library binaries were not found. You may wish to download them online at https://www.github.com/jdbancal/gem/releases .');
+                    binariesOk = 0;
+                else
+                    binariesOk = 1;
+                end
+            end
+            value = binariesOk;
+        end
+        
     end
-    value = binariesOk;
+
 end
 
