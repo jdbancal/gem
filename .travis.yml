@@ -42,11 +42,6 @@ before_script:
   - pwd
   # Check gcc version
   - gcc --version
-  - which gcc
-  - which gcc-7
-  - gcc-7 --version
-  - ls -al /usr/bin/gcc
-  - echo $PATH
   # Check what octave packages we have installed
   - octave -q --eval "ver"
   # ---------------------------------------------------------------------------

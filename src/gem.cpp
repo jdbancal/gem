@@ -320,12 +320,12 @@ void GmpEigenMatrix::display(const int& precision) const
     //        are not well converted (they may not finish with zeros)
     bool integerMatrix(isInt());
 //        cout << "integerMatrix = " << integerMatrix << endl;
-    int largestExponent((int)((iszero(matrixR(0,0)) || mpfr::isnan(matrixR(0,0)) || mpfr::isinf(matrixR(0,0))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+    int largestExponent((int)((iszero(matrixR(0,0)) || mpfr::isnan(matrixR(0,0)) || mpfr::isinf(matrixR(0,0))) ? INT_MIN : mpfr::mpreal::toLong(mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision)))))))));
     for (mwIndex i = 0; i < matrixR.rows(); ++i) {
         for (mwIndex j = 0; j < matrixR.cols(); ++j) {
-            largestExponent = max(largestExponent, (int)((iszero(matrixR(i,j)) || mpfr::isnan(matrixR(i,j)) || mpfr::isinf(matrixR(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+            largestExponent = max(largestExponent, (int)((iszero(matrixR(i,j)) || mpfr::isnan(matrixR(i,j)) || mpfr::isinf(matrixR(i,j))) ? INT_MIN : mpfr::mpreal::toLong(mpfr::floor(mpfr::log10(mpfr::abs((matrixR(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision)))))))));
             if (isComplex)
-                largestExponent = max(largestExponent, (int)((iszero(matrixI(i,j)) || mpfr::isnan(matrixI(i,j)) || mpfr::isinf(matrixI(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixI(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+                largestExponent = max(largestExponent, (int)((iszero(matrixI(i,j)) || mpfr::isnan(matrixI(i,j)) || mpfr::isinf(matrixI(i,j))) ? INT_MIN : mpfr::mpreal::toLong(mpfr::floor(mpfr::log10(mpfr::abs((matrixI(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision)))))))));
         }
     }
     // In case the matrix only contains zeros, NaNs and Infs, the global exponent is 0
