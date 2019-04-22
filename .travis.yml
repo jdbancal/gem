@@ -1,0 +1,58 @@
+# We pretend to be Java because we need GNU Octave which is not 
+# available (as of January 2016)
+language: java
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:octave/stable'
+    packages:
+      - octave
+      - liboctave-dev
+      - libmpfrc++-dev
+      - libgmp-dev
+
+###############################################################################
+cache:
+  # Downloading octave takes a while, so let's cache apt
+  apt: true
+  directories:
+    # Cache octave packages
+    - $HOME/octave
+    # Cache other packages
+    - $HOME/external_cache
+
+###############################################################################
+# Command to install dependencies
+before_install:
+  - git submodule update --init
+
+###############################################################################
+install:
+  ADDPATH_COMMAND=""
+
+###############################################################################
+before_script:
+  - TEST_ARGS="'-recursive', '-verbose', '-junit_xml_file', 'testresults.xml'";
+    TEST_COMMAND="exit(~moxunit_runtests('tests', $TEST_ARGS));";
+    echo "TEST_COMMAND| $TEST_COMMAND";
+  # Double-check we are still in the right directory
+  - pwd
+  # Check what octave packages we have installed
+  - octave -q --eval "ver"
+  # ---------------------------------------------------------------------------
+  # Remove any cached results files from previous build, if present
+  - rm -f testresults.xml;
+  # ---------------------------------------------------------------------------
+  # Build binaries script
+  - BUILD_BINARIES="make;"
+
+###############################################################################
+script:
+  - octave -q --eval "$ADDPATH_COMMAND $BUILD_BINARIES";
+
+###############################################################################
+after_script:
+  # Check where we ended up and what's going on where we are
+  - pwd
+  - ls -alh
