@@ -2,7 +2,6 @@
 *.mex*
 .syncthing*
 *~
-src/*eigen*
 src/*gmp-*
 src/*mpfr-*
 src/*mpfrc++*
