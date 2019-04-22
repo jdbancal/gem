@@ -106,7 +106,7 @@ public:
     /* Extracts the first real value of the matrix */
     inline mpfr::mpreal getFirstRealValue()
     {
-        return matrixR(0.0);
+        return matrixR(0,0);
     }
 
     /* Extracting the raw data: the following function extracts the internal
