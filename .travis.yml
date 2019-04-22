@@ -14,10 +14,6 @@ addons:
       - libmpfrc++-dev
       - libgmp-dev
 
-env:
-  - CC=gcc-7
-  - CXX=g++-7
-
 ###############################################################################
 cache:
   # Downloading octave takes a while, so let's cache apt
@@ -39,9 +35,9 @@ install:
 
 ###############################################################################
 before_script:
-  - TEST_ARGS="'-recursive', '-verbose', '-junit_xml_file', 'testresults.xml'";
-    TEST_COMMAND="exit(~moxunit_runtests('tests', $TEST_ARGS));";
-    echo "TEST_COMMAND| $TEST_COMMAND";
+  # make sure gcc-7 is used instead of the default gcc-4
+  - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
+  - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
   # Double-check we are still in the right directory
   - pwd
   # Check gcc version
@@ -50,14 +46,19 @@ before_script:
   - which gcc-7
   - gcc-7 --version
   - ls -al /usr/bin/gcc
+  - echo $PATH
   # Check what octave packages we have installed
   - octave -q --eval "ver"
   # ---------------------------------------------------------------------------
   # Remove any cached results files from previous build, if present
   - rm -f testresults.xml;
   # ---------------------------------------------------------------------------
-  # Build binaries script
+  # Prepare build command
   - BUILD_BINARIES="make;"
+  # Prepare test command
+  - TEST_ARGS="'-recursive', '-verbose', '-junit_xml_file', 'testresults.xml'";
+    TEST_COMMAND="exit(~moxunit_runtests('tests', $TEST_ARGS));";
+    echo "TEST_COMMAND| $TEST_COMMAND";
 
 ###############################################################################
 script:
