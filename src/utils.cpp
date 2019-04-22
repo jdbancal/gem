@@ -150,7 +150,7 @@ string mprealToString(const mpreal& x, int width, const int& exponentShift, int 
     // We are interested in the intersection between this range and the ones on
     // which the number has significant digits. Here are the exponents of the
     // first and last digits of our number
-    int numberPower1(iszero(x) ? 0 : mpfr::floor(mpfr::log10(mpfr::abs(x))));
+    int numberPower1(iszero(x) ? 0 : mpfr::floor(mpfr::log10(mpfr::abs(x))).toLong());
     int numberPower2(numberPower1 - bits2digits(x.get_prec()) + 1);
 
     // WARNING : If the first digit is rounded up, it may create one more digit higher up (!)
@@ -269,7 +269,7 @@ string mprealToString2(const mpreal& x, const int& width, const bool& padOnTheRi
 //    cout << endl << x.toDouble() << endl;
 
     // First, we check what is the exponent of the number
-    int exponent(iszero(x) ? 0 : mpfr::floor(mpfr::log10(mpfr::abs(x))));
+    int exponent(iszero(x) ? 0 : mpfr::floor(mpfr::log10(mpfr::abs(x))).toLong());
     int lengthExponent(ToString(exponent).length());
 
 //    cout << exponent << " " << lengthExponent << endl;

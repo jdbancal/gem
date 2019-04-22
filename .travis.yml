@@ -1,0 +1,66 @@
+# We pretend to be Java because we need GNU Octave which is not 
+# available (as of January 2016)
+language: java
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:octave/stable'
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+      - octave
+      - liboctave-dev
+      - libmpfrc++-dev
+      - libgmp-dev
+
+###############################################################################
+cache:
+  # Downloading octave takes a while, so let's cache apt
+  apt: true
+  directories:
+    # Cache octave packages
+    - $HOME/octave
+    # Cache other packages
+    - $HOME/external_cache
+
+###############################################################################
+# Command to install dependencies
+before_install:
+  - git submodule update --init
+
+###############################################################################
+install:
+  ADDPATH_COMMAND=""
+
+###############################################################################
+before_script:
+  # make sure gcc-7 is used instead of the default gcc-4
+  - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
+  - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
+  # Double-check we are still in the right directory
+  - pwd
+  # Check gcc version
+  - gcc --version
+  # Check what octave packages we have installed
+  - octave -q --eval "ver"
+  # ---------------------------------------------------------------------------
+  # Remove any cached results files from previous build, if present
+  - rm -f testresults.xml;
+  # ---------------------------------------------------------------------------
+  # Prepare build command
+  - BUILD_BINARIES="make;"
+  # Prepare test command
+  - TEST_ARGS="'-recursive', '-verbose', '-junit_xml_file', 'testresults.xml'";
+    TEST_COMMAND="exit(~moxunit_runtests('tests', $TEST_ARGS));";
+    echo "TEST_COMMAND| $TEST_COMMAND";
+
+###############################################################################
+script:
+  - octave -q --eval "$ADDPATH_COMMAND $BUILD_BINARIES";
+
+###############################################################################
+after_script:
+  # Check where we ended up and what's going on where we are
+  - pwd
+  - ls -alh

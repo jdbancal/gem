@@ -84,7 +84,7 @@ classdef sgem < handle
                     % The we create a sparse version of the provided dense 
                     % gem object with default threshold
                     threshold = min(size(varargin{1}))*10^gem(-this.getWorkingPrecision);
-                    this.objectIdentifier = sgem_mex('sparse', objectIdentifier(varargin{1}), objectIdentifier(threshold));
+                    this.objectIdentifier = sgem_mex('sparse', varargin{1}.objectIdentifier, threshold.objectIdentifier);
                 elseif isnumeric(varargin{1}) || islogical(varargin{1})
                     % Then we interpret this call as a call for the library to
                     % create an instance of this class from some numerical
@@ -105,7 +105,7 @@ classdef sgem < handle
                     end
                     [m n] = size(varargin{1});
                     if isequal(class(s),'gem') % in principle this case should not occur
-                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s.objectIdentifier, m, n, this.getWorkingPrecision);
                     elseif isa(varargin{1}, 'uint8') || isa(varargin{1}, 'uint16') || isa(varargin{1}, 'uint32') || isa(varargin{1}, 'uint64') ...
                         || isa(varargin{1}, 'int8') || isa(varargin{1}, 'int16') || isa(varargin{1}, 'int32') || isa(varargin{1}, 'int64')
                         % For integers, we set the values manually to make
@@ -220,7 +220,7 @@ classdef sgem < handle
                     m = max(i);
                     n = max(j);
                     if isequal(class(s),'gem') % in principle this case should not occur
-                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s.objectIdentifier, m, n, this.getWorkingPrecision);
                     elseif isa(varargin{1}, 'uint8') || isa(varargin{1}, 'uint16') || isa(varargin{1}, 'uint32') || isa(varargin{1}, 'uint64') ...
                         || isa(varargin{1}, 'int8') || isa(varargin{1}, 'int16') || isa(varargin{1}, 'int32') || isa(varargin{1}, 'int64')
                         % For integers, we set the values manually to make
@@ -307,7 +307,7 @@ classdef sgem < handle
                         error('Incompatible sizes in construction of an sgem object.');
                     end
                     if isequal(class(s),'gem')
-                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, objectIdentifier(s), m, n, this.getWorkingPrecision);
+                        this.objectIdentifier = sgem_mex('newFromMatlab', i, j, s.objectIdentifier, m, n, this.getWorkingPrecision);
                     else
                         this.objectIdentifier = sgem_mex('newFromMatlab', i, j, double(s), m, n, this.getWorkingPrecision);
                     end
@@ -347,7 +347,11 @@ classdef sgem < handle
 
         % Destructor - Destroy the C++ class instance
         function delete(this)
-            sgem_mex('delete', this.objectIdentifier);
+            % Latest versions of matlab might try to delete object which
+            % were not fully constructed yet...
+            if ~isempty(this.objectIdentifier)
+                sgem_mex('delete', this.objectIdentifier);
+            end
         end    
     end
 

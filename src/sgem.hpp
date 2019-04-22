@@ -9,14 +9,14 @@
 #include <Eigen/OrderingMethods>
 #include <Eigen/SparseLU>
 #include "utils.hpp"
-#include <SymEigsSolver.h>
-#include <GenEigsSolver.h>
-#include <MatOp/SparseSymMatProd.h>
-#include <MatOp/SparseGenMatProd.h>
-#include <SymEigsShiftSolver.h>
-#include <GenEigsRealShiftSolver.h>
-#include <MatOp/SparseSymShiftSolve.h>
-#include <MatOp/SparseGenRealShiftSolve.h>
+#include <Spectra/SymEigsSolver.h>
+#include <Spectra/GenEigsSolver.h>
+#include <Spectra/MatOp/SparseSymMatProd.h>
+#include <Spectra/MatOp/SparseGenMatProd.h>
+#include <Spectra/SymEigsShiftSolver.h>
+#include <Spectra/GenEigsRealShiftSolver.h>
+#include <Spectra/MatOp/SparseSymShiftSolve.h>
+#include <Spectra/MatOp/SparseGenRealShiftSolve.h>
 
 /*
   This file contains the description of our c++ class, including all its

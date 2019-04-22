@@ -3,10 +3,8 @@
 *.dll
 .syncthing*
 *~
-src/*eigen*
-src/*gmp-*
-src/*mpfr-*
-src/*mpfrc++*
-src/*spectra*
-src/*boost_*
-src/staticLibraries/
+external/*gmp-*
+external/*mpfr-*
+external/*mpfrc++*
+external/*boost_*
+external/staticLibraries/

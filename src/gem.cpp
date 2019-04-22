@@ -320,12 +320,12 @@ void GmpEigenMatrix::display(const int& precision) const
     //        are not well converted (they may not finish with zeros)
     bool integerMatrix(isInt());
 //        cout << "integerMatrix = " << integerMatrix << endl;
-    int largestExponent((int)((iszero(matrixR(0,0)) || mpfr::isnan(matrixR(0,0)) || mpfr::isinf(matrixR(0,0))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+    int largestExponent((int)((iszero(matrixR(0,0)) || mpfr::isnan(matrixR(0,0)) || mpfr::isinf(matrixR(0,0))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(0,0)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision)))))).toLong()));
     for (mwIndex i = 0; i < matrixR.rows(); ++i) {
         for (mwIndex j = 0; j < matrixR.cols(); ++j) {
-            largestExponent = max(largestExponent, (int)((iszero(matrixR(i,j)) || mpfr::isnan(matrixR(i,j)) || mpfr::isinf(matrixR(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+            largestExponent = max(largestExponent, (int)((iszero(matrixR(i,j)) || mpfr::isnan(matrixR(i,j)) || mpfr::isinf(matrixR(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixR(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision)))))).toLong()));
             if (isComplex)
-                largestExponent = max(largestExponent, (int)((iszero(matrixI(i,j)) || mpfr::isnan(matrixI(i,j)) || mpfr::isinf(matrixI(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixI(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision))))))));
+                largestExponent = max(largestExponent, (int)((iszero(matrixI(i,j)) || mpfr::isnan(matrixI(i,j)) || mpfr::isinf(matrixI(i,j))) ? INT_MIN : mpfr::floor(mpfr::log10(mpfr::abs((matrixI(i,j)/(mpreal("1.0") - mpreal("5.0")*mpfr::pow(10,-1-precision)))))).toLong()));
         }
     }
     // In case the matrix only contains zeros, NaNs and Infs, the global exponent is 0
@@ -3258,12 +3258,9 @@ GmpEigenMatrix& GmpEigenMatrix::asin_new() const
 {
     GmpEigenMatrix& result(*(new GmpEigenMatrix));
 
-    cout << this->matrixR << endl << endl;
     // We compute the analytic extension (valid for all complex numbers
     // including real numbers outside [-1,1])
     result = -constI()*(constI()*(*this) + (GmpEigenMatrix(1) - (*this).power(GmpEigenMatrix(2))).sqrt()).log();
-
-    cout << result.matrixR << endl << endl;
 
     // Now we could also compute the images of real numbers between -1 and 1 if we want
     for (IndexType j(0); j < result.matrixR.cols(); ++j)

@@ -8,12 +8,12 @@
 #include <Eigen/LU>
 #include <Eigen/SVD>
 #include "utils.hpp"
-#include <SymEigsSolver.h>
-#include <GenEigsSolver.h>
-#include <SymEigsShiftSolver.h>
-#include <GenEigsComplexShiftSolver.h>
-#include <MatOp/DenseSymShiftSolve.h>
-#include <MatOp/DenseGenComplexShiftSolve.h>
+#include <Spectra/SymEigsSolver.h>
+#include <Spectra/GenEigsSolver.h>
+#include <Spectra/SymEigsShiftSolver.h>
+#include <Spectra/GenEigsComplexShiftSolver.h>
+#include <Spectra/MatOp/DenseSymShiftSolve.h>
+#include <Spectra/MatOp/DenseGenComplexShiftSolve.h>
 
 /*
   This file contains the description of our c++ class, including all its
@@ -106,7 +106,7 @@ public:
     /* Extracts the first real value of the matrix */
     inline mpfr::mpreal getFirstRealValue()
     {
-        return matrixR(0.0);
+        return matrixR(0,0);
     }
 
     /* Extracting the raw data: the following function extracts the internal

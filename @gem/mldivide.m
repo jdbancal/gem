@@ -53,15 +53,15 @@ function result = mldivide(this, varargin)
     % Now we call the appropriate division procedure, and store the
     % result in the adequate object.
     if isequal(class(this), 'gem')
-        newObjectIdentifier = gem_mex('mldivide', objectIdentifier(this), objectIdentifier(varargin{1}));
+        newObjectIdentifier = gem_mex('mldivide', this.objectIdentifier, varargin{1}.objectIdentifier);
         result = gem('encapsulate', newObjectIdentifier);
     else
         % A priori we should not arrive here... but just in case
         if isequal(class(varargin{1}), 'gem')
-            newObjectIdentifier = sgem_mex('mldivide_sf', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = sgem_mex('mldivide_sf', this.objectIdentifier, varargin{1}.objectIdentifier);
             result = gem('encapsulate', newObjectIdentifier);
         else
-            newObjectIdentifier = sgem_mex('mldivide', objectIdentifier(this), objectIdentifier(varargin{1}));
+            newObjectIdentifier = sgem_mex('mldivide', this.objectIdentifier, varargin{1}.objectIdentifier);
             result = sgem('encapsulate', newObjectIdentifier);
         end
     end
