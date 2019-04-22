@@ -6,7 +6,9 @@ addons:
   apt:
     sources:
       - sourceline: 'ppa:octave/stable'
+      - ubuntu-toolchain-r-test
     packages:
+      - g++-7
       - octave
       - liboctave-dev
       - libmpfrc++-dev
