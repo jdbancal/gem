@@ -1,25 +1,25 @@
 Getting started with the GEM Library
 ====================================
 
-Here is a short introduction to the usage of GEM library in matlab. This introduction assumes that the gem folder is in matlab's path and that it is working (this can be checked by typing e.g. `gem('pi')` into matlab; if this command yields an error, check that the gem library is compiled for your system and that its folder is in matlab's path).
+Here is a short introduction to the usage of GEM library in MATLAB and GNU Octave. This introduction assumes that the gem folder is in MATLAB/GNU Octave's path and that it is working (this can be checked by typing e.g. `gem('pi')` into MATLAB/GNU Octave; if this command yields an error, check that the GEM library is compiled for your system and that its folder is in MATLAB/GNU Octave's path).
 
 ## Creating High Precision Matrices
 
 ### Dense matrices
 
-A matrix for high precision computation can be created from any matlab matrix by calling the `gem` constructor.
+A matrix for high precision computation can be created from any MATLAB/GNU Octave matrix by calling the `gem` constructor.
  - `a = gem([1 2; 3 4+5i])` is a 2x2 gem object
 
-    This matrix can be manipulated like a conventional matlab matrix. For instance, `a(2,2)` extracts the (2,2) element of the matrix: `4+5i`.
+    This matrix can be manipulated like a conventional matrix. For instance, `a(2,2)` extracts the (2,2) element of the matrix: `4+5i`.
 
 When constructing a gem object from a double-precision matrix, the first 15 digits of each component are taken into account and completed by trailing zeros (up to the precision of the gem object). This garantees that all numbers are transfered with a predictable way, and that integers remain integers after conversion.
 
-High precision objects can also be constructed by specifying all digits in a string. This allows to define numbers with more than 15 digits precision as in the following example:
+High precision objects can also be constructed by specifying all digits in a string. This allows to define numbers with more than 15 digits precision, as in the following example:
  - `gem('1.93754981629874513245725542343')`
 
     creates a 1x1 matrix (i.e. a scalar) with 20 non-trivial digits. The remaining digits are set to zeros.
 
-When creating a number from a char which contains more digits than the precision defined by `gemWorkingPrecision`, the precision of the created number is automatically adjusted to hold all specified digits.
+When creating a number from a string which contains more digits than the precision defined by `gemWorkingPrecision`, the precision of the created number is automatically adjusted to hold all specified digits.
 
 All elements of a matrix can be individually initialized to an arbitrary precision by calling the constructor `gem` with a cell array containing the corresponding strings:
  - `gem({'1.321321123123321123' '456.4566544566544564'; '0.789987987789987789' '369.639369366963936'})`
@@ -27,12 +27,12 @@ All elements of a matrix can be individually initialized to an arbitrary precisi
 
 ### Sparse matrices
 
-Just like in the case of dense matrices, sparse matlab matrix are easily transfered to sparse gem object by calling the `sgem` constructor:
+Just like in the case of dense matrices, sparse MATLAB/GNU Octave matrix are easily transfered to sparse gem object by calling the `sgem` constructor:
  - `sgem(speye(3))` is a sparse 3x3 identity matrix
 
-More generally, a high precision object can be constructed from a matlab matrix, whether it is full or sparse, by calling the `sparsify` function. This will create a gem object when given a full matrix, and an sgem object when given a sparse one.
+More generally, a high precision object can be constructed from a MATLAB/GNU Octave matrix, whether it is full or sparse, by calling the `sparsify` function. This will create a gem object when given a full matrix, and an sgem object when given a sparse one.
 
-Sgem object ca also be constructed by calling the `sparse(i,j,s,m,n)` function with a gem vector `s`:
+Sgem object can also be constructed by calling the `sparse(i,j,s,m,n)` function with a gem vector `s`:
  - `sparse([1 2], [1 3], gem({'123.45678901234567890' '987.653210987654321'}), 3, 3)` is a sparse matrix with two high precision components
 
 
@@ -62,11 +62,11 @@ The precision at which the GEM library works can be adjusted throught the functi
         3.14
     (the remaining digits are ignored)
 
-Note that when creating a gem object from a double, at most 15 digits are taken into account. When using strings of digits to specify a number, the precision is automatically adjusted to guarantee that all provided digits are taken into account, unless explicitely stated:
+When creating a gem object from a double, at most 15 digits are taken into account. When using strings of digits to specify a number, the precision is automatically adjusted to guarantee that all provided digits are taken into account, unless explicitely stated:
  - `gem('123456789012345678901234567890123456789012345678901234567891') - gem('123456789012345678901234567890123456789012345678901234567890')` produces the result
 
         1
-    even though the difference is of the order of 1e-60. In this case, the actual precision of the numbers is higher than the current working precision.
+    even though the relative difference is of the order of 1e-60. In this case, the actual precision of the numbers is higher than the current working precision.
 
  - `gem('1234567890',3) - gem('1234567891',3)` produces
 
@@ -79,6 +79,9 @@ The `precision` function can be used to determine how many digits are used to de
  - `precision(gem('3.2'))` is
 
         50
+    `precision(gem('123456789012345678901234567890123456789012345678901234567891'))` is
+
+        60
     while `precision(gem('e',5))` is
 
         5
@@ -86,22 +89,22 @@ The `precision` function can be used to determine how many digits are used to de
 
 ### Display precision
 
-When displaying a high precision number, only part of the number is usually printed out. This is the default behavior, because long string of digits can quickly become cumbersome. Note however that if all digits are not printed systematically, this does not mean that they are not kept in memory. The function `gemDisplayPrecision` can be used to adjust the number of displayed digits. Alternatively, the display precision can also be directly specified as a second argument of the `display` function:
- - `display(gem('pi'),50)` prints 50 digits:
+When displaying a high precision number, only part of the number is usually printed out. This is the default behavior, because long string of digits can quickly become cumbersome. Even though all significant digits are not systematically printed, they are indeed kept in memory and used in the computations. The function `gemDisplayPrecision` can be used to adjust the number of displayed digits. Alternatively, the display precision can also be directly specified as a second argument of the `disp` or `display` functions:
+ - `disp(gem('pi'),50)` prints 50 digits:
 
         3.1415926535897932384626433832795028841971693993751
 
 A *negative* display precision prints out all digits in memory:
- - `display(gem('pi'),-1)` prints the same 50 digits as above.
+ - `disp(gem('pi'),-1)` prints the same 50 digits as above.
 
 
 
 
 ## Functions
 
-A list of the functions that can be applied to gem and sgem is available [here](functions.md). In general, these functions take the same arguments as their matlab counterparts, and behave in the same way. For instance, the `max` function applied to a vector containing two complex numbers returns the complex number with largest magnitude, or the one with largest angle if both magnitudes are equal.
+A list of the functions that can be applied to gem and sgem objects is available [here](functions.md). In general, these functions take the same arguments as their MATLAB/GNU Octave counterparts, and behave in the same way. For instance, the `max` function applied to a vector containing two complex numbers returns the complex number with largest magnitude, or the one with largest angle if both magnitudes are equal.
 
-For some functions, all possible behaviors are not yet implemented. For instance, mpower currently only supports powers of +1 and -1. Anyone wishing to have a specific feature is invited to mention so and eventually consider contributing to this open source project by implementing the missing behaviors and submitting a push request (see also [this page](howToContribute.md) for more ways to get involved).
+For some functions, all possible behaviors are not yet implemented. For instance, `mpower` currently only supports powers of +1 and -1. Anyone wishing to have a specific feature is invited to open an [issue](https://github.com/jdbancal/gem/issues) and eventually consider contributing to this open source project by implementing the missing behaviors and submitting a push request (see also [this page](howToContribute.md) for more ways to get involved).
 
-The default behavior of some GEM functions does differ from Matlab's implementation. This is the case for example for functions which don't preserve the sparsity when applied to sparse objects. This point is explained in the `gemSparseLikeMatlab.m` file. This default matlab behavior is easily restored by calling `gemSparseLikeMatlab(1)`.
+Note that the default behavior of some GEM functions does differ from MATLAB's implementation. This is the case for example for functions which don't preserve the sparsity when applied to sparse objects. This point is explained in the `gemSparseLikeMatlab.m` file. This default MATLAB behavior is easily restored by calling `gemSparseLikeMatlab(1)`.
 

@@ -1,4 +1,12 @@
-## [1.0.0] - 2018-01-08
+##
+- Support for GNU Octave
+- Set up continuous integration framework
+- Included Eigen and Spectra as submodules
+- Updated to latest Eigen and Spectra libraries
+- Added gemRandn function
+- Minor fixes
+
+## [1.0.1] - 2018-01-08
 - Updated the usage of class precedence to the latest matlab standard
 - Added an example related to the golden ratio
 - Minor modification to Readme

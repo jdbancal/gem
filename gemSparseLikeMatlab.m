@@ -24,8 +24,8 @@
 % an operation only if there is a chance that this result is sparse. Since
 % both behaviors may be interesting, this function allows one to define 
 % whether we want the gem library to produce sparse or full matrices based 
-% on whether the applied function preserves the null element, or whether we
-% want to choose matrix types the way matlab does.
+% on whether the applied function preserves the null element, or whether to
+% choose matrix types the way matlab does.
 %
 % To get the current setting, use
 %   gemSparseLikeMatlab
