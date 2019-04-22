@@ -14,6 +14,10 @@ addons:
       - libmpfrc++-dev
       - libgmp-dev
 
+env:
+  - CC=gcc-7
+  - CXX=g++-7
+
 ###############################################################################
 cache:
   # Downloading octave takes a while, so let's cache apt
@@ -42,6 +46,10 @@ before_script:
   - pwd
   # Check gcc version
   - gcc --version
+  - which gcc
+  - which gcc-7
+  - gcc-7 --version
+  - ls -al /usr/bin/gcc
   # Check what octave packages we have installed
   - octave -q --eval "ver"
   # ---------------------------------------------------------------------------
