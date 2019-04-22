@@ -38,6 +38,8 @@ before_script:
     echo "TEST_COMMAND| $TEST_COMMAND";
   # Double-check we are still in the right directory
   - pwd
+  # Check gcc version
+  - gcc --version
   # Check what octave packages we have installed
   - octave -q --eval "ver"
   # ---------------------------------------------------------------------------
